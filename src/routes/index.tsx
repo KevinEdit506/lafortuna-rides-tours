@@ -110,6 +110,8 @@ function Index() {
   const [rideType, setRideType] = useState<"private" | "shared">("private");
   const [passengers, setPassengers] = useState(2);
   const [showFare, setShowFare] = useState(true);
+  const [fareExpanded, setFareExpanded] = useState(true);
+  const [confirmed, setConfirmed] = useState(false);
   const t = copy[language];
   const fare = useMemo(() => {
     const sharedFactor = rideType === "shared" ? 0.68 : 1;
@@ -198,14 +200,17 @@ function Index() {
               <section className="rise mt-4 overflow-hidden rounded-[28px] bg-jungle p-5 text-primary-foreground shadow-2xl shadow-primary/25 lg:mt-8 [animation-delay:260ms]">
                 <div className="flex items-center justify-between"><p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-mist/70">{t.estimate}</p><ShieldCheck className="size-5 text-leaf" /></div>
                 <div className="mt-2 flex items-baseline gap-2"><p className="font-display text-[38px] leading-none">${fare.total}</p><p className="text-xs text-mist/60">USD</p></div>
-                <button onClick={() => setShowFare(!showFare)} className="mt-4 flex w-full items-center justify-between border-t border-mist/15 pt-4 text-xs font-semibold text-mist/80"><span>{t.details}</span><ChevronDown className="size-4 rotate-180" /></button>
-                <div className="mt-3 space-y-2 rounded-2xl bg-primary-foreground/5 p-3 text-[13px] ring-1 ring-primary-foreground/10">
+                <button onClick={() => setFareExpanded(!fareExpanded)} className="mt-4 flex w-full items-center justify-between border-t border-mist/15 pt-4 text-xs font-semibold text-mist/80"><span>{t.details}</span><ChevronDown className={`size-4 transition-transform ${fareExpanded ? "rotate-180" : ""}`} /></button>
+                {fareExpanded && <div className="mt-3 space-y-2 rounded-2xl bg-primary-foreground/5 p-3 text-[13px] ring-1 ring-primary-foreground/10">
                   <div className="flex justify-between"><span className="text-mist/75">{t.trip}</span><strong>${fare.service}</strong></div>
                   <div className="flex justify-between"><span className="text-mist/75">{t.operations}</span><strong>${fare.operations}</strong></div>
                   <div className="flex justify-between"><span className="text-mist/75">{t.platform}</span><strong>${fare.platform}</strong></div>
                   <div className="flex justify-between border-t border-mist/15 pt-2"><span>{t.total}</span><strong className="font-display text-lg">${fare.total}</strong></div>
-                </div>
+                </div>}
                 <p className="mt-3 flex items-center gap-2 text-xs italic text-mist/65"><ShieldCheck className="size-4" />{t.note}</p>
+                <button onClick={() => setConfirmed(true)} className="mt-4 w-full rounded-2xl bg-leaf py-3.5 text-sm font-bold text-accent-foreground transition-transform active:scale-[0.98]">
+                  {confirmed ? (language === "es" ? "Solicitud confirmada" : "Request confirmed") : (language === "es" ? "Confirmar reserva" : "Confirm booking")}
+                </button>
               </section>
             )}
 
