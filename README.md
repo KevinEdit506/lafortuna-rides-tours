@@ -10,7 +10,7 @@ Visit the deployed app at [kevinedit506.github.io/lafortuna-rides-tours](https:/
 
 - Bilingual Spanish and English interface.
 - Private and shared transfer options.
-- Automatic fare preview inspired by familiar ride-hailing flows.
+- Automatic fare preview inspired by familiar ride-hailing flows, recalculated when the route changes.
 - Fixed private-trip pricing regardless of passenger count.
 - Shared-trip pricing calculated separately for each passenger route.
 - Transparent fare breakdown for service, operating costs, and coverage.
@@ -21,7 +21,7 @@ Visit the deployed app at [kevinedit506.github.io/lafortuna-rides-tours](https:/
 - Card or cash payment preference included in the WhatsApp booking request.
 - Curated La Fortuna experiences, including the Místico Hanging Bridges and Peñas Blancas River.
 - Tour discovery categories for Arenal, beaches, national parks, and rivers across Costa Rica.
-- Google Maps address autocomplete and driving-route distance/time when a Maps API key is configured.
+- Google Maps address suggestions and driving-route distance/time when a restricted Maps API key is configured.
 - Responsive layout designed for mobile travelers and larger screens.
 
 ## Local development
@@ -49,7 +49,7 @@ The fare panel displays both USD and Costa Rican colones when the current BCCR r
 
 Set `VITE_GOOGLE_MAPS_API_KEY` in the GitHub Actions repository secrets and expose it during the Pages build to enable Google Places Autocomplete and Google Maps driving routes. The key should be restricted to the deployed GitHub Pages origin and limited to the Maps JavaScript API and Places API. Without the key, the interface keeps a safe local route preview and a short-distance fallback estimate rather than failing.
 
-The fare model follows the familiar distance-based structure used by ride-hailing services: a base amount, a distance component, a time component, operating costs, and a platform/coverage component. Private fares are calculated once per trip; shared fares calculate each passenger route independently.
+The fare model follows the familiar distance-based structure used by ride-hailing services: a base amount, a distance component, a time component, operating costs, and a platform/coverage component. Private fares are calculated once per trip; shared fares calculate each passenger route independently. Changing either endpoint updates the route preview, distance, duration, and fare.
 
 ## Deployment
 
