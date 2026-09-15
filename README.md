@@ -14,6 +14,8 @@ Visit the deployed app at [kevinedit506.github.io/lafortuna-rides-tours](https:/
 - Fixed private-trip pricing regardless of passenger count.
 - Shared-trip pricing calculated separately for each passenger route.
 - Transparent fare breakdown for service, operating costs, and coverage.
+- Distance-based upfront fare formula using base fare, time, distance, dynamic multiplier, and tolls/fees.
+- Payment selection is locked after a booking request is confirmed and sent to WhatsApp.
 - Live USD-to-CRC conversion using the BCCR reference rate through a public data endpoint.
 - Scheduled or immediate ride planning.
 - A lightweight trip agenda for scheduled rides.
@@ -49,7 +51,7 @@ The fare panel displays both USD and Costa Rican colones when the current BCCR r
 
 Set `VITE_GOOGLE_MAPS_API_KEY` in the GitHub Actions repository secrets and expose it during the Pages build to enable Google Places Autocomplete and Google Maps driving routes. The key should be restricted to the deployed GitHub Pages origin and limited to the Maps JavaScript API and Places API. Without the key, the interface keeps a safe local route preview and a short-distance fallback estimate rather than failing.
 
-The fare model follows the familiar distance-based structure used by ride-hailing services: a base amount, a distance component, a time component, operating costs, and a platform/coverage component. Private fares are calculated once per trip; shared fares calculate each passenger route independently. Changing either endpoint updates the route preview, distance, duration, and fare.
+The fare model uses `Final Price = (Base Fare + Time × Per-Minute Rate + Distance × Per-Kilometer Rate) × Dynamic Multiplier + Tolls/Fees`. The current default multiplier is `1.0x` while demand data is unavailable; it is displayed in the fare breakdown rather than being presented as a hidden adjustment. Private fares are calculated once per trip; shared fares calculate each passenger route independently. Changing either endpoint updates the route preview, distance, duration, and fare. Once a booking request is confirmed, the selected payment method cannot be changed in that confirmed request.
 
 ## Deployment
 

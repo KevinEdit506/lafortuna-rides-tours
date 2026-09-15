@@ -115,6 +115,12 @@ const copy = {
     mapsFallback: "Activa Google Maps para calcular la ruta exacta",
     routeUpdating: "Actualizando ruta y tarifa…",
     routeUpdated: "Ruta y tarifa actualizadas",
+    baseFare: "Tarifa base",
+    timeFare: "Tiempo",
+    distanceFare: "Distancia",
+    dynamicFare: "Multiplicador dinámico",
+    tolls: "Peajes y cuotas",
+    paymentLocked: "Pago bloqueado después de confirmar",
     estimate: "Tarifa estimada",
     details: "Ver desglose",
     trip: "Servicio de traslado",
@@ -166,6 +172,12 @@ const copy = {
     mapsFallback: "Enable Google Maps for exact routing",
     routeUpdating: "Updating route and fare…",
     routeUpdated: "Route and fare updated",
+    baseFare: "Base fare",
+    timeFare: "Time",
+    distanceFare: "Distance",
+    dynamicFare: "Dynamic multiplier",
+    tolls: "Tolls and fees",
+    paymentLocked: "Payment locked after confirmation",
     estimate: "Estimated fare",
     details: "View breakdown",
     trip: "Transfer service",
@@ -220,6 +232,8 @@ function Index() {
   const [passengerDistances, setPassengerDistances] = useState<number[]>([8, 8]);
   const [mapsStatus, setMapsStatus] = useState<"loading" | "ready" | "fallback">("loading");
   const [routeStatus, setRouteStatus] = useState<"idle" | "updating" | "updated">("idle");
+  const dynamicMultiplier = 1;
+  const tollsAndFees = 0;
   const mapsScriptLoaded = useRef(false);
   const originInputRef = useRef<HTMLInputElement>(null);
   const destinationInputRef = useRef<HTMLInputElement>(null);
@@ -349,19 +363,24 @@ function Index() {
     };
   }, []);
   const fare = useMemo(() => {
-    const pricingFactor = 1;
     if (rideType === "private") {
-      const base = 8;
-      const distanceCharge = distanceKm * 1.35;
-      const timeCharge = durationMinutes * 0.18;
-      const service = Math.round((base + distanceCharge + timeCharge) * pricingFactor);
-      const operations = Math.round(7 * pricingFactor);
-      const platform = Math.round(4 * pricingFactor);
+      const base = 1.5;
+      const distanceCharge = distanceKm * 0.6;
+      const timeCharge = durationMinutes * 0.2;
+      const routeSubtotal = base + distanceCharge + timeCharge;
+      const service = Math.round(routeSubtotal * dynamicMultiplier * 100) / 100;
+      const operations = 0;
+      const platform = tollsAndFees;
       return {
+        base,
+        timeCharge,
+        distanceCharge,
+        dynamicMultiplier,
+        tollsAndFees,
         service,
         operations,
         platform,
-        total: service + operations + platform,
+        total: Math.round((service + platform) * 100) / 100,
         perPassenger: [] as Array<{ destination: string; total: number }>,
       };
     }
@@ -369,15 +388,26 @@ function Index() {
       .slice(0, passengers)
       .map((passengerDestination, index) => {
         const passengerDistance = passengerDistances[index] ?? distanceKm;
-        const service = Math.round(
-          (5 + passengerDistance * 0.95 + durationMinutes * 0.1) * pricingFactor,
-        );
-        const operations = Math.round(4 * pricingFactor);
-        const platform = Math.round(3 * pricingFactor);
-        return { destination: passengerDestination, total: service + operations + platform };
+        const base = 1.5;
+        const distanceCharge = passengerDistance * 0.6;
+        const timeCharge = durationMinutes * 0.2;
+        const routeSubtotal = base + distanceCharge + timeCharge;
+        const total = Math.round((routeSubtotal * dynamicMultiplier + tollsAndFees) * 100) / 100;
+        return { destination: passengerDestination, total };
       });
     const total = perPassenger.reduce((sum, item) => sum + item.total, 0);
-    return { service: total, operations: 0, platform: 0, total, perPassenger };
+    return {
+      base: 1.5,
+      timeCharge: durationMinutes * 0.2,
+      distanceCharge: distanceKm * 0.6,
+      dynamicMultiplier,
+      tollsAndFees,
+      service: total,
+      operations: 0,
+      platform: 0,
+      total: Math.round(total * 100) / 100,
+      perPassenger,
+    };
   }, [
     distanceKm,
     durationMinutes,
@@ -385,6 +415,8 @@ function Index() {
     passengerDistances,
     passengers,
     rideType,
+    dynamicMultiplier,
+    tollsAndFees,
   ]);
 
   const formatColones = (amount: number) =>
@@ -745,13 +777,19 @@ function Index() {
                     {(["card", "cash"] as const).map((method) => (
                       <button
                         key={method}
+                        disabled={confirmed}
                         onClick={() => setPaymentMethod(method)}
-                        className={`rounded-xl py-2.5 text-sm font-bold transition-colors ${paymentMethod === method ? "bg-leaf text-accent-foreground" : "text-muted-foreground"}`}
+                        className={`rounded-xl py-2.5 text-sm font-bold transition-colors ${paymentMethod === method ? "bg-leaf text-accent-foreground" : "text-muted-foreground"} ${confirmed ? "cursor-not-allowed opacity-60" : ""}`}
                       >
                         {method === "card" ? t.card : t.cash}
                       </button>
                     ))}
                   </div>
+                  {confirmed && (
+                    <p className="px-3 pb-2 pt-1 text-[10px] font-semibold text-muted-foreground">
+                      {t.paymentLocked}
+                    </p>
+                  )}
                 </div>
               </section>
             ) : (
@@ -818,16 +856,28 @@ function Index() {
                         </div>
                       ))}
                     <div className="flex justify-between">
-                      <span className="text-mist/75">{t.trip}</span>
-                      <strong>${fare.service}</strong>
+                      <span className="text-mist/75">{t.baseFare}</span>
+                      <strong>${fare.base.toFixed(2)}</strong>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-mist/75">{t.operations}</span>
-                      <strong>${fare.operations}</strong>
+                      <span className="text-mist/75">
+                        {t.timeFare} · {durationMinutes} min
+                      </span>
+                      <strong>${fare.timeCharge.toFixed(2)}</strong>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-mist/75">{t.platform}</span>
-                      <strong>${fare.platform}</strong>
+                      <span className="text-mist/75">
+                        {t.distanceFare} · {distanceKm.toFixed(1)} km
+                      </span>
+                      <strong>${fare.distanceCharge.toFixed(2)}</strong>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-mist/75">{t.dynamicFare}</span>
+                      <strong>{fare.dynamicMultiplier.toFixed(1)}x</strong>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-mist/75">{t.tolls}</span>
+                      <strong>${fare.tollsAndFees.toFixed(2)}</strong>
                     </div>
                     <div className="flex justify-between border-t border-mist/15 pt-2">
                       <span>{t.total}</span>
