@@ -18,10 +18,31 @@ import {
   UserRound,
   UsersRound,
 } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import misticoImage from "../assets/mistico-bridges.jpg";
 import riverImage from "../assets/penas-blancas.jpg";
+
+type MapsWindow = Window & {
+  google?: {
+    maps?: {
+      DirectionsService: new () => {
+        route: (request: unknown, callback: (result: unknown, status: string) => void) => void;
+      };
+      DirectionsStatus: { OK: string };
+      TravelMode: { DRIVING: string };
+      places?: {
+        Autocomplete: new (
+          input: HTMLInputElement,
+          options?: unknown,
+        ) => {
+          addListener: (event: string, callback: () => void) => void;
+          getPlace: () => { formatted_address?: string; name?: string };
+        };
+      };
+    };
+  };
+};
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -89,6 +110,10 @@ const copy = {
     destinationShort: "Destino",
     perPassenger: "Por pasajero",
     privateFixed: "Tarifa privada fija por viaje",
+    distance: "Distancia",
+    duration: "Tiempo estimado",
+    mapsLoading: "Conectando con Google Maps…",
+    mapsFallback: "Activa Google Maps para calcular la ruta exacta",
     estimate: "Tarifa estimada",
     details: "Ver desglose",
     trip: "Servicio de traslado",
@@ -135,6 +160,10 @@ const copy = {
     destinationShort: "Destination",
     perPassenger: "Per passenger",
     privateFixed: "Fixed private trip fare",
+    distance: "Distance",
+    duration: "Estimated time",
+    mapsLoading: "Connecting to Google Maps…",
+    mapsFallback: "Enable Google Maps for exact routing",
     estimate: "Estimated fare",
     details: "View breakdown",
     trip: "Transfer service",
@@ -184,7 +213,109 @@ function Index() {
   const [scheduledTrips, setScheduledTrips] = useState<string[]>([]);
   const [scheduleDate, setScheduleDate] = useState("2026-09-18");
   const [scheduleTime, setScheduleTime] = useState("09:30");
+  const [distanceKm, setDistanceKm] = useState(8);
+  const [durationMinutes, setDurationMinutes] = useState(18);
+  const [passengerDistances, setPassengerDistances] = useState<number[]>([8, 8]);
+  const [mapsStatus, setMapsStatus] = useState<"loading" | "ready" | "fallback">("loading");
+  const mapsScriptLoaded = useRef(false);
+  const originInputRef = useRef<HTMLInputElement>(null);
+  const destinationInputRef = useRef<HTMLInputElement>(null);
   const t = copy[language];
+  useEffect(() => {
+    const key = import.meta.env["VITE_GOOGLE_MAPS_API_KEY"];
+    if (!key) {
+      setMapsStatus("fallback");
+      return;
+    }
+    if (mapsScriptLoaded.current || document.querySelector("script[data-google-maps]")) {
+      mapsScriptLoaded.current = true;
+      setMapsStatus("ready");
+      return;
+    }
+    const script = document.createElement("script");
+    script.dataset["googleMaps"] = "true";
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(key)}&libraries=places`;
+    script.async = true;
+    script.onload = () => {
+      mapsScriptLoaded.current = true;
+      setMapsStatus("ready");
+    };
+    script.onerror = () => setMapsStatus("fallback");
+    document.head.appendChild(script);
+  }, []);
+
+  useEffect(() => {
+    if (mapsStatus !== "ready" || !origin.trim() || !destination.trim()) return;
+    const maps = (window as MapsWindow).google?.maps;
+    if (!maps) return;
+    const service = new maps.DirectionsService();
+    service.route(
+      { origin, destination, travelMode: maps.TravelMode.DRIVING },
+      (result: unknown, status) => {
+        const leg = (
+          result as {
+            routes?: Array<{
+              legs?: Array<{ distance?: { value: number }; duration?: { value: number } }>;
+            }>;
+          }
+        )?.routes?.[0]?.legs?.[0];
+        if (status !== maps.DirectionsStatus.OK || !leg?.distance?.value || !leg.duration?.value)
+          return;
+        setDistanceKm(Math.max(1, Number(leg.distance.value) / 1000));
+        setDurationMinutes(Math.max(1, Math.round(Number(leg.duration.value) / 60)));
+      },
+    );
+  }, [destination, mapsStatus, origin]);
+
+  useEffect(() => {
+    if (rideType !== "shared" || mapsStatus !== "ready") return;
+    const maps = (window as MapsWindow).google?.maps;
+    if (!maps) return;
+    const service = new maps.DirectionsService();
+    passengerOrigins.slice(0, passengers).forEach((passengerOrigin, index) => {
+      const passengerDestination = passengerDestinations[index] ?? destination;
+      service.route(
+        {
+          origin: passengerOrigin,
+          destination: passengerDestination,
+          travelMode: maps.TravelMode.DRIVING,
+        },
+        (result: unknown, status) => {
+          const leg = (
+            result as { routes?: Array<{ legs?: Array<{ distance?: { value: number } }> }> }
+          )?.routes?.[0]?.legs?.[0];
+          if (status === maps.DirectionsStatus.OK && leg?.distance?.value) {
+            setPassengerDistances((current) => {
+              const next = [...current];
+              next[index] = Math.max(1, leg.distance!.value / 1000);
+              return next;
+            });
+          }
+        },
+      );
+    });
+  }, [destination, mapsStatus, passengerDestinations, passengerOrigins, passengers, rideType]);
+
+  useEffect(() => {
+    if (mapsStatus !== "ready") return;
+    const places = (window as MapsWindow).google?.maps?.places;
+    if (!places) return;
+    const setup = (input: HTMLInputElement | null, setter: (value: string) => void) => {
+      if (!input || input.dataset["autocompleteReady"] === "true") return;
+      const autocomplete = new places.Autocomplete(input, {
+        componentRestrictions: { country: "cr" },
+        fields: ["formatted_address", "name"],
+      });
+      autocomplete.addListener("place_changed", () => {
+        const place = autocomplete.getPlace();
+        setter(place.formatted_address ?? place.name ?? input.value);
+      });
+      input.dataset["autocompleteReady"] = "true";
+    };
+    setup(originInputRef.current, setOrigin);
+    setup(destinationInputRef.current, setDestination);
+  }, [mapsStatus]);
+
   useEffect(() => {
     let active = true;
     fetch("https://api.frankfurter.dev/v2/providers/bccr/rates?base=usd")
@@ -204,9 +335,12 @@ function Index() {
   const fare = useMemo(() => {
     const discount = 0.9;
     if (rideType === "private") {
-      const service = Math.round(34 * discount);
-      const operations = Math.round(11 * discount);
-      const platform = Math.round(5 * discount);
+      const base = 8;
+      const distanceCharge = distanceKm * 1.35;
+      const timeCharge = durationMinutes * 0.18;
+      const service = Math.round((base + distanceCharge + timeCharge) * discount);
+      const operations = Math.round(7 * discount);
+      const platform = Math.round(4 * discount);
       return {
         service,
         operations,
@@ -218,14 +352,24 @@ function Index() {
     const perPassenger = passengerDestinations
       .slice(0, passengers)
       .map((passengerDestination, index) => {
-        const service = Math.round((22 + index * 3) * discount);
-        const operations = Math.round(6 * discount);
-        const platform = Math.round(4 * discount);
+        const passengerDistance = passengerDistances[index] ?? distanceKm;
+        const service = Math.round(
+          (5 + passengerDistance * 0.95 + durationMinutes * 0.1) * discount,
+        );
+        const operations = Math.round(4 * discount);
+        const platform = Math.round(3 * discount);
         return { destination: passengerDestination, total: service + operations + platform };
       });
     const total = perPassenger.reduce((sum, item) => sum + item.total, 0);
     return { service: total, operations: 0, platform: 0, total, perPassenger };
-  }, [passengers, passengerDestinations, rideType]);
+  }, [
+    distanceKm,
+    durationMinutes,
+    passengerDestinations,
+    passengerDistances,
+    passengers,
+    rideType,
+  ]);
 
   const formatColones = (amount: number) =>
     exchangeRate
@@ -352,6 +496,21 @@ function Index() {
                     <p className="truncate font-semibold">{destination}</p>
                   </div>
                 </div>
+                <div className="mt-3 flex items-center justify-between border-t border-mist/15 pt-3 text-[11px] text-mist/70">
+                  <span>
+                    {t.distance}: {distanceKm.toFixed(1)} km
+                  </span>
+                  <span>
+                    {t.duration}: {durationMinutes} min
+                  </span>
+                </div>
+                <p className="mt-2 text-[10px] text-mist/50">
+                  {mapsStatus === "ready"
+                    ? "Google Maps · ruta en automóvil"
+                    : mapsStatus === "loading"
+                      ? t.mapsLoading
+                      : t.mapsFallback}
+                </p>
               </section>
             )}
 
@@ -365,6 +524,7 @@ function Index() {
                         {t.origin}
                       </span>
                       <input
+                        ref={originInputRef}
                         aria-label={t.origin}
                         value={origin}
                         onChange={(event) => setOrigin(event.target.value)}
@@ -381,6 +541,7 @@ function Index() {
                         {t.destination}
                       </span>
                       <input
+                        ref={destinationInputRef}
                         aria-label={t.destination}
                         value={destination}
                         onChange={(event) => setDestination(event.target.value)}
