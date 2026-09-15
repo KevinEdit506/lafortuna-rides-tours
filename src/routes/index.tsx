@@ -25,18 +25,39 @@ import riverImage from "../assets/penas-blancas.jpg";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Via La Fortuna | Traslados y tours" },
+      { title: "Via La Fortuna | Transfers & Tours in Arenal" },
       {
         name: "description",
-        content: "Reserve traslados privados, viajes programados y tours bilingües en La Fortuna.",
+        content:
+          "Reserve traslados privados y tours bilingües en La Fortuna, Costa Rica. Tarifas claras, atención local y experiencias memorables cerca del Arenal.",
       },
-      { property: "og:title", content: "Via La Fortuna | Traslados y tours" },
+      { property: "og:title", content: "Via La Fortuna | Transfers & Tours in Arenal" },
       {
         property: "og:description",
-        content: "Movilidad confiable y experiencias locales bilingües en La Fortuna.",
+        content:
+          "Traslados privados y tours bilingües en La Fortuna, Costa Rica. Tarifas claras, atención local y experiencias memorables cerca del Arenal.",
       },
       { property: "og:type", content: "website" },
+      { property: "og:url", content: "https://kevinedit506.github.io/lafortuna-rides-tours/" },
+      { property: "og:site_name", content: "Via La Fortuna" },
+      { property: "og:locale", content: "es_CR" },
+      {
+        property: "og:image",
+        content: "https://kevinedit506.github.io/lafortuna-rides-tours/social-preview.jpg",
+      },
+      { property: "og:image:width", content: "2560" },
+      { property: "og:image:height", content: "1440" },
       { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:title", content: "Via La Fortuna | Transfers & Tours in Arenal" },
+      {
+        name: "twitter:description",
+        content:
+          "Traslados privados y tours bilingües en La Fortuna, Costa Rica. Tarifas claras y atención local.",
+      },
+      {
+        name: "twitter:image",
+        content: "https://kevinedit506.github.io/lafortuna-rides-tours/social-preview.jpg",
+      },
     ],
   }),
   component: Index,

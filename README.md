@@ -1,26 +1,43 @@
-# La Fortuna Journeys
+# Via La Fortuna
 
-Toma la imagen como referencia, me ayudas a mejorar visualmente, que tenga más "elegancia y seriedad y genere confianza" puedes tomar algo de la app (Uber) para crear un valance de precio + costos operativos, que las personas puedan reservar viejes programados, conserva las ilustraciónes visuales como en la foto para hacer más llamativo para el turismo ya que vivo en zona turística (La Fortuna) para ser exactos, incluso una segunda opción en la misma seria poder ofrecer tours en la zona y cercanías, servicio bilingüe
+Via La Fortuna is a bilingual rides and tours experience for travelers visiting La Fortuna and the Arenal region of Costa Rica. The app combines clear transfer estimates, scheduled private or shared rides, and curated local experiences in a calm, trustworthy interface.
 
-This project was built with [Lovable](https://lovable.dev).
+## Live site
 
-**Live app**: https://lafortuna-rides-tours.lovable.app
+Visit the deployed app at [kevinedit506.github.io/lafortuna-rides-tours](https://kevinedit506.github.io/lafortuna-rides-tours/).
 
-## Build with Lovable
+## Highlights
 
-Continue developing this project in the [Lovable editor](https://lovable.dev/projects/d0d2ba85-8f0b-46ef-b10a-6f8edcde9adb).
+- Bilingual Spanish and English interface.
+- Private and shared transfer options.
+- Transparent fare breakdown for service, operating costs, and coverage.
+- Scheduled or immediate ride planning.
+- Curated La Fortuna experiences, including the Místico Hanging Bridges and Peñas Blancas River.
+- Responsive layout designed for mobile travelers and larger screens.
 
-- **Ship faster**: describe what you want to build and Lovable handles the code.
-- **Stay in sync**: every change made in Lovable is committed straight to this repository.
-- **Full ownership**: this code is yours. Push to `main` on GitHub and your changes sync back into Lovable, ready for your next prompt.
+## Local development
 
-## Development
-
-Prefer working locally? You need Node.js and npm — [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating).
+This project uses React, TanStack Start, Vite, Tailwind CSS, and TypeScript. To run it locally:
 
 ```sh
-git clone <this-repository-url>
-cd <repository-name>
-npm i
+git clone https://github.com/KevinEdit506/lafortuna-rides-tours.git
+cd lafortuna-rides-tours
+npm install
 npm run dev
 ```
+
+For a production-style validation, run:
+
+```sh
+npm run ci
+```
+
+The command runs linting, TypeScript checks, and the static production build.
+
+## Deployment
+
+Changes pushed to `main` are validated and deployed through [GitHub Actions](.github/workflows/pages.yml). GitHub Pages serves the prerendered output at the live site URL above.
+
+## Brand assets
+
+The public metadata uses a branded Via La Fortuna favicon and a scenic Arenal-region social preview image. The image was selected to communicate the product promise at a glance: reliable local mobility surrounded by the landscape travelers come to experience.

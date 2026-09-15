@@ -77,19 +77,40 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Via La Fortuna" },
+      { title: "Via La Fortuna | Transfers & Tours in Arenal" },
       {
         name: "description",
-        content: "Traslados privados y tours bilingües en La Fortuna, Costa Rica.",
+        content:
+          "Reserve traslados privados y tours bilingües en La Fortuna, Costa Rica. Tarifas claras, atención local y experiencias memorables cerca del Arenal.",
       },
       { name: "author", content: "Via La Fortuna" },
-      { property: "og:title", content: "Via La Fortuna" },
+      { property: "og:title", content: "Via La Fortuna | Transfers & Tours in Arenal" },
       {
         property: "og:description",
-        content: "Traslados privados y tours bilingües en La Fortuna, Costa Rica.",
+        content:
+          "Traslados privados y tours bilingües en La Fortuna, Costa Rica. Tarifas claras, atención local y experiencias memorables cerca del Arenal.",
       },
       { property: "og:type", content: "website" },
+      { property: "og:url", content: "https://kevinedit506.github.io/lafortuna-rides-tours/" },
+      { property: "og:site_name", content: "Via La Fortuna" },
+      { property: "og:locale", content: "es_CR" },
+      {
+        property: "og:image",
+        content: "https://kevinedit506.github.io/lafortuna-rides-tours/social-preview.jpg",
+      },
+      { property: "og:image:width", content: "2560" },
+      { property: "og:image:height", content: "1440" },
       { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:title", content: "Via La Fortuna | Transfers & Tours in Arenal" },
+      {
+        name: "twitter:description",
+        content:
+          "Traslados privados y tours bilingües en La Fortuna, Costa Rica. Tarifas claras y atención local.",
+      },
+      {
+        name: "twitter:image",
+        content: "https://kevinedit506.github.io/lafortuna-rides-tours/social-preview.jpg",
+      },
     ],
     links: [
       {
@@ -102,7 +123,12 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         rel: "stylesheet",
         href: "https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap",
       },
-      { rel: "icon", href: `${import.meta.env.BASE_URL}favicon.ico`, type: "image/x-icon" },
+      { rel: "icon", href: `${import.meta.env.BASE_URL}favicon.svg`, type: "image/svg+xml" },
+      {
+        rel: "alternate icon",
+        href: `${import.meta.env.BASE_URL}favicon.ico`,
+        type: "image/x-icon",
+      },
     ],
   }),
   shellComponent: RootShell,
@@ -113,7 +139,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 
 function RootShell({ children }: { children: ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="es">
       <head>
         <HeadContent />
       </head>
