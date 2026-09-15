@@ -11,7 +11,10 @@ Visit the deployed app at [kevinedit506.github.io/lafortuna-rides-tours](https:/
 - Bilingual Spanish and English interface.
 - Private and shared transfer options.
 - Transparent fare breakdown for service, operating costs, and coverage.
+- Live USD-to-CRC conversion using the BCCR reference rate through a public data endpoint.
 - Scheduled or immediate ride planning.
+- Shared rides with an individual destination for each passenger.
+- Card or cash payment preference included in the WhatsApp booking request.
 - Curated La Fortuna experiences, including the Místico Hanging Bridges and Peñas Blancas River.
 - Responsive layout designed for mobile travelers and larger screens.
 
@@ -33,6 +36,8 @@ npm run ci
 ```
 
 The command runs linting, TypeScript checks, and the static production build.
+
+The fare panel displays both USD and Costa Rican colones when the current BCCR reference rate is available. The rate is fetched in the browser from [Frankfurter's BCCR provider](https://frankfurter.dev/providers/bccr/), which publishes current and historical rates from the [Banco Central de Costa Rica](https://sdd.bccr.fi.cr/es/IndicadoresEconomicos/Inicio/Contenedor/6).
 
 ## Deployment
 

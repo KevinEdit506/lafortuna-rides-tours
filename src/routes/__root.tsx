@@ -96,7 +96,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { property: "og:locale", content: "es_CR" },
       {
         property: "og:image",
-        content: "https://kevinedit506.github.io/lafortuna-rides-tours/social-preview.jpg",
+        content:
+          "https://kevinedit506.github.io/lafortuna-rides-tours/social-preview.jpg?v=20260914-2",
       },
       { property: "og:image:width", content: "2560" },
       { property: "og:image:height", content: "1440" },
@@ -109,7 +110,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       },
       {
         name: "twitter:image",
-        content: "https://kevinedit506.github.io/lafortuna-rides-tours/social-preview.jpg",
+        content:
+          "https://kevinedit506.github.io/lafortuna-rides-tours/social-preview.jpg?v=20260914-2",
       },
     ],
     links: [

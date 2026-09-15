@@ -17,7 +17,7 @@ import {
   UserRound,
   UsersRound,
 } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import misticoImage from "../assets/mistico-bridges.jpg";
 import riverImage from "../assets/penas-blancas.jpg";
@@ -43,7 +43,8 @@ export const Route = createFileRoute("/")({
       { property: "og:locale", content: "es_CR" },
       {
         property: "og:image",
-        content: "https://kevinedit506.github.io/lafortuna-rides-tours/social-preview.jpg",
+        content:
+          "https://kevinedit506.github.io/lafortuna-rides-tours/social-preview.jpg?v=20260914-2",
       },
       { property: "og:image:width", content: "2560" },
       { property: "og:image:height", content: "1440" },
@@ -56,7 +57,8 @@ export const Route = createFileRoute("/")({
       },
       {
         name: "twitter:image",
-        content: "https://kevinedit506.github.io/lafortuna-rides-tours/social-preview.jpg",
+        content:
+          "https://kevinedit506.github.io/lafortuna-rides-tours/social-preview.jpg?v=20260914-2",
       },
     ],
   }),
@@ -90,6 +92,13 @@ const copy = {
     escapes: "Experiencias en La Fortuna",
     explore: "Ver todas",
     reserveTour: "Reservar tour",
+    payment: "Pago",
+    card: "Tarjeta",
+    cash: "Efectivo",
+    sharedDestinations: "Destinos de pasajeros",
+    passengerDestination: "Destino pasajero",
+    exchangeLoading: "Consultando tipo de cambio BCCR…",
+    exchangeSource: "Tipo de cambio de referencia BCCR",
     hours: "horas",
     home: "Inicio",
     routes: "Viajes",
@@ -122,6 +131,13 @@ const copy = {
     escapes: "Experiences in La Fortuna",
     explore: "View all",
     reserveTour: "Book tour",
+    payment: "Payment",
+    card: "Card",
+    cash: "Cash",
+    sharedDestinations: "Passenger destinations",
+    passengerDestination: "Passenger destination",
+    exchangeLoading: "Checking BCCR exchange rate…",
+    exchangeSource: "BCCR reference exchange rate",
     hours: "hours",
     home: "Home",
     routes: "Trips",
@@ -138,10 +154,32 @@ function Index() {
   const [passengers, setPassengers] = useState(2);
   const [origin, setOrigin] = useState("Centro de La Fortuna");
   const [destination, setDestination] = useState("Parque Nacional Volcán Arenal");
+  const [passengerDestinations, setPassengerDestinations] = useState([
+    "Parque Nacional Volcán Arenal",
+    "Parque Nacional Volcán Arenal",
+  ]);
+  const [paymentMethod, setPaymentMethod] = useState<"card" | "cash">("card");
+  const [exchangeRate, setExchangeRate] = useState<number | null>(null);
   const [showFare, setShowFare] = useState(true);
   const [fareExpanded, setFareExpanded] = useState(true);
   const [confirmed, setConfirmed] = useState(false);
   const t = copy[language];
+  useEffect(() => {
+    let active = true;
+    fetch("https://api.frankfurter.dev/v2/providers/bccr/rates?base=usd")
+      .then((response) => {
+        if (!response.ok) throw new Error("Exchange rate request failed");
+        return response.json() as Promise<Array<{ quote: string; rate: number }>>;
+      })
+      .then((rates) => {
+        const usdToCrc = rates.find((rate) => rate.quote === "CRC")?.rate;
+        if (active && usdToCrc) setExchangeRate(usdToCrc);
+      })
+      .catch(() => undefined);
+    return () => {
+      active = false;
+    };
+  }, []);
   const fare = useMemo(() => {
     const sharedFactor = rideType === "shared" ? 0.68 : 1;
     const passengerExtra = Math.max(0, passengers - 2) * 4;
@@ -150,6 +188,18 @@ function Index() {
     return { service, operations, platform: 5, total: service + operations + 5 };
   }, [passengers, rideType]);
 
+  const formatColones = (amount: number) =>
+    exchangeRate
+      ? `₡${Math.round(amount * exchangeRate).toLocaleString("es-CR")}`
+      : t.exchangeLoading;
+
+  const updatePassengers = (nextPassengers: number) => {
+    setPassengers(nextPassengers);
+    setPassengerDestinations((current) =>
+      Array.from({ length: nextPassengers }, (_, index) => current[index] ?? destination),
+    );
+  };
+
   const openWhatsApp = (tourName?: string) => {
     const isSpanish = language === "es";
     const message = tourName
@@ -157,8 +207,8 @@ function Index() {
         ? `Hola Via La Fortuna, me gustaría reservar el tour ${tourName}. ¿Podrían ayudarme con disponibilidad y próximos pasos?`
         : `Hello Via La Fortuna, I would like to book the ${tourName} tour. Could you help me with availability and next steps?`
       : isSpanish
-        ? `Hola Via La Fortuna, me gustaría reservar un traslado.\n\nOrigen: ${origin}\nDestino: ${destination}\nTipo: ${rideType === "private" ? "Privado" : "Compartido"}\nHorario: ${timing === "now" ? "Ahora" : "18 Sep · 09:30"}\nPasajeros: ${passengers}\nTarifa estimada: $${fare.total} USD`
-        : `Hello Via La Fortuna, I would like to book a transfer.\n\nPickup: ${origin}\nDestination: ${destination}\nType: ${rideType === "private" ? "Private" : "Shared"}\nTiming: ${timing === "now" ? "Now" : "18 Sep · 09:30"}\nPassengers: ${passengers}\nEstimated fare: $${fare.total} USD`;
+        ? `Hola Via La Fortuna, me gustaría reservar un traslado.\n\nOrigen: ${origin}\nDestino: ${destination}\n${rideType === "shared" ? `Destinos de pasajeros:\n${passengerDestinations.map((item, index) => `Pasajero ${index + 1}: ${item}`).join("\n")}` : ""}\nTipo: ${rideType === "private" ? "Privado" : "Compartido"}\nHorario: ${timing === "now" ? "Ahora" : "18 Sep · 09:30"}\nPasajeros: ${passengers}\nPago: ${paymentMethod === "card" ? "Tarjeta" : "Efectivo"}\nTarifa estimada: $${fare.total} USD (${formatColones(fare.total)})`
+        : `Hello Via La Fortuna, I would like to book a transfer.\n\nPickup: ${origin}\nDestination: ${destination}\n${rideType === "shared" ? `Passenger destinations:\n${passengerDestinations.map((item, index) => `Passenger ${index + 1}: ${item}`).join("\n")}` : ""}\nType: ${rideType === "private" ? "Private" : "Shared"}\nTiming: ${timing === "now" ? "Now" : "18 Sep · 09:30"}\nPassengers: ${passengers}\nPayment: ${paymentMethod === "card" ? "Card" : "Cash"}\nEstimated fare: $${fare.total} USD (${formatColones(fare.total)})`;
 
     window.open(
       `https://wa.me/50663135655?text=${encodeURIComponent(message)}`,
@@ -298,18 +348,63 @@ function Index() {
                     <div className="mt-1 flex items-center justify-between">
                       <button
                         aria-label="Restar pasajero"
-                        onClick={() => setPassengers(Math.max(1, passengers - 1))}
+                        onClick={() => updatePassengers(Math.max(1, passengers - 1))}
                       >
                         <Minus className="size-4" />
                       </button>
                       <span className="text-sm font-bold">{passengers}</span>
                       <button
                         aria-label="Agregar pasajero"
-                        onClick={() => setPassengers(Math.min(8, passengers + 1))}
+                        onClick={() => updatePassengers(Math.min(8, passengers + 1))}
                       >
                         <Plus className="size-4 text-leaf" />
                       </button>
                     </div>
+                  </div>
+                </div>
+                {rideType === "shared" && (
+                  <div className="mt-3 rounded-2xl bg-background p-3 ring-1 ring-border">
+                    <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">
+                      <MapPin className="size-3.5 text-leaf" />
+                      {t.sharedDestinations}
+                    </div>
+                    <div className="mt-2 space-y-2">
+                      {Array.from({ length: passengers }, (_, index) => (
+                        <label key={index} className="block">
+                          <span className="text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
+                            {t.passengerDestination} {index + 1}
+                          </span>
+                          <input
+                            value={passengerDestinations[index] ?? ""}
+                            onChange={(event) =>
+                              setPassengerDestinations((current) =>
+                                current.map((item, itemIndex) =>
+                                  itemIndex === index ? event.target.value : item,
+                                ),
+                              )
+                            }
+                            placeholder={destination}
+                            className="mt-0.5 w-full bg-transparent text-sm font-semibold outline-none"
+                          />
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                <div className="mt-3 rounded-2xl bg-background p-1 ring-1 ring-border">
+                  <p className="px-3 pt-2 text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">
+                    {t.payment}
+                  </p>
+                  <div className="mt-1 grid grid-cols-2 gap-1">
+                    {(["card", "cash"] as const).map((method) => (
+                      <button
+                        key={method}
+                        onClick={() => setPaymentMethod(method)}
+                        className={`rounded-xl py-2.5 text-sm font-bold transition-colors ${paymentMethod === method ? "bg-leaf text-accent-foreground" : "text-muted-foreground"}`}
+                      >
+                        {method === "card" ? t.card : t.cash}
+                      </button>
+                    ))}
                   </div>
                 </div>
                 <button
@@ -348,6 +443,14 @@ function Index() {
                   <p className="font-display text-[38px] leading-none">${fare.total}</p>
                   <p className="text-xs text-mist/60">USD</p>
                 </div>
+                <p className="mt-1 text-sm font-semibold text-mist/85">
+                  {formatColones(fare.total)} {exchangeRate ? "CRC" : ""}
+                </p>
+                <p className="mt-1 text-[10px] text-mist/55">
+                  {exchangeRate
+                    ? `${t.exchangeSource}: ₡${exchangeRate.toLocaleString("es-CR")} / USD`
+                    : t.exchangeLoading}
+                </p>
                 <button
                   onClick={() => setFareExpanded(!fareExpanded)}
                   className="mt-4 flex w-full items-center justify-between border-t border-mist/15 pt-4 text-xs font-semibold text-mist/80"
