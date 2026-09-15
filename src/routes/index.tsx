@@ -113,6 +113,8 @@ const copy = {
     duration: "Tiempo estimado",
     mapsLoading: "Conectando con Google Maps…",
     mapsFallback: "Activa Google Maps para calcular la ruta exacta",
+    routeUpdating: "Actualizando ruta y tarifa…",
+    routeUpdated: "Ruta y tarifa actualizadas",
     estimate: "Tarifa estimada",
     details: "Ver desglose",
     trip: "Servicio de traslado",
@@ -162,6 +164,8 @@ const copy = {
     duration: "Estimated time",
     mapsLoading: "Connecting to Google Maps…",
     mapsFallback: "Enable Google Maps for exact routing",
+    routeUpdating: "Updating route and fare…",
+    routeUpdated: "Route and fare updated",
     estimate: "Estimated fare",
     details: "View breakdown",
     trip: "Transfer service",
@@ -215,6 +219,7 @@ function Index() {
   const [durationMinutes, setDurationMinutes] = useState(18);
   const [passengerDistances, setPassengerDistances] = useState<number[]>([8, 8]);
   const [mapsStatus, setMapsStatus] = useState<"loading" | "ready" | "fallback">("loading");
+  const [routeStatus, setRouteStatus] = useState<"idle" | "updating" | "updated">("idle");
   const mapsScriptLoaded = useRef(false);
   const originInputRef = useRef<HTMLInputElement>(null);
   const destinationInputRef = useRef<HTMLInputElement>(null);
@@ -244,6 +249,7 @@ function Index() {
 
   useEffect(() => {
     if (mapsStatus !== "ready" || !origin.trim() || !destination.trim()) return;
+    setRouteStatus("updating");
     const maps = (window as MapsWindow).google?.maps;
     if (!maps) return;
     const service = new maps.DirectionsService();
@@ -261,8 +267,20 @@ function Index() {
           return;
         setDistanceKm(Math.max(1, Number(leg.distance.value) / 1000));
         setDurationMinutes(Math.max(1, Math.round(Number(leg.duration.value) / 60)));
+        setRouteStatus("updated");
       },
     );
+  }, [destination, mapsStatus, origin]);
+
+  useEffect(() => {
+    if (mapsStatus !== "fallback" || !origin.trim() || !destination.trim()) return;
+    const fallbackDistance = Math.max(
+      1,
+      4 + ((origin.length * 7 + destination.length * 11) % 120) / 10,
+    );
+    setDistanceKm(fallbackDistance);
+    setDurationMinutes(Math.max(3, Math.round(fallbackDistance * 2.2)));
+    setRouteStatus("updated");
   }, [destination, mapsStatus, origin]);
 
   useEffect(() => {
@@ -528,6 +546,11 @@ function Index() {
                       ? t.mapsLoading
                       : t.mapsFallback}
                 </p>
+                {routeStatus !== "idle" && (
+                  <p className="mt-1 text-[10px] font-semibold text-leaf">
+                    {routeStatus === "updating" ? t.routeUpdating : t.routeUpdated}
+                  </p>
+                )}
               </section>
             )}
 
@@ -544,7 +567,10 @@ function Index() {
                         ref={originInputRef}
                         aria-label={t.origin}
                         value={origin}
-                        onChange={(event) => setOrigin(event.target.value)}
+                        onChange={(event) => {
+                          setOrigin(event.target.value);
+                          setRouteStatus("updating");
+                        }}
                         className="mt-0.5 w-full rounded-full bg-surface px-4 py-2 text-[15px] font-semibold outline-none ring-1 ring-border transition focus:ring-2 focus:ring-leaf"
                       />
                     </label>
@@ -561,7 +587,10 @@ function Index() {
                         ref={destinationInputRef}
                         aria-label={t.destination}
                         value={destination}
-                        onChange={(event) => setDestination(event.target.value)}
+                        onChange={(event) => {
+                          setDestination(event.target.value);
+                          setRouteStatus("updating");
+                        }}
                         className="mt-0.5 w-full rounded-full bg-surface px-4 py-2 text-[15px] font-semibold outline-none ring-1 ring-border transition focus:ring-2 focus:ring-leaf"
                       />
                     </label>
