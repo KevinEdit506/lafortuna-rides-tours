@@ -102,7 +102,6 @@ const copy = {
     now: "Ahora",
     schedule: "Programar",
     passengers: "Pasajeros",
-    discount: "10% de descuento aplicado",
     routePreview: "Ruta del viaje",
     agenda: "Agenda de viajes",
     scheduledTrip: "Viaje programado",
@@ -152,7 +151,6 @@ const copy = {
     now: "Now",
     schedule: "Schedule",
     passengers: "Passengers",
-    discount: "10% discount applied",
     routePreview: "Trip route",
     agenda: "Trip schedule",
     scheduledTrip: "Scheduled trip",
@@ -333,14 +331,14 @@ function Index() {
     };
   }, []);
   const fare = useMemo(() => {
-    const discount = 0.9;
+    const pricingFactor = 1;
     if (rideType === "private") {
       const base = 8;
       const distanceCharge = distanceKm * 1.35;
       const timeCharge = durationMinutes * 0.18;
-      const service = Math.round((base + distanceCharge + timeCharge) * discount);
-      const operations = Math.round(7 * discount);
-      const platform = Math.round(4 * discount);
+      const service = Math.round((base + distanceCharge + timeCharge) * pricingFactor);
+      const operations = Math.round(7 * pricingFactor);
+      const platform = Math.round(4 * pricingFactor);
       return {
         service,
         operations,
@@ -354,10 +352,10 @@ function Index() {
       .map((passengerDestination, index) => {
         const passengerDistance = passengerDistances[index] ?? distanceKm;
         const service = Math.round(
-          (5 + passengerDistance * 0.95 + durationMinutes * 0.1) * discount,
+          (5 + passengerDistance * 0.95 + durationMinutes * 0.1) * pricingFactor,
         );
-        const operations = Math.round(4 * discount);
-        const platform = Math.round(3 * discount);
+        const operations = Math.round(4 * pricingFactor);
+        const platform = Math.round(3 * pricingFactor);
         return { destination: passengerDestination, total: service + operations + platform };
       });
     const total = perPassenger.reduce((sum, item) => sum + item.total, 0);
@@ -474,12 +472,31 @@ function Index() {
 
             {mode === "transfers" && (
               <section className="mt-3 overflow-hidden rounded-[28px] bg-jungle p-4 text-primary-foreground shadow-lg shadow-primary/15">
-                <div className="relative h-24 overflow-hidden rounded-[22px] bg-[#174b3b]">
-                  <div className="absolute inset-0 opacity-40 [background-image:linear-gradient(35deg,transparent_42%,#9bbf92_43%,#9bbf92_45%,transparent_46%),linear-gradient(145deg,transparent_44%,#f1f3e9_45%,#f1f3e9_47%,transparent_48%)]" />
-                  <div className="absolute left-[17%] top-1/2 h-3 w-3 -translate-y-1/2 rounded-full bg-leaf ring-4 ring-leaf/20" />
-                  <div className="absolute right-[18%] top-1/3 h-3 w-3 rounded-full bg-primary-foreground ring-4 ring-primary-foreground/20" />
-                  <div className="absolute left-[22%] top-[52%] h-1 w-[56%] rotate-[-12deg] rounded-full bg-leaf" />
-                  <Navigation className="absolute right-3 top-3 size-4 text-leaf" />
+                <div className="relative h-44 overflow-hidden rounded-[22px] bg-[#1d2929]">
+                  <div className="absolute inset-0 opacity-70 [background-image:linear-gradient(18deg,transparent_11%,#41514b_12%,#41514b_13%,transparent_14%,transparent_58%,#41514b_59%,#41514b_60%,transparent_61%),linear-gradient(112deg,transparent_18%,#33433f_19%,#33433f_22%,transparent_23%),linear-gradient(78deg,transparent_67%,#33433f_68%,#33433f_70%,transparent_71%),linear-gradient(160deg,transparent_42%,#52615a_43%,#52615a_44%,transparent_45%)]" />
+                  <div className="absolute inset-x-0 top-[30%] h-px bg-[#718078]/50" />
+                  <div className="absolute -left-8 top-[68%] h-px w-[120%] rotate-[-18deg] bg-[#718078]/60" />
+                  <div className="absolute left-[14%] top-[63%] h-3 w-3 rounded-full bg-white shadow-[0_0_0_5px_rgba(255,255,255,0.18)]" />
+                  <div className="absolute right-[18%] top-[22%] h-4 w-4 rounded-full border-[3px] border-white bg-[#ff5a5f] shadow-[0_0_0_5px_rgba(255,90,95,0.2)]" />
+                  <div className="absolute left-[18%] top-[59%] h-[3px] w-[65%] rotate-[-34deg] rounded-full bg-[#b9e36d] shadow-[0_0_8px_rgba(185,227,109,0.8)]" />
+                  <div className="absolute left-3 top-3 rounded-full bg-[#101818]/80 px-2.5 py-1 text-[9px] font-bold uppercase tracking-[0.15em] text-white/80">
+                    Ruta sugerida
+                  </div>
+                  <div className="absolute right-3 top-3 grid gap-1 rounded-xl bg-[#101818]/80 p-1 text-white/80">
+                    <button
+                      aria-label="Acercar mapa"
+                      className="grid size-6 place-items-center rounded-lg text-sm"
+                    >
+                      +
+                    </button>
+                    <button
+                      aria-label="Alejar mapa"
+                      className="grid size-6 place-items-center rounded-lg text-sm"
+                    >
+                      −
+                    </button>
+                  </div>
+                  <Navigation className="absolute bottom-3 right-3 size-4 text-[#b9e36d]" />
                 </div>
                 <div className="mt-3 flex items-center justify-between gap-3 text-xs">
                   <div className="min-w-0">
@@ -739,9 +756,6 @@ function Index() {
                 </div>
                 <p className="mt-1 text-sm font-semibold text-mist/85">
                   {formatColones(fare.total)} {exchangeRate ? "CRC" : ""}
-                </p>
-                <p className="mt-2 inline-flex rounded-full bg-leaf/20 px-3 py-1 text-xs font-bold text-leaf">
-                  {t.discount}
                 </p>
                 <p className="mt-2 text-[10px] text-mist/55">
                   {rideType === "private" ? t.privateFixed : t.perPassenger}
