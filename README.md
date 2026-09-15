@@ -10,12 +10,17 @@ Visit the deployed app at [kevinedit506.github.io/lafortuna-rides-tours](https:/
 
 - Bilingual Spanish and English interface.
 - Private and shared transfer options.
+- Automatic fare preview inspired by familiar ride-hailing flows, with a 10% promotional discount.
+- Fixed private-trip pricing regardless of passenger count.
+- Shared-trip pricing calculated separately for each passenger route.
 - Transparent fare breakdown for service, operating costs, and coverage.
 - Live USD-to-CRC conversion using the BCCR reference rate through a public data endpoint.
 - Scheduled or immediate ride planning.
+- A lightweight trip agenda for scheduled rides.
 - Shared rides with an individual destination for each passenger.
 - Card or cash payment preference included in the WhatsApp booking request.
 - Curated La Fortuna experiences, including the Místico Hanging Bridges and Peñas Blancas River.
+- Tour discovery categories for Arenal, beaches, national parks, and rivers across Costa Rica.
 - Responsive layout designed for mobile travelers and larger screens.
 
 ## Local development

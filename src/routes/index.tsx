@@ -9,6 +9,7 @@ import {
   Home,
   MapPin,
   MessageCircle,
+  Navigation,
   Minus,
   Plus,
   Route as RouteIcon,
@@ -80,7 +81,14 @@ const copy = {
     now: "Ahora",
     schedule: "Programar",
     passengers: "Pasajeros",
-    calculate: "Calcular tarifa",
+    discount: "10% de descuento aplicado",
+    routePreview: "Ruta del viaje",
+    agenda: "Agenda de viajes",
+    scheduledTrip: "Viaje programado",
+    pickupShort: "Origen",
+    destinationShort: "Destino",
+    perPassenger: "Por pasajero",
+    privateFixed: "Tarifa privada fija por viaje",
     estimate: "Tarifa estimada",
     details: "Ver desglose",
     trip: "Servicio de traslado",
@@ -119,7 +127,14 @@ const copy = {
     now: "Now",
     schedule: "Schedule",
     passengers: "Passengers",
-    calculate: "Calculate fare",
+    discount: "10% discount applied",
+    routePreview: "Trip route",
+    agenda: "Trip schedule",
+    scheduledTrip: "Scheduled trip",
+    pickupShort: "Pickup",
+    destinationShort: "Destination",
+    perPassenger: "Per passenger",
+    privateFixed: "Fixed private trip fare",
     estimate: "Estimated fare",
     details: "View breakdown",
     trip: "Transfer service",
@@ -154,15 +169,21 @@ function Index() {
   const [passengers, setPassengers] = useState(2);
   const [origin, setOrigin] = useState("Centro de La Fortuna");
   const [destination, setDestination] = useState("Parque Nacional Volcán Arenal");
+  const [passengerOrigins, setPassengerOrigins] = useState([
+    "Centro de La Fortuna",
+    "Centro de La Fortuna",
+  ]);
   const [passengerDestinations, setPassengerDestinations] = useState([
     "Parque Nacional Volcán Arenal",
     "Parque Nacional Volcán Arenal",
   ]);
   const [paymentMethod, setPaymentMethod] = useState<"card" | "cash">("card");
   const [exchangeRate, setExchangeRate] = useState<number | null>(null);
-  const [showFare, setShowFare] = useState(true);
   const [fareExpanded, setFareExpanded] = useState(true);
   const [confirmed, setConfirmed] = useState(false);
+  const [scheduledTrips, setScheduledTrips] = useState<string[]>([]);
+  const [scheduleDate, setScheduleDate] = useState("2026-09-18");
+  const [scheduleTime, setScheduleTime] = useState("09:30");
   const t = copy[language];
   useEffect(() => {
     let active = true;
@@ -181,12 +202,30 @@ function Index() {
     };
   }, []);
   const fare = useMemo(() => {
-    const sharedFactor = rideType === "shared" ? 0.68 : 1;
-    const passengerExtra = Math.max(0, passengers - 2) * 4;
-    const service = Math.round((34 + passengerExtra) * sharedFactor);
-    const operations = Math.round(11 * sharedFactor);
-    return { service, operations, platform: 5, total: service + operations + 5 };
-  }, [passengers, rideType]);
+    const discount = 0.9;
+    if (rideType === "private") {
+      const service = Math.round(34 * discount);
+      const operations = Math.round(11 * discount);
+      const platform = Math.round(5 * discount);
+      return {
+        service,
+        operations,
+        platform,
+        total: service + operations + platform,
+        perPassenger: [] as Array<{ destination: string; total: number }>,
+      };
+    }
+    const perPassenger = passengerDestinations
+      .slice(0, passengers)
+      .map((passengerDestination, index) => {
+        const service = Math.round((22 + index * 3) * discount);
+        const operations = Math.round(6 * discount);
+        const platform = Math.round(4 * discount);
+        return { destination: passengerDestination, total: service + operations + platform };
+      });
+    const total = perPassenger.reduce((sum, item) => sum + item.total, 0);
+    return { service: total, operations: 0, platform: 0, total, perPassenger };
+  }, [passengers, passengerDestinations, rideType]);
 
   const formatColones = (amount: number) =>
     exchangeRate
@@ -195,9 +234,18 @@ function Index() {
 
   const updatePassengers = (nextPassengers: number) => {
     setPassengers(nextPassengers);
+    setPassengerOrigins((current) =>
+      Array.from({ length: nextPassengers }, (_, index) => current[index] ?? origin),
+    );
     setPassengerDestinations((current) =>
       Array.from({ length: nextPassengers }, (_, index) => current[index] ?? destination),
     );
+  };
+
+  const scheduleTrip = () => {
+    const label = `${scheduleDate} · ${scheduleTime} · ${origin} → ${destination}`;
+    setScheduledTrips((current) => [...current, label]);
+    setTiming("schedule");
   };
 
   const openWhatsApp = (tourName?: string) => {
@@ -207,8 +255,8 @@ function Index() {
         ? `Hola Via La Fortuna, me gustaría reservar el tour ${tourName}. ¿Podrían ayudarme con disponibilidad y próximos pasos?`
         : `Hello Via La Fortuna, I would like to book the ${tourName} tour. Could you help me with availability and next steps?`
       : isSpanish
-        ? `Hola Via La Fortuna, me gustaría reservar un traslado.\n\nOrigen: ${origin}\nDestino: ${destination}\n${rideType === "shared" ? `Destinos de pasajeros:\n${passengerDestinations.map((item, index) => `Pasajero ${index + 1}: ${item}`).join("\n")}` : ""}\nTipo: ${rideType === "private" ? "Privado" : "Compartido"}\nHorario: ${timing === "now" ? "Ahora" : "18 Sep · 09:30"}\nPasajeros: ${passengers}\nPago: ${paymentMethod === "card" ? "Tarjeta" : "Efectivo"}\nTarifa estimada: $${fare.total} USD (${formatColones(fare.total)})`
-        : `Hello Via La Fortuna, I would like to book a transfer.\n\nPickup: ${origin}\nDestination: ${destination}\n${rideType === "shared" ? `Passenger destinations:\n${passengerDestinations.map((item, index) => `Passenger ${index + 1}: ${item}`).join("\n")}` : ""}\nType: ${rideType === "private" ? "Private" : "Shared"}\nTiming: ${timing === "now" ? "Now" : "18 Sep · 09:30"}\nPassengers: ${passengers}\nPayment: ${paymentMethod === "card" ? "Card" : "Cash"}\nEstimated fare: $${fare.total} USD (${formatColones(fare.total)})`;
+        ? `Hola Via La Fortuna, me gustaría reservar un traslado.\n\nOrigen: ${origin}\nDestino: ${destination}\n${rideType === "shared" ? `Rutas por pasajero:\n${passengerDestinations.map((item, index) => `Pasajero ${index + 1}: ${passengerOrigins[index]} → ${item}`).join("\n")}` : ""}\nTipo: ${rideType === "private" ? "Privado" : "Compartido"}\nHorario: ${timing === "now" ? "Ahora" : `${scheduleDate} · ${scheduleTime}`}\nPasajeros: ${passengers}\nPago: ${paymentMethod === "card" ? "Tarjeta" : "Efectivo"}\nTarifa estimada: $${fare.total} USD (${formatColones(fare.total)})`
+        : `Hello Via La Fortuna, I would like to book a transfer.\n\nPickup: ${origin}\nDestination: ${destination}\n${rideType === "shared" ? `Passenger routes:\n${passengerDestinations.map((item, index) => `Passenger ${index + 1}: ${passengerOrigins[index]} → ${item}`).join("\n")}` : ""}\nType: ${rideType === "private" ? "Private" : "Shared"}\nTiming: ${timing === "now" ? "Now" : `${scheduleDate} · ${scheduleTime}`}\nPassengers: ${passengers}\nPayment: ${paymentMethod === "card" ? "Card" : "Cash"}\nEstimated fare: $${fare.total} USD (${formatColones(fare.total)})`;
 
     window.open(
       `https://wa.me/50663135655?text=${encodeURIComponent(message)}`,
@@ -280,6 +328,33 @@ function Index() {
               </button>
             </div>
 
+            {mode === "transfers" && (
+              <section className="mt-3 overflow-hidden rounded-[28px] bg-jungle p-4 text-primary-foreground shadow-lg shadow-primary/15">
+                <div className="relative h-24 overflow-hidden rounded-[22px] bg-[#174b3b]">
+                  <div className="absolute inset-0 opacity-40 [background-image:linear-gradient(35deg,transparent_42%,#9bbf92_43%,#9bbf92_45%,transparent_46%),linear-gradient(145deg,transparent_44%,#f1f3e9_45%,#f1f3e9_47%,transparent_48%)]" />
+                  <div className="absolute left-[17%] top-1/2 h-3 w-3 -translate-y-1/2 rounded-full bg-leaf ring-4 ring-leaf/20" />
+                  <div className="absolute right-[18%] top-1/3 h-3 w-3 rounded-full bg-primary-foreground ring-4 ring-primary-foreground/20" />
+                  <div className="absolute left-[22%] top-[52%] h-1 w-[56%] rotate-[-12deg] rounded-full bg-leaf" />
+                  <Navigation className="absolute right-3 top-3 size-4 text-leaf" />
+                </div>
+                <div className="mt-3 flex items-center justify-between gap-3 text-xs">
+                  <div className="min-w-0">
+                    <p className="text-[10px] uppercase tracking-[0.16em] text-mist/60">
+                      {t.pickupShort}
+                    </p>
+                    <p className="truncate font-semibold">{origin}</p>
+                  </div>
+                  <ArrowDownUp className="size-4 shrink-0 text-leaf" />
+                  <div className="min-w-0 text-right">
+                    <p className="text-[10px] uppercase tracking-[0.16em] text-mist/60">
+                      {t.destinationShort}
+                    </p>
+                    <p className="truncate font-semibold">{destination}</p>
+                  </div>
+                </div>
+              </section>
+            )}
+
             {mode === "transfers" ? (
               <section className="rise mt-4 rounded-[30px] bg-surface p-4 shadow-xl shadow-primary/10 ring-1 ring-border [animation-delay:200ms]">
                 <div className="rounded-2xl bg-background/70 p-4 ring-1 ring-border">
@@ -293,7 +368,7 @@ function Index() {
                         aria-label={t.origin}
                         value={origin}
                         onChange={(event) => setOrigin(event.target.value)}
-                        className="mt-0.5 w-full bg-transparent text-[15px] font-semibold outline-none"
+                        className="mt-0.5 w-full rounded-full bg-surface px-4 py-2 text-[15px] font-semibold outline-none ring-1 ring-border transition focus:ring-2 focus:ring-leaf"
                       />
                     </label>
                     <ArrowDownUp className="size-4 text-muted-foreground" />
@@ -309,7 +384,7 @@ function Index() {
                         aria-label={t.destination}
                         value={destination}
                         onChange={(event) => setDestination(event.target.value)}
-                        className="mt-0.5 w-full bg-transparent text-[15px] font-semibold outline-none"
+                        className="mt-0.5 w-full rounded-full bg-surface px-4 py-2 text-[15px] font-semibold outline-none ring-1 ring-border transition focus:ring-2 focus:ring-leaf"
                       />
                     </label>
                   </div>
@@ -362,6 +437,51 @@ function Index() {
                     </div>
                   </div>
                 </div>
+                {timing === "schedule" && (
+                  <div className="mt-3 rounded-[24px] bg-background p-3 ring-1 ring-border">
+                    <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">
+                      <CalendarDays className="size-3.5 text-leaf" />
+                      {t.scheduledTrip}
+                    </div>
+                    <div className="mt-2 grid grid-cols-2 gap-2">
+                      <input
+                        type="date"
+                        value={scheduleDate}
+                        onChange={(event) => setScheduleDate(event.target.value)}
+                        className="rounded-full bg-surface px-3 py-2 text-sm font-semibold ring-1 ring-border outline-none"
+                      />
+                      <input
+                        type="time"
+                        value={scheduleTime}
+                        onChange={(event) => setScheduleTime(event.target.value)}
+                        className="rounded-full bg-surface px-3 py-2 text-sm font-semibold ring-1 ring-border outline-none"
+                      />
+                    </div>
+                    <button
+                      onClick={scheduleTrip}
+                      className="mt-2 w-full rounded-full bg-leaf py-2 text-xs font-bold text-accent-foreground"
+                    >
+                      {t.agenda}
+                    </button>
+                  </div>
+                )}
+                {scheduledTrips.length > 0 && (
+                  <div className="mt-3 rounded-[24px] bg-background p-3 ring-1 ring-border">
+                    <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">
+                      {t.agenda}
+                    </p>
+                    <div className="mt-2 space-y-2">
+                      {scheduledTrips.map((trip, index) => (
+                        <p
+                          key={`${trip}-${index}`}
+                          className="rounded-full bg-surface px-3 py-2 text-xs font-semibold"
+                        >
+                          {trip}
+                        </p>
+                      ))}
+                    </div>
+                  </div>
+                )}
                 {rideType === "shared" && (
                   <div className="mt-3 rounded-2xl bg-background p-3 ring-1 ring-border">
                     <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">
@@ -370,23 +490,42 @@ function Index() {
                     </div>
                     <div className="mt-2 space-y-2">
                       {Array.from({ length: passengers }, (_, index) => (
-                        <label key={index} className="block">
-                          <span className="text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
-                            {t.passengerDestination} {index + 1}
-                          </span>
-                          <input
-                            value={passengerDestinations[index] ?? ""}
-                            onChange={(event) =>
-                              setPassengerDestinations((current) =>
-                                current.map((item, itemIndex) =>
-                                  itemIndex === index ? event.target.value : item,
-                                ),
-                              )
-                            }
-                            placeholder={destination}
-                            className="mt-0.5 w-full bg-transparent text-sm font-semibold outline-none"
-                          />
-                        </label>
+                        <div key={index} className="space-y-1">
+                          <label className="block">
+                            <span className="text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
+                              {t.pickupShort} {index + 1}
+                            </span>
+                            <input
+                              value={passengerOrigins[index] ?? ""}
+                              onChange={(event) =>
+                                setPassengerOrigins((current) =>
+                                  current.map((item, itemIndex) =>
+                                    itemIndex === index ? event.target.value : item,
+                                  ),
+                                )
+                              }
+                              placeholder={origin}
+                              className="mt-0.5 w-full rounded-full bg-surface px-3 py-2 text-sm font-semibold outline-none ring-1 ring-border"
+                            />
+                          </label>
+                          <label className="block">
+                            <span className="text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
+                              {t.passengerDestination} {index + 1}
+                            </span>
+                            <input
+                              value={passengerDestinations[index] ?? ""}
+                              onChange={(event) =>
+                                setPassengerDestinations((current) =>
+                                  current.map((item, itemIndex) =>
+                                    itemIndex === index ? event.target.value : item,
+                                  ),
+                                )
+                              }
+                              placeholder={destination}
+                              className="mt-0.5 w-full rounded-full bg-surface px-3 py-2 text-sm font-semibold outline-none ring-1 ring-border"
+                            />
+                          </label>
+                        </div>
                       ))}
                     </div>
                   </div>
@@ -407,12 +546,6 @@ function Index() {
                     ))}
                   </div>
                 </div>
-                <button
-                  onClick={() => setShowFare(true)}
-                  className="mt-4 w-full rounded-2xl bg-jungle py-4 text-[15px] font-bold text-primary-foreground shadow-xl shadow-primary/25 transition-transform active:scale-[0.98]"
-                >
-                  {t.calculate}
-                </button>
               </section>
             ) : (
               <section className="rise mt-4 rounded-[30px] bg-surface p-5 shadow-xl shadow-primary/10 ring-1 ring-border">
@@ -431,7 +564,7 @@ function Index() {
           </div>
 
           <div>
-            {mode === "transfers" && showFare && (
+            {mode === "transfers" && (
               <section className="rise mt-4 overflow-hidden rounded-[28px] bg-jungle p-5 text-primary-foreground shadow-2xl shadow-primary/25 lg:mt-8 [animation-delay:260ms]">
                 <div className="flex items-center justify-between">
                   <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-mist/70">
@@ -445,6 +578,12 @@ function Index() {
                 </div>
                 <p className="mt-1 text-sm font-semibold text-mist/85">
                   {formatColones(fare.total)} {exchangeRate ? "CRC" : ""}
+                </p>
+                <p className="mt-2 inline-flex rounded-full bg-leaf/20 px-3 py-1 text-xs font-bold text-leaf">
+                  {t.discount}
+                </p>
+                <p className="mt-2 text-[10px] text-mist/55">
+                  {rideType === "private" ? t.privateFixed : t.perPassenger}
                 </p>
                 <p className="mt-1 text-[10px] text-mist/55">
                   {exchangeRate
@@ -462,6 +601,18 @@ function Index() {
                 </button>
                 {fareExpanded && (
                   <div className="mt-3 space-y-2 rounded-2xl bg-primary-foreground/5 p-3 text-[13px] ring-1 ring-primary-foreground/10">
+                    {fare.perPassenger.length > 0 &&
+                      fare.perPassenger.map((item, index) => (
+                        <div
+                          key={`${item.destination}-${index}`}
+                          className="flex justify-between gap-3"
+                        >
+                          <span className="truncate text-mist/75">
+                            Pasajero {index + 1} · {item.destination}
+                          </span>
+                          <strong>${item.total}</strong>
+                        </div>
+                      ))}
                     <div className="flex justify-between">
                       <span className="text-mist/75">{t.trip}</span>
                       <strong>${fare.service}</strong>
@@ -510,6 +661,21 @@ function Index() {
                 </div>
                 <button className="text-xs font-bold text-leaf">{t.explore}</button>
               </div>
+              <p className="mb-3 text-sm leading-relaxed text-muted-foreground">
+                {language === "es"
+                  ? "Descubre experiencias locales y escapadas por Costa Rica: playas, parques nacionales, ríos y bosque tropical."
+                  : "Discover local experiences and Costa Rica escapes: beaches, national parks, rivers, and tropical forest."}
+              </p>
+              <div className="mb-4 flex gap-2 overflow-x-auto pb-1">
+                {["Arenal", "Playas", "Parques nacionales", "Ríos"].map((category) => (
+                  <button
+                    key={category}
+                    className="shrink-0 rounded-full bg-mist/30 px-4 py-2 text-xs font-bold text-primary ring-1 ring-border"
+                  >
+                    {category}
+                  </button>
+                ))}
+              </div>
               <div className="hide-scrollbar -mx-6 flex gap-4 overflow-x-auto px-6 pb-6 lg:mx-0 lg:grid lg:grid-cols-2 lg:px-0">
                 {[
                   {
@@ -518,6 +684,9 @@ function Index() {
                     meta: `3.5 ${t.hours}`,
                     price: "$85",
                     rating: "4.9",
+                    category: "Arenal · Naturaleza",
+                    summary:
+                      "Senderos y puentes suspendidos entre bosque nuboso, con vistas del paisaje volcánico.",
                   },
                   {
                     image: riverImage,
@@ -525,6 +694,9 @@ function Index() {
                     meta: `4 ${t.hours}`,
                     price: "$60",
                     rating: "4.8",
+                    category: "La Fortuna · Río",
+                    summary:
+                      "Recorrido tranquilo por el río para observar aves y vida silvestre con guía local.",
                   },
                 ].map((tour) => (
                   <article
@@ -541,6 +713,12 @@ function Index() {
                     />
                     <div className="px-2 pb-2 pt-4">
                       <h3 className="font-display text-[17px] leading-snug">{tour.title}</h3>
+                      <p className="mt-1 text-[10px] font-bold uppercase tracking-[0.12em] text-leaf">
+                        {tour.category}
+                      </p>
+                      <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
+                        {tour.summary}
+                      </p>
                       <div className="mt-2 flex items-center justify-between text-xs text-muted-foreground">
                         <span>
                           {tour.meta} · {tour.price}
