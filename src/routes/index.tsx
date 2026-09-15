@@ -136,6 +136,8 @@ function Index() {
   const [timing, setTiming] = useState<"now" | "schedule">("now");
   const [rideType, setRideType] = useState<"private" | "shared">("private");
   const [passengers, setPassengers] = useState(2);
+  const [origin, setOrigin] = useState("Centro de La Fortuna");
+  const [destination, setDestination] = useState("Parque Nacional Volcán Arenal");
   const [showFare, setShowFare] = useState(true);
   const [fareExpanded, setFareExpanded] = useState(true);
   const [confirmed, setConfirmed] = useState(false);
@@ -147,6 +149,24 @@ function Index() {
     const operations = Math.round(11 * sharedFactor);
     return { service, operations, platform: 5, total: service + operations + 5 };
   }, [passengers, rideType]);
+
+  const openWhatsApp = (tourName?: string) => {
+    const isSpanish = language === "es";
+    const message = tourName
+      ? isSpanish
+        ? `Hola Via La Fortuna, me gustaría reservar el tour ${tourName}. ¿Podrían ayudarme con disponibilidad y próximos pasos?`
+        : `Hello Via La Fortuna, I would like to book the ${tourName} tour. Could you help me with availability and next steps?`
+      : isSpanish
+        ? `Hola Via La Fortuna, me gustaría reservar un traslado.\n\nOrigen: ${origin}\nDestino: ${destination}\nTipo: ${rideType === "private" ? "Privado" : "Compartido"}\nHorario: ${timing === "now" ? "Ahora" : "18 Sep · 09:30"}\nPasajeros: ${passengers}\nTarifa estimada: $${fare.total} USD`
+        : `Hello Via La Fortuna, I would like to book a transfer.\n\nPickup: ${origin}\nDestination: ${destination}\nType: ${rideType === "private" ? "Private" : "Shared"}\nTiming: ${timing === "now" ? "Now" : "18 Sep · 09:30"}\nPassengers: ${passengers}\nEstimated fare: $${fare.total} USD`;
+
+    window.open(
+      `https://wa.me/50663135655?text=${encodeURIComponent(message)}`,
+      "_blank",
+      "noopener,noreferrer",
+    );
+    if (!tourName) setConfirmed(true);
+  };
 
   return (
     <main className="min-h-screen bg-background text-foreground selection:bg-accent selection:text-accent-foreground">
@@ -221,7 +241,8 @@ function Index() {
                       </span>
                       <input
                         aria-label={t.origin}
-                        defaultValue="Centro de La Fortuna"
+                        value={origin}
+                        onChange={(event) => setOrigin(event.target.value)}
                         className="mt-0.5 w-full bg-transparent text-[15px] font-semibold outline-none"
                       />
                     </label>
@@ -236,7 +257,8 @@ function Index() {
                       </span>
                       <input
                         aria-label={t.destination}
-                        defaultValue="Parque Nacional Volcán Arenal"
+                        value={destination}
+                        onChange={(event) => setDestination(event.target.value)}
                         className="mt-0.5 w-full bg-transparent text-[15px] font-semibold outline-none"
                       />
                     </label>
@@ -360,7 +382,7 @@ function Index() {
                   {t.note}
                 </p>
                 <button
-                  onClick={() => setConfirmed(true)}
+                  onClick={() => openWhatsApp()}
                   className="mt-4 w-full rounded-2xl bg-leaf py-3.5 text-sm font-bold text-accent-foreground transition-transform active:scale-[0.98]"
                 >
                   {confirmed
@@ -425,7 +447,10 @@ function Index() {
                           {tour.rating}
                         </span>
                       </div>
-                      <button className="mt-3 w-full rounded-xl bg-mist/30 py-2.5 text-xs font-bold text-primary">
+                      <button
+                        onClick={() => openWhatsApp(tour.title)}
+                        className="mt-3 w-full rounded-xl bg-mist/30 py-2.5 text-xs font-bold text-primary"
+                      >
                         {t.reserveTour}
                       </button>
                     </div>
