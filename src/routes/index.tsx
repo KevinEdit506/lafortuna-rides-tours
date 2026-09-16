@@ -215,6 +215,7 @@ function Index() {
   ];
   const [language, setLanguage] = useState<"es" | "en">("es");
   const [mode, setMode] = useState<"transfers" | "tours">("transfers");
+  const [selectedCategory, setSelectedCategory] = useState("Arenal");
   const [timing, setTiming] = useState<"now" | "schedule">("now");
   const [rideType, setRideType] = useState<"private" | "shared">("private");
   const [passengers, setPassengers] = useState(2);
@@ -1013,11 +1014,18 @@ function Index() {
                   ? "Descubre experiencias locales y escapadas por Costa Rica: playas, parques nacionales, ríos y bosque tropical."
                   : "Discover local experiences and Costa Rica escapes: beaches, national parks, rivers, and tropical forest."}
               </p>
-              <div className="mb-4 flex gap-2 overflow-x-auto pb-1">
+              <div className="mb-4 flex gap-3 overflow-x-auto px-1 pb-2">
                 {["Arenal", "Playas", "Parques nacionales", "Ríos"].map((category) => (
                   <button
                     key={category}
-                    className="shrink-0 rounded-full bg-mist/30 px-4 py-2 text-xs font-bold text-primary ring-1 ring-border"
+                    type="button"
+                    aria-pressed={selectedCategory === category}
+                    onClick={() => setSelectedCategory(category)}
+                    className={`shrink-0 rounded-[18px] px-5 py-3 text-xs font-bold shadow-lg shadow-primary/5 ring-1 transition-all active:scale-[0.98] ${
+                      selectedCategory === category
+                        ? "bg-jungle text-primary-foreground ring-jungle"
+                        : "bg-surface text-primary ring-border hover:-translate-y-0.5 hover:shadow-xl"
+                    }`}
                   >
                     {category}
                   </button>
