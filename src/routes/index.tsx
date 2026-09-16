@@ -205,6 +205,14 @@ const copy = {
 } as const;
 
 function Index() {
+  const localPlaceSuggestions = [
+    "Centro de La Fortuna",
+    "Parque Nacional Volcán Arenal",
+    "Aeropuerto Internacional Juan Santamaría",
+    "Terminal de buses de La Fortuna",
+    "Puentes Colgantes Místico",
+    "Río Peñas Blancas",
+  ];
   const [language, setLanguage] = useState<"es" | "en">("es");
   const [mode, setMode] = useState<"transfers" | "tours">("transfers");
   const [timing, setTiming] = useState<"now" | "schedule">("now");
@@ -230,6 +238,7 @@ function Index() {
   const [distanceKm, setDistanceKm] = useState(8);
   const [durationMinutes, setDurationMinutes] = useState(18);
   const [passengerDistances, setPassengerDistances] = useState<number[]>([8, 8]);
+  const [passengerDurations, setPassengerDurations] = useState<number[]>([18, 18]);
   const [mapsStatus, setMapsStatus] = useState<"loading" | "ready" | "fallback">("loading");
   const [routeStatus, setRouteStatus] = useState<"idle" | "updating" | "updated">("idle");
   const dynamicMultiplier = 1;
@@ -277,8 +286,10 @@ function Index() {
             }>;
           }
         )?.routes?.[0]?.legs?.[0];
-        if (status !== maps.DirectionsStatus.OK || !leg?.distance?.value || !leg.duration?.value)
+        if (status !== maps.DirectionsStatus.OK || !leg?.distance?.value || !leg.duration?.value) {
+          setRouteStatus("updated");
           return;
+        }
         setDistanceKm(Math.max(1, Number(leg.distance.value) / 1000));
         setDurationMinutes(Math.max(1, Math.round(Number(leg.duration.value) / 60)));
         setRouteStatus("updated");
@@ -298,6 +309,40 @@ function Index() {
   }, [destination, mapsStatus, origin]);
 
   useEffect(() => {
+    if (rideType !== "shared" || mapsStatus !== "fallback") return;
+    setPassengerDistances((current) =>
+      Array.from({ length: passengers }, (_, index) => {
+        const passengerOrigin = passengerOrigins[index] ?? origin;
+        const passengerDestination = passengerDestinations[index] ?? destination;
+        return Math.max(
+          1,
+          4 + ((passengerOrigin.length * 7 + passengerDestination.length * 11) % 120) / 10,
+        );
+      }),
+    );
+    setPassengerDurations(() =>
+      Array.from({ length: passengers }, (_, index) => {
+        const passengerOrigin = passengerOrigins[index] ?? origin;
+        const passengerDestination = passengerDestinations[index] ?? destination;
+        const fallbackDistance = Math.max(
+          1,
+          4 + ((passengerOrigin.length * 7 + passengerDestination.length * 11) % 120) / 10,
+        );
+        return Math.max(3, Math.round(fallbackDistance * 2.2));
+      }),
+    );
+  }, [
+    destination,
+    durationMinutes,
+    mapsStatus,
+    origin,
+    passengerDestinations,
+    passengerOrigins,
+    passengers,
+    rideType,
+  ]);
+
+  useEffect(() => {
     if (rideType !== "shared" || mapsStatus !== "ready") return;
     const maps = (window as MapsWindow).google?.maps;
     if (!maps) return;
@@ -312,12 +357,21 @@ function Index() {
         },
         (result: unknown, status) => {
           const leg = (
-            result as { routes?: Array<{ legs?: Array<{ distance?: { value: number } }> }> }
+            result as {
+              routes?: Array<{
+                legs?: Array<{ distance?: { value: number }; duration?: { value: number } }>;
+              }>;
+            }
           )?.routes?.[0]?.legs?.[0];
-          if (status === maps.DirectionsStatus.OK && leg?.distance?.value) {
+          if (status === maps.DirectionsStatus.OK && leg?.distance?.value && leg.duration?.value) {
             setPassengerDistances((current) => {
               const next = [...current];
               next[index] = Math.max(1, leg.distance!.value / 1000);
+              return next;
+            });
+            setPassengerDurations((current) => {
+              const next = [...current];
+              next[index] = Math.max(1, Math.round(leg.duration!.value / 60));
               return next;
             });
           }
@@ -334,6 +388,7 @@ function Index() {
       if (!input || input.dataset["autocompleteReady"] === "true") return;
       const autocomplete = new places.Autocomplete(input, {
         componentRestrictions: { country: "cr" },
+        types: ["geocode", "establishment"],
         fields: ["formatted_address", "name"],
       });
       autocomplete.addListener("place_changed", () => {
@@ -381,7 +436,12 @@ function Index() {
         operations,
         platform,
         total: Math.round((service + platform) * 100) / 100,
-        perPassenger: [] as Array<{ destination: string; total: number }>,
+        perPassenger: [] as Array<{
+          destination: string;
+          distance: number;
+          duration: number;
+          total: number;
+        }>,
       };
     }
     const perPassenger = passengerDestinations
@@ -390,10 +450,16 @@ function Index() {
         const passengerDistance = passengerDistances[index] ?? distanceKm;
         const base = 1.5;
         const distanceCharge = passengerDistance * 0.6;
-        const timeCharge = durationMinutes * 0.2;
+        const passengerDuration = passengerDurations[index] ?? durationMinutes;
+        const timeCharge = passengerDuration * 0.2;
         const routeSubtotal = base + distanceCharge + timeCharge;
         const total = Math.round((routeSubtotal * dynamicMultiplier + tollsAndFees) * 100) / 100;
-        return { destination: passengerDestination, total };
+        return {
+          destination: passengerDestination,
+          distance: passengerDistance,
+          duration: passengerDuration,
+          total,
+        };
       });
     const total = perPassenger.reduce((sum, item) => sum + item.total, 0);
     return {
@@ -413,6 +479,7 @@ function Index() {
     durationMinutes,
     passengerDestinations,
     passengerDistances,
+    passengerDurations,
     passengers,
     rideType,
     dynamicMultiplier,
@@ -432,12 +499,22 @@ function Index() {
     setPassengerDestinations((current) =>
       Array.from({ length: nextPassengers }, (_, index) => current[index] ?? destination),
     );
+    setPassengerDistances((current) =>
+      Array.from({ length: nextPassengers }, (_, index) => current[index] ?? distanceKm),
+    );
+    setPassengerDurations((current) =>
+      Array.from({ length: nextPassengers }, (_, index) => current[index] ?? durationMinutes),
+    );
   };
 
   const scheduleTrip = () => {
     const label = `${scheduleDate} · ${scheduleTime} · ${origin} → ${destination}`;
-    setScheduledTrips((current) => [...current, label]);
+    setScheduledTrips((current) => (current.includes(label) ? current : [...current, label]));
     setTiming("schedule");
+  };
+
+  const scrollToSection = (id: string) => {
+    document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
   const openWhatsApp = (tourName?: string) => {
@@ -521,7 +598,10 @@ function Index() {
             </div>
 
             {mode === "transfers" && (
-              <section className="mt-3 overflow-hidden rounded-[28px] bg-jungle p-4 text-primary-foreground shadow-lg shadow-primary/15">
+              <section
+                id="route-preview"
+                className="mt-3 overflow-hidden rounded-[28px] bg-jungle p-4 text-primary-foreground shadow-lg shadow-primary/15"
+              >
                 <div className="relative h-44 overflow-hidden rounded-[22px] bg-[#1d2929]">
                   <div className="absolute inset-0 opacity-70 [background-image:linear-gradient(18deg,transparent_11%,#41514b_12%,#41514b_13%,transparent_14%,transparent_58%,#41514b_59%,#41514b_60%,transparent_61%),linear-gradient(112deg,transparent_18%,#33433f_19%,#33433f_22%,transparent_23%),linear-gradient(78deg,transparent_67%,#33433f_68%,#33433f_70%,transparent_71%),linear-gradient(160deg,transparent_42%,#52615a_43%,#52615a_44%,transparent_45%)]" />
                   <div className="absolute inset-x-0 top-[30%] h-px bg-[#718078]/50" />
@@ -603,6 +683,7 @@ function Index() {
                           setOrigin(event.target.value);
                           setRouteStatus("updating");
                         }}
+                        list="place-suggestions"
                         className="mt-0.5 w-full rounded-full bg-surface px-4 py-2 text-[15px] font-semibold outline-none ring-1 ring-border transition focus:ring-2 focus:ring-leaf"
                       />
                     </label>
@@ -623,11 +704,17 @@ function Index() {
                           setDestination(event.target.value);
                           setRouteStatus("updating");
                         }}
+                        list="place-suggestions"
                         className="mt-0.5 w-full rounded-full bg-surface px-4 py-2 text-[15px] font-semibold outline-none ring-1 ring-border transition focus:ring-2 focus:ring-leaf"
                       />
                     </label>
                   </div>
                 </div>
+                <datalist id="place-suggestions">
+                  {localPlaceSuggestions.map((place) => (
+                    <option key={place} value={place} />
+                  ))}
+                </datalist>
 
                 <div className="mt-4 grid grid-cols-2 gap-2 rounded-full bg-background p-1 ring-1 ring-border">
                   {(["private", "shared"] as const).map((value) => (
@@ -650,7 +737,7 @@ function Index() {
                       onClick={() => setTiming(timing === "now" ? "schedule" : "now")}
                       className="mt-1 flex w-full items-center justify-between text-sm font-semibold"
                     >
-                      {timing === "now" ? t.now : "18 Sep · 09:30"}
+                      {timing === "now" ? t.now : `${scheduleDate} · ${scheduleTime}`}
                       <CalendarDays className="size-4 text-leaf" />
                     </button>
                   </div>
@@ -850,9 +937,10 @@ function Index() {
                           className="flex justify-between gap-3"
                         >
                           <span className="truncate text-mist/75">
-                            Pasajero {index + 1} · {item.destination}
+                            Pasajero {index + 1} · {item.destination} · {item.distance.toFixed(1)}{" "}
+                            km · {item.duration} min
                           </span>
-                          <strong>${item.total}</strong>
+                          <strong>${item.total.toFixed(2)}</strong>
                         </div>
                       ))}
                     <div className="flex justify-between">
@@ -904,7 +992,7 @@ function Index() {
               </section>
             )}
 
-            <section className="mt-10">
+            <section id="tours" className="mt-10 scroll-mt-6">
               <div className="mb-4 flex items-end justify-between">
                 <div>
                   <div className="flex items-center gap-2 text-leaf">
@@ -913,7 +1001,12 @@ function Index() {
                   </div>
                   <h2 className="mt-1 font-display text-[22px]">{t.escapes}</h2>
                 </div>
-                <button className="text-xs font-bold text-leaf">{t.explore}</button>
+                <button
+                  onClick={() => scrollToSection("tours")}
+                  className="text-xs font-bold text-leaf"
+                >
+                  {t.explore}
+                </button>
               </div>
               <p className="mb-3 text-sm leading-relaxed text-muted-foreground">
                 {language === "es"
@@ -1000,13 +1093,29 @@ function Index() {
       <nav className="pointer-events-none fixed bottom-0 left-1/2 z-20 w-full max-w-[430px] -translate-x-1/2 px-6 pb-5 lg:max-w-xl">
         <div className="pointer-events-auto flex items-center justify-between rounded-[26px] bg-jungle/95 px-7 py-3 text-primary-foreground shadow-2xl ring-1 ring-primary-foreground/10 backdrop-blur-md">
           {[
-            { label: t.home, icon: Home, active: true },
-            { label: t.routes, icon: RouteIcon, active: false },
-            { label: t.chat, icon: MessageCircle, active: false },
-            { label: t.profile, icon: UserRound, active: false },
-          ].map(({ label, icon: Icon, active }) => (
+            {
+              label: t.home,
+              icon: Home,
+              active: true,
+              action: () => window.scrollTo({ top: 0, behavior: "smooth" }),
+            },
+            {
+              label: t.routes,
+              icon: RouteIcon,
+              active: false,
+              action: () => scrollToSection("route-preview"),
+            },
+            { label: t.chat, icon: MessageCircle, active: false, action: () => openWhatsApp() },
+            {
+              label: t.profile,
+              icon: UserRound,
+              active: false,
+              action: () => scrollToSection("tours"),
+            },
+          ].map(({ label, icon: Icon, active, action }) => (
             <button
               key={label}
+              onClick={action}
               className={`flex min-w-12 flex-col items-center gap-1 text-[10px] font-bold ${active ? "text-primary-foreground" : "text-mist/45"}`}
             >
               <span

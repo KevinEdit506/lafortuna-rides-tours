@@ -24,6 +24,8 @@ Visit the deployed app at [kevinedit506.github.io/lafortuna-rides-tours](https:/
 - Curated La Fortuna experiences, including the Místico Hanging Bridges and Peñas Blancas River.
 - Tour discovery categories for Arenal, beaches, national parks, and rivers across Costa Rica.
 - Google Maps address suggestions and driving-route distance/time when a restricted Maps API key is configured.
+- Local Costa Rica place suggestions remain available as a browser fallback when the Maps key is unavailable.
+- Shared fares include the independently calculated distance and duration for each passenger route.
 - Responsive layout designed for mobile travelers and larger screens.
 
 ## Local development
