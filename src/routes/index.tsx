@@ -216,6 +216,12 @@ function Index() {
   const [language, setLanguage] = useState<"es" | "en">("es");
   const [mode, setMode] = useState<"transfers" | "tours">("transfers");
   const [selectedCategory, setSelectedCategory] = useState("Arenal");
+  const categoryOptions = [
+    { label: "Arenal", image: `${import.meta.env.BASE_URL}category-arenal.jpg` },
+    { label: "Playas", image: `${import.meta.env.BASE_URL}category-playas.jpg` },
+    { label: "Parques nacionales", image: `${import.meta.env.BASE_URL}category-parques.jpg` },
+    { label: "Ríos", image: `${import.meta.env.BASE_URL}category-rios.jpg` },
+  ];
   const [timing, setTiming] = useState<"now" | "schedule">("now");
   const [rideType, setRideType] = useState<"private" | "shared">("private");
   const [passengers, setPassengers] = useState(2);
@@ -1015,19 +1021,27 @@ function Index() {
                   : "Discover local experiences and Costa Rica escapes: beaches, national parks, rivers, and tropical forest."}
               </p>
               <div className="mb-4 flex gap-3 overflow-x-auto px-1 pb-2">
-                {["Arenal", "Playas", "Parques nacionales", "Ríos"].map((category) => (
+                {categoryOptions.map((category) => (
                   <button
-                    key={category}
+                    key={category.label}
                     type="button"
-                    aria-pressed={selectedCategory === category}
-                    onClick={() => setSelectedCategory(category)}
-                    className={`shrink-0 rounded-[18px] px-5 py-3 text-xs font-bold shadow-lg shadow-primary/5 ring-1 transition-all active:scale-[0.98] ${
-                      selectedCategory === category
+                    aria-pressed={selectedCategory === category.label}
+                    onClick={() => setSelectedCategory(category.label)}
+                    className={`flex shrink-0 items-center gap-2 rounded-[18px] p-1.5 pr-4 text-xs font-bold shadow-lg shadow-primary/5 ring-1 transition-all active:scale-[0.98] ${
+                      selectedCategory === category.label
                         ? "bg-jungle text-primary-foreground ring-jungle"
                         : "bg-surface text-primary ring-border hover:-translate-y-0.5 hover:shadow-xl"
                     }`}
                   >
-                    {category}
+                    <img
+                      src={category.image}
+                      alt=""
+                      aria-hidden="true"
+                      width={48}
+                      height={36}
+                      className="h-9 w-12 rounded-[12px] object-cover"
+                    />
+                    <span>{category.label}</span>
                   </button>
                 ))}
               </div>
