@@ -609,31 +609,44 @@ function Index() {
                 id="route-preview"
                 className="mt-3 overflow-hidden rounded-[28px] bg-jungle p-4 text-primary-foreground shadow-lg shadow-primary/15"
               >
-                <div className="relative h-44 overflow-hidden rounded-[22px] bg-[#1d2929]">
-                  <div className="absolute inset-0 opacity-70 [background-image:linear-gradient(18deg,transparent_11%,#41514b_12%,#41514b_13%,transparent_14%,transparent_58%,#41514b_59%,#41514b_60%,transparent_61%),linear-gradient(112deg,transparent_18%,#33433f_19%,#33433f_22%,transparent_23%),linear-gradient(78deg,transparent_67%,#33433f_68%,#33433f_70%,transparent_71%),linear-gradient(160deg,transparent_42%,#52615a_43%,#52615a_44%,transparent_45%)]" />
-                  <div className="absolute inset-x-0 top-[30%] h-px bg-[#718078]/50" />
-                  <div className="absolute -left-8 top-[68%] h-px w-[120%] rotate-[-18deg] bg-[#718078]/60" />
-                  <div className="absolute left-[14%] top-[63%] h-3 w-3 rounded-full bg-white shadow-[0_0_0_5px_rgba(255,255,255,0.18)]" />
-                  <div className="absolute right-[18%] top-[22%] h-4 w-4 rounded-full border-[3px] border-white bg-[#ff5a5f] shadow-[0_0_0_5px_rgba(255,90,95,0.2)]" />
-                  <div className="absolute left-[18%] top-[59%] h-[3px] w-[65%] rotate-[-34deg] rounded-full bg-[#b9e36d] shadow-[0_0_8px_rgba(185,227,109,0.8)]" />
-                  <div className="absolute left-3 top-3 rounded-full bg-[#101818]/80 px-2.5 py-1 text-[9px] font-bold uppercase tracking-[0.15em] text-white/80">
-                    Ruta sugerida
+                <div
+                  className="relative h-44 overflow-hidden rounded-[22px] bg-[#e8eee8] ring-1 ring-white/10"
+                  role="img"
+                  aria-label={`${t.routePreview}: ${origin} a ${destination}`}
+                >
+                  <svg
+                    viewBox="0 0 640 300"
+                    preserveAspectRatio="none"
+                    className="absolute inset-0 size-full"
+                    aria-hidden="true"
+                  >
+                    <rect width="640" height="300" fill="#e8eee8" />
+                    <path d="M-30 245 C120 210 150 120 285 135 S490 240 670 180" fill="none" stroke="#cbd8ce" strokeWidth="34" />
+                    <path d="M-30 245 C120 210 150 120 285 135 S490 240 670 180" fill="none" stroke="#ffffff" strokeWidth="26" />
+                    <path d="M100 -20 C125 70 215 80 240 155 S300 265 350 320" fill="none" stroke="#d1ddd3" strokeWidth="24" />
+                    <path d="M100 -20 C125 70 215 80 240 155 S300 265 350 320" fill="none" stroke="#ffffff" strokeWidth="17" />
+                    <path d="M460 -20 C430 70 470 125 410 175 S390 250 450 320" fill="none" stroke="#d1ddd3" strokeWidth="22" />
+                    <path d="M460 -20 C430 70 470 125 410 175 S390 250 450 320" fill="none" stroke="#ffffff" strokeWidth="15" />
+                    <path d="M0 65 L640 65 M0 275 L640 275 M35 0 L35 300 M570 0 L570 300" stroke="#d5e1d7" strokeWidth="8" opacity=".8" />
+                    <path d="M128 218 C185 185 214 150 258 142 S340 151 386 190 S444 218 504 164" fill="none" stroke="#ffffff" strokeWidth="12" strokeLinecap="round" />
+                    <path d="M128 218 C185 185 214 150 258 142 S340 151 386 190 S444 218 504 164" fill="none" stroke="#4d9d7d" strokeWidth="6" strokeLinecap="round" />
+                    <circle cx="128" cy="218" r="13" fill="#ffffff" stroke="#173b2b" strokeWidth="6" />
+                    <circle cx="504" cy="164" r="13" fill="#ffffff" stroke="#ef625d" strokeWidth="6" />
+                    <text x="145" y="215" fill="#173b2b" fontSize="15" fontWeight="700">A</text>
+                    <text x="522" y="160" fill="#9b3836" fontSize="15" fontWeight="700">B</text>
+                  </svg>
+                  <div className="absolute left-3 top-3 rounded-full bg-white/90 px-2.5 py-1 text-[9px] font-bold uppercase tracking-[0.15em] text-[#173b2b] shadow-sm">
+                    {t.routePreview}
                   </div>
-                  <div className="absolute right-3 top-3 grid gap-1 rounded-xl bg-[#101818]/80 p-1 text-white/80">
-                    <button
-                      aria-label="Acercar mapa"
-                      className="grid size-6 place-items-center rounded-lg text-sm"
-                    >
-                      +
-                    </button>
-                    <button
-                      aria-label="Alejar mapa"
-                      className="grid size-6 place-items-center rounded-lg text-sm"
-                    >
-                      −
-                    </button>
+                  <div className="absolute right-3 top-3 grid gap-1 rounded-xl bg-white/90 p-1 text-[#173b2b] shadow-sm">
+                    <button aria-label="Acercar mapa" className="grid size-6 place-items-center rounded-lg text-sm">+</button>
+                    <button aria-label="Alejar mapa" className="grid size-6 place-items-center rounded-lg text-sm">−</button>
                   </div>
-                  <Navigation className="absolute bottom-3 right-3 size-4 text-[#b9e36d]" />
+                  <div className="absolute bottom-3 left-3 flex items-center gap-2 rounded-full bg-white/90 px-2.5 py-1 text-[9px] font-semibold text-[#173b2b] shadow-sm">
+                    <span className="h-1.5 w-5 rounded-full bg-[#4d9d7d]" />
+                    {distanceKm.toFixed(1)} km · {durationMinutes} min
+                  </div>
+                  <Navigation className="absolute bottom-3 right-3 size-4 text-[#2c8365]" />
                 </div>
                 <div className="mt-3 flex items-center justify-between gap-3 text-xs">
                   <div className="min-w-0">
