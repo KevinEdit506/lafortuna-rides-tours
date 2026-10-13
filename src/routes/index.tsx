@@ -3,6 +3,7 @@ import {
   ArrowDownUp,
   CalendarDays,
   CarFront,
+  CheckCircle2,
   ChevronDown,
   Clock3,
   Compass,
@@ -15,6 +16,7 @@ import {
   Route as RouteIcon,
   ShieldCheck,
   Star,
+  X,
   UserRound,
   UsersRound,
 } from "lucide-react";
@@ -121,6 +123,10 @@ const copy = {
     dynamicFare: "Multiplicador dinámico",
     tolls: "Peajes y cuotas",
     paymentLocked: "Pago bloqueado después de confirmar",
+    scheduledSuccess: "Viaje añadido a tu agenda",
+    confirmedTitle: "Solicitud lista para WhatsApp",
+    confirmedBody: "El mensaje fue preparado con tu ruta, horario y forma de pago.",
+    remove: "Eliminar",
     estimate: "Tarifa estimada",
     details: "Ver desglose",
     trip: "Servicio de traslado",
@@ -178,6 +184,10 @@ const copy = {
     dynamicFare: "Dynamic multiplier",
     tolls: "Tolls and fees",
     paymentLocked: "Payment locked after confirmation",
+    scheduledSuccess: "Trip added to your schedule",
+    confirmedTitle: "Request ready for WhatsApp",
+    confirmedBody: "Your message was prepared with the route, timing, and payment method.",
+    remove: "Remove",
     estimate: "Estimated fare",
     details: "View breakdown",
     trip: "Transfer service",
@@ -240,7 +250,11 @@ function Index() {
   const [fareExpanded, setFareExpanded] = useState(true);
   const [confirmed, setConfirmed] = useState(false);
   const [scheduledTrips, setScheduledTrips] = useState<string[]>([]);
-  const [scheduleDate, setScheduleDate] = useState("2026-09-18");
+  const [scheduleDate, setScheduleDate] = useState(() => {
+    const today = new Date();
+    const offset = today.getTimezoneOffset();
+    return new Date(today.getTime() - offset * 60_000).toISOString().slice(0, 10);
+  });
   const [scheduleTime, setScheduleTime] = useState("09:30");
   const [distanceKm, setDistanceKm] = useState(8);
   const [durationMinutes, setDurationMinutes] = useState(18);
@@ -621,26 +635,101 @@ function Index() {
                     aria-hidden="true"
                   >
                     <rect width="640" height="300" fill="#e8eee8" />
-                    <path d="M-30 245 C120 210 150 120 285 135 S490 240 670 180" fill="none" stroke="#cbd8ce" strokeWidth="34" />
-                    <path d="M-30 245 C120 210 150 120 285 135 S490 240 670 180" fill="none" stroke="#ffffff" strokeWidth="26" />
-                    <path d="M100 -20 C125 70 215 80 240 155 S300 265 350 320" fill="none" stroke="#d1ddd3" strokeWidth="24" />
-                    <path d="M100 -20 C125 70 215 80 240 155 S300 265 350 320" fill="none" stroke="#ffffff" strokeWidth="17" />
-                    <path d="M460 -20 C430 70 470 125 410 175 S390 250 450 320" fill="none" stroke="#d1ddd3" strokeWidth="22" />
-                    <path d="M460 -20 C430 70 470 125 410 175 S390 250 450 320" fill="none" stroke="#ffffff" strokeWidth="15" />
-                    <path d="M0 65 L640 65 M0 275 L640 275 M35 0 L35 300 M570 0 L570 300" stroke="#d5e1d7" strokeWidth="8" opacity=".8" />
-                    <path d="M128 218 C185 185 214 150 258 142 S340 151 386 190 S444 218 504 164" fill="none" stroke="#ffffff" strokeWidth="12" strokeLinecap="round" />
-                    <path d="M128 218 C185 185 214 150 258 142 S340 151 386 190 S444 218 504 164" fill="none" stroke="#4d9d7d" strokeWidth="6" strokeLinecap="round" />
-                    <circle cx="128" cy="218" r="13" fill="#ffffff" stroke="#173b2b" strokeWidth="6" />
-                    <circle cx="504" cy="164" r="13" fill="#ffffff" stroke="#ef625d" strokeWidth="6" />
-                    <text x="145" y="215" fill="#173b2b" fontSize="15" fontWeight="700">A</text>
-                    <text x="522" y="160" fill="#9b3836" fontSize="15" fontWeight="700">B</text>
+                    <path
+                      d="M-30 245 C120 210 150 120 285 135 S490 240 670 180"
+                      fill="none"
+                      stroke="#cbd8ce"
+                      strokeWidth="34"
+                    />
+                    <path
+                      d="M-30 245 C120 210 150 120 285 135 S490 240 670 180"
+                      fill="none"
+                      stroke="#ffffff"
+                      strokeWidth="26"
+                    />
+                    <path
+                      d="M100 -20 C125 70 215 80 240 155 S300 265 350 320"
+                      fill="none"
+                      stroke="#d1ddd3"
+                      strokeWidth="24"
+                    />
+                    <path
+                      d="M100 -20 C125 70 215 80 240 155 S300 265 350 320"
+                      fill="none"
+                      stroke="#ffffff"
+                      strokeWidth="17"
+                    />
+                    <path
+                      d="M460 -20 C430 70 470 125 410 175 S390 250 450 320"
+                      fill="none"
+                      stroke="#d1ddd3"
+                      strokeWidth="22"
+                    />
+                    <path
+                      d="M460 -20 C430 70 470 125 410 175 S390 250 450 320"
+                      fill="none"
+                      stroke="#ffffff"
+                      strokeWidth="15"
+                    />
+                    <path
+                      d="M0 65 L640 65 M0 275 L640 275 M35 0 L35 300 M570 0 L570 300"
+                      stroke="#d5e1d7"
+                      strokeWidth="8"
+                      opacity=".8"
+                    />
+                    <path
+                      d="M128 218 C185 185 214 150 258 142 S340 151 386 190 S444 218 504 164"
+                      fill="none"
+                      stroke="#ffffff"
+                      strokeWidth="12"
+                      strokeLinecap="round"
+                    />
+                    <path
+                      d="M128 218 C185 185 214 150 258 142 S340 151 386 190 S444 218 504 164"
+                      fill="none"
+                      stroke="#4d9d7d"
+                      strokeWidth="6"
+                      strokeLinecap="round"
+                    />
+                    <circle
+                      cx="128"
+                      cy="218"
+                      r="13"
+                      fill="#ffffff"
+                      stroke="#173b2b"
+                      strokeWidth="6"
+                    />
+                    <circle
+                      cx="504"
+                      cy="164"
+                      r="13"
+                      fill="#ffffff"
+                      stroke="#ef625d"
+                      strokeWidth="6"
+                    />
+                    <text x="145" y="215" fill="#173b2b" fontSize="15" fontWeight="700">
+                      A
+                    </text>
+                    <text x="522" y="160" fill="#9b3836" fontSize="15" fontWeight="700">
+                      B
+                    </text>
                   </svg>
                   <div className="absolute left-3 top-3 rounded-full bg-white/90 px-2.5 py-1 text-[9px] font-bold uppercase tracking-[0.15em] text-[#173b2b] shadow-sm">
                     {t.routePreview}
                   </div>
                   <div className="absolute right-3 top-3 grid gap-1 rounded-xl bg-white/90 p-1 text-[#173b2b] shadow-sm">
-                    <button aria-label="Acercar mapa" className="grid size-6 place-items-center rounded-lg text-sm">+</button>
-                    <button aria-label="Alejar mapa" className="grid size-6 place-items-center rounded-lg text-sm">−</button>
+                    <button
+                      aria-label="Acercar mapa"
+                      className="grid size-6 place-items-center rounded-lg text-sm"
+                    >
+                      +
+                    </button>
+                    <button
+                      aria-label="Alejar mapa"
+                      className="grid size-6 place-items-center rounded-lg text-sm"
+                    >
+                      −
+                    </button>
                   </div>
                   <div className="absolute bottom-3 left-3 flex items-center gap-2 rounded-full bg-white/90 px-2.5 py-1 text-[9px] font-semibold text-[#173b2b] shadow-sm">
                     <span className="h-1.5 w-5 rounded-full bg-[#4d9d7d]" />
@@ -793,6 +882,7 @@ function Index() {
                       <input
                         type="date"
                         value={scheduleDate}
+                        min={scheduleDate}
                         onChange={(event) => setScheduleDate(event.target.value)}
                         className="rounded-full bg-surface px-3 py-2 text-sm font-semibold ring-1 ring-border outline-none"
                       />
@@ -805,7 +895,7 @@ function Index() {
                     </div>
                     <button
                       onClick={scheduleTrip}
-                      className="mt-2 w-full rounded-full bg-leaf py-2 text-xs font-bold text-accent-foreground"
+                      className="mt-2 w-full rounded-full bg-leaf py-2 text-xs font-bold text-accent-foreground transition-transform active:scale-[0.98]"
                     >
                       {t.agenda}
                     </button>
@@ -813,17 +903,36 @@ function Index() {
                 )}
                 {scheduledTrips.length > 0 && (
                   <div className="mt-3 rounded-[24px] bg-background p-3 ring-1 ring-border">
-                    <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">
-                      {t.agenda}
-                    </p>
+                    <div className="flex items-center justify-between gap-3">
+                      <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">
+                        {t.agenda}
+                      </p>
+                      <span className="rounded-full bg-leaf/15 px-2 py-1 text-[10px] font-bold text-leaf">
+                        {scheduledTrips.length}
+                      </span>
+                    </div>
                     <div className="mt-2 space-y-2">
                       {scheduledTrips.map((trip, index) => (
-                        <p
+                        <div
                           key={`${trip}-${index}`}
-                          className="rounded-full bg-surface px-3 py-2 text-xs font-semibold"
+                          className="flex items-center gap-2 rounded-2xl bg-surface px-3 py-2 text-xs font-semibold"
                         >
-                          {trip}
-                        </p>
+                          <CalendarDays className="size-3.5 shrink-0 text-leaf" />
+                          <span className="min-w-0 flex-1 truncate">{trip}</span>
+                          <button
+                            type="button"
+                            aria-label={`${t.remove}: ${trip}`}
+                            title={t.remove}
+                            onClick={() =>
+                              setScheduledTrips((current) =>
+                                current.filter((_, itemIndex) => itemIndex !== index),
+                              )
+                            }
+                            className="grid size-6 shrink-0 place-items-center rounded-full text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
+                          >
+                            <X className="size-3.5" />
+                          </button>
+                        </div>
                       ))}
                     </div>
                   </div>
@@ -898,6 +1007,18 @@ function Index() {
                     </p>
                   )}
                 </div>
+                {confirmed && (
+                  <div
+                    className="mt-3 flex items-start gap-2 rounded-2xl bg-leaf/15 p-3 text-xs text-primary ring-1 ring-leaf/25"
+                    role="status"
+                  >
+                    <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-leaf" />
+                    <div>
+                      <p className="font-bold">{t.confirmedTitle}</p>
+                      <p className="mt-0.5 text-muted-foreground">{t.confirmedBody}</p>
+                    </div>
+                  </div>
+                )}
               </section>
             ) : (
               <section className="rise mt-4 rounded-[30px] bg-surface p-5 shadow-xl shadow-primary/10 ring-1 ring-border">
@@ -908,7 +1029,13 @@ function Index() {
                     ? "Elija una experiencia con transporte y acompañamiento bilingüe incluidos."
                     : "Choose an experience with transport and bilingual assistance included."}
                 </p>
-                <button className="mt-5 w-full rounded-2xl bg-jungle py-4 text-sm font-bold text-primary-foreground">
+                <button
+                  onClick={() => {
+                    setMode("tours");
+                    scrollToSection("tours");
+                  }}
+                  className="mt-5 w-full rounded-2xl bg-jungle py-4 text-sm font-bold text-primary-foreground transition-transform active:scale-[0.98]"
+                >
                   {t.explore}
                 </button>
               </section>
@@ -1022,8 +1149,11 @@ function Index() {
                   <h2 className="mt-1 font-display text-[22px]">{t.escapes}</h2>
                 </div>
                 <button
-                  onClick={() => scrollToSection("tours")}
-                  className="text-xs font-bold text-leaf"
+                  onClick={() => {
+                    setMode("tours");
+                    scrollToSection("tours");
+                  }}
+                  className="rounded-full px-2 py-1 text-xs font-bold text-leaf transition-colors hover:bg-leaf/10"
                 >
                   {t.explore}
                 </button>
