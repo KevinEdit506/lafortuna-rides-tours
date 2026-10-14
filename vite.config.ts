@@ -13,6 +13,8 @@ export default defineConfig({
   vite: {
     // GitHub Pages project sites are served from /<repository>/ instead of the domain root.
     base,
+    // The sandbox review URL uses a generated host that Vite cannot know ahead of time.
+    server: { allowedHosts: true },
   },
   tanstackStart: {
     // Redirect TanStack Start's bundled server entry to src/server.ts (our SSR error wrapper).
