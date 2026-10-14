@@ -587,7 +587,7 @@ function Index() {
           className={`lg:gap-16 ${mode === "transfers" ? "lg:grid lg:grid-cols-[minmax(0,0.9fr)_minmax(390px,0.72fr)]" : "lg:block"}`}
         >
           <div>
-            <section className="rise mt-8 rounded-[28px] bg-[#101714] px-5 py-5 text-white shadow-[0_14px_32px_rgba(8,14,11,0.34)] ring-1 ring-black/45 [animation-delay:80ms]">
+            <section className="rise mt-8 rounded-[28px] bg-gradient-to-br from-[#101714] via-[#1b4033] to-[#2d6952] px-5 py-5 text-white shadow-[0_14px_32px_rgba(8,14,11,0.34)] ring-1 ring-white/15 [animation-delay:80ms]">
               <div className="flex items-center gap-2 text-white">
                 <span className="h-px w-4 bg-white/55" />
                 <p className="text-[11px] font-semibold uppercase tracking-[0.22em]">{t.eyebrow}</p>
@@ -600,7 +600,7 @@ function Index() {
               </p>
             </section>
 
-            <div className="rise mt-7 rounded-3xl bg-[#1d2622] px-5 py-3.5 text-center shadow-[0_6px_14px_rgba(16,24,20,0.24)] ring-1 ring-black/30 [animation-delay:140ms]">
+            <div className="rise mt-7 rounded-3xl bg-gradient-to-r from-[#163128] via-[#275a48] to-[#438365] px-5 py-3.5 text-center shadow-[0_8px_18px_rgba(16,38,29,0.28)] ring-1 ring-white/15 [animation-delay:140ms]">
               <p className="text-sm font-bold tracking-wide text-white">{t.mobilityTitle}</p>
             </div>
 
@@ -1122,7 +1122,10 @@ function Index() {
               </section>
             )}
 
-            <section id="tours" className="mt-10 scroll-mt-6">
+            <section
+              id="tours"
+              className="mt-10 scroll-mt-6 rounded-[30px] bg-leaf/10 p-4 ring-1 ring-leaf/20"
+            >
               <div className="mb-4">
                 <div>
                   <div className="flex items-center gap-2 text-leaf">
@@ -1222,7 +1225,7 @@ function Index() {
                 ].map((tour) => (
                   <article
                     key={tour.title}
-                    className="flex h-[500px] w-full flex-col rounded-[26px] bg-surface p-3 shadow-xl shadow-primary/10 ring-1 ring-border lg:h-[510px]"
+                    className="flex h-[500px] w-full flex-col rounded-[26px] bg-gradient-to-br from-surface via-surface to-leaf/10 p-3 shadow-xl shadow-primary/10 ring-1 ring-border lg:h-[510px]"
                   >
                     <img
                       src={tour.image}
@@ -1249,7 +1252,7 @@ function Index() {
                       </div>
                       <button
                         onClick={() => openWhatsApp(tour.title)}
-                        className="mt-auto w-full rounded-xl bg-mist/30 py-2.5 text-xs font-bold text-primary"
+                        className="mt-auto w-full rounded-xl bg-leaf py-2.5 text-xs font-bold text-accent-foreground shadow-[0_3px_0_color-mix(in_oklch,var(--color-jungle)_35%,transparent)]"
                       >
                         {t.reserveTour}
                       </button>
