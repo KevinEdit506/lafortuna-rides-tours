@@ -587,15 +587,15 @@ function Index() {
           className={`lg:gap-16 ${mode === "transfers" ? "lg:grid lg:grid-cols-[minmax(0,0.9fr)_minmax(390px,0.72fr)]" : "lg:block"}`}
         >
           <div>
-            <section className="rise mt-8 rounded-[28px] bg-black/10 px-5 py-5 shadow-[0_12px_28px_rgba(24,38,32,0.16)] ring-1 ring-black/10 [animation-delay:80ms]">
-              <div className="flex items-center gap-2 text-leaf">
-                <span className="h-px w-4 bg-leaf/50" />
+            <section className="rise mt-8 rounded-[28px] bg-[#101714] px-5 py-5 text-white shadow-[0_14px_32px_rgba(8,14,11,0.34)] ring-1 ring-black/45 [animation-delay:80ms]">
+              <div className="flex items-center gap-2 text-white">
+                <span className="h-px w-4 bg-white/55" />
                 <p className="text-[11px] font-semibold uppercase tracking-[0.22em]">{t.eyebrow}</p>
               </div>
-              <h1 className="mt-2 max-w-xl font-display text-[32px] leading-[1.12] lg:text-5xl">
+              <h1 className="mt-2 max-w-xl font-display text-[32px] leading-[1.12] text-white lg:text-5xl">
                 {t.title}
               </h1>
-              <p className="mt-3 max-w-xl text-sm leading-relaxed text-muted-foreground lg:text-base">
+              <p className="mt-3 max-w-xl text-sm leading-relaxed text-white/80 lg:text-base">
                 {t.subtitle}
               </p>
             </section>
