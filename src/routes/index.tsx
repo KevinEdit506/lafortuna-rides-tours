@@ -600,8 +600,8 @@ function Index() {
               </p>
             </section>
 
-            <div className="rise mt-7 rounded-3xl bg-mist/20 px-5 py-3.5 text-center ring-1 ring-border [animation-delay:140ms]">
-              <p className="text-sm font-bold tracking-wide text-primary">{t.mobilityTitle}</p>
+            <div className="rise mt-7 rounded-3xl bg-[#1d2622] px-5 py-3.5 text-center shadow-[0_6px_14px_rgba(16,24,20,0.24)] ring-1 ring-black/30 [animation-delay:140ms]">
+              <p className="text-sm font-bold tracking-wide text-white">{t.mobilityTitle}</p>
             </div>
 
             {mode === "transfers" && (
