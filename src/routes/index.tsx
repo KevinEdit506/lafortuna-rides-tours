@@ -604,7 +604,10 @@ function Index() {
                 {t.transfers}
               </button>
               <button
-                onClick={() => setMode("tours")}
+                onClick={() => {
+                  setMode("tours");
+                  scrollToSection("tours");
+                }}
                 className={`rounded-[18px] py-3.5 text-sm font-bold transition-all ${mode === "tours" ? "bg-jungle text-primary-foreground shadow-lg shadow-primary/20" : "text-muted-foreground"}`}
               >
                 {t.tours}
@@ -1156,7 +1159,7 @@ function Index() {
                   ? "Descubre experiencias locales y escapadas por Costa Rica: playas, parques nacionales, ríos y bosque tropical."
                   : "Discover local experiences and Costa Rica escapes: beaches, national parks, rivers, and tropical forest."}
               </p>
-              <div className="hide-scrollbar -mx-6 flex gap-4 overflow-x-auto px-6 pb-6 lg:mx-0 lg:grid lg:grid-cols-2 lg:px-0">
+              <div className="flex flex-col gap-4 pb-6">
                 {[
                   {
                     image: `${import.meta.env.BASE_URL}category-arenal.jpg`,
@@ -1247,7 +1250,7 @@ function Index() {
                 ].map((tour) => (
                   <article
                     key={tour.title}
-                    className="flex h-[500px] w-[260px] shrink-0 flex-col rounded-[26px] bg-surface p-3 shadow-xl shadow-primary/10 ring-1 ring-border lg:h-[510px] lg:w-auto"
+                    className="flex h-[500px] w-full flex-col rounded-[26px] bg-surface p-3 shadow-xl shadow-primary/10 ring-1 ring-border lg:h-[510px]"
                   >
                     <img
                       src={tour.image}
