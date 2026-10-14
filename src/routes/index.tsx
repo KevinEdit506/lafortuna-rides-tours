@@ -225,13 +225,6 @@ function Index() {
   ];
   const [language, setLanguage] = useState<"es" | "en">("es");
   const [mode, setMode] = useState<"transfers" | "tours">("transfers");
-  const [selectedCategory, setSelectedCategory] = useState("Arenal");
-  const categoryOptions = [
-    { label: "Arenal", image: `${import.meta.env.BASE_URL}category-arenal.jpg` },
-    { label: "Playas", image: `${import.meta.env.BASE_URL}category-playas.jpg` },
-    { label: "Parques nacionales", image: `${import.meta.env.BASE_URL}category-parques.jpg` },
-    { label: "Ríos", image: `${import.meta.env.BASE_URL}category-rios.jpg` },
-  ];
   const [timing, setTiming] = useState<"now" | "schedule">("now");
   const [rideType, setRideType] = useState<"private" | "shared">("private");
   const [passengers, setPassengers] = useState(2);
@@ -1163,57 +1156,98 @@ function Index() {
                   ? "Descubre experiencias locales y escapadas por Costa Rica: playas, parques nacionales, ríos y bosque tropical."
                   : "Discover local experiences and Costa Rica escapes: beaches, national parks, rivers, and tropical forest."}
               </p>
-              <div className="mb-4 flex gap-3 overflow-x-auto px-1 pb-2">
-                {categoryOptions.map((category) => (
-                  <button
-                    key={category.label}
-                    type="button"
-                    aria-pressed={selectedCategory === category.label}
-                    onClick={() => setSelectedCategory(category.label)}
-                    className={`flex shrink-0 items-center gap-2 rounded-[18px] p-1.5 pr-4 text-xs font-bold shadow-lg shadow-primary/5 ring-1 transition-all active:scale-[0.98] ${
-                      selectedCategory === category.label
-                        ? "bg-jungle text-primary-foreground ring-jungle"
-                        : "bg-surface text-primary ring-border hover:-translate-y-0.5 hover:shadow-xl"
-                    }`}
-                  >
-                    <img
-                      src={category.image}
-                      alt=""
-                      aria-hidden="true"
-                      width={48}
-                      height={36}
-                      className="h-9 w-12 rounded-[12px] object-cover"
-                    />
-                    <span>{category.label}</span>
-                  </button>
-                ))}
-              </div>
               <div className="hide-scrollbar -mx-6 flex gap-4 overflow-x-auto px-6 pb-6 lg:mx-0 lg:grid lg:grid-cols-2 lg:px-0">
                 {[
                   {
+                    image: `${import.meta.env.BASE_URL}category-arenal.jpg`,
+                    title:
+                      language === "es"
+                        ? "Volcán Arenal y aguas termales"
+                        : "Arenal Volcano & hot springs",
+                    meta: `5 ${t.hours}`,
+                    price: "$95",
+                    rating: "4.9",
+                    category: language === "es" ? "Arenal · Naturaleza" : "Arenal · Nature",
+                    summary:
+                      language === "es"
+                        ? "Paisajes volcánicos, senderos y una pausa relajante en aguas termales de la zona."
+                        : "Volcanic views, rainforest trails, and a relaxing pause in the area's hot springs.",
+                  },
+                  {
                     image: misticoImage,
-                    title: "Puentes Colgantes Místico",
+                    title:
+                      language === "es" ? "Puentes Colgantes Místico" : "Mystic Hanging Bridges",
                     meta: `3.5 ${t.hours}`,
                     price: "$85",
                     rating: "4.9",
-                    category: "Arenal · Naturaleza",
+                    category: language === "es" ? "Arenal · Naturaleza" : "Arenal · Nature",
                     summary:
-                      "Senderos y puentes suspendidos entre bosque nuboso, con vistas del paisaje volcánico.",
+                      language === "es"
+                        ? "Senderos y puentes suspendidos entre bosque nuboso, con vistas del paisaje volcánico."
+                        : "Trails and suspended bridges through cloud forest, with views of the volcanic landscape.",
+                  },
+                  {
+                    image: `${import.meta.env.BASE_URL}category-playas.jpg`,
+                    title:
+                      language === "es"
+                        ? "Escapada a playas del Pacífico"
+                        : "Pacific coast beach escape",
+                    meta: `10 ${t.hours}`,
+                    price: "$120",
+                    rating: "4.8",
+                    category: language === "es" ? "Playas · Día completo" : "Beaches · Full day",
+                    summary:
+                      language === "es"
+                        ? "Un día de costa, arena y mar con traslado cómodo desde La Fortuna."
+                        : "A full day of coast, sand, and sea with a comfortable transfer from La Fortuna.",
+                  },
+                  {
+                    image: `${import.meta.env.BASE_URL}category-parques.jpg`,
+                    title:
+                      language === "es"
+                        ? "Parques nacionales de Costa Rica"
+                        : "Costa Rica national parks",
+                    meta: `8 ${t.hours}`,
+                    price: "$110",
+                    rating: "4.9",
+                    category: language === "es" ? "Parques · Aventura" : "Parks · Adventure",
+                    summary:
+                      language === "es"
+                        ? "Explora senderos protegidos, miradores y biodiversidad con acompañamiento local."
+                        : "Explore protected trails, viewpoints, and biodiversity with local assistance.",
                   },
                   {
                     image: riverImage,
-                    title: "Safari Río Peñas Blancas",
+                    title:
+                      language === "es" ? "Safari Río Peñas Blancas" : "Peñas Blancas River Safari",
                     meta: `4 ${t.hours}`,
                     price: "$60",
                     rating: "4.8",
-                    category: "La Fortuna · Río",
+                    category: language === "es" ? "La Fortuna · Río" : "La Fortuna · River",
                     summary:
-                      "Recorrido tranquilo por el río para observar aves y vida silvestre con guía local.",
+                      language === "es"
+                        ? "Recorrido tranquilo por el río para observar aves y vida silvestre con guía local."
+                        : "A peaceful river ride to observe birds and wildlife with a local guide.",
+                  },
+                  {
+                    image: `${import.meta.env.BASE_URL}category-rios.jpg`,
+                    title:
+                      language === "es"
+                        ? "Ríos y aventura tropical"
+                        : "Rivers & tropical adventure",
+                    meta: `6 ${t.hours}`,
+                    price: "$75",
+                    rating: "4.7",
+                    category: language === "es" ? "Ríos · Aire libre" : "Rivers · Outdoors",
+                    summary:
+                      language === "es"
+                        ? "Naturaleza, agua dulce y actividades al aire libre para descubrir la región."
+                        : "Fresh water, nature, and outdoor activities to discover the region.",
                   },
                 ].map((tour) => (
                   <article
                     key={tour.title}
-                    className="w-[260px] shrink-0 rounded-[26px] bg-surface p-3 shadow-xl shadow-primary/10 ring-1 ring-border lg:w-auto"
+                    className="flex h-[500px] w-[260px] shrink-0 flex-col rounded-[26px] bg-surface p-3 shadow-xl shadow-primary/10 ring-1 ring-border lg:h-[510px] lg:w-auto"
                   >
                     <img
                       src={tour.image}
@@ -1221,9 +1255,9 @@ function Index() {
                       width={1024}
                       height={768}
                       loading="lazy"
-                      className="aspect-[4/3] w-full rounded-[19px] object-cover"
+                      className="h-44 w-full rounded-[19px] object-cover"
                     />
-                    <div className="px-2 pb-2 pt-4">
+                    <div className="flex min-h-0 flex-1 flex-col px-2 pb-2 pt-4">
                       <h3 className="font-display text-[17px] leading-snug">{tour.title}</h3>
                       <p className="mt-1 text-[10px] font-bold uppercase tracking-[0.12em] text-leaf">
                         {tour.category}
@@ -1242,7 +1276,7 @@ function Index() {
                       </div>
                       <button
                         onClick={() => openWhatsApp(tour.title)}
-                        className="mt-3 w-full rounded-xl bg-mist/30 py-2.5 text-xs font-bold text-primary"
+                        className="mt-auto w-full rounded-xl bg-mist/30 py-2.5 text-xs font-bold text-primary"
                       >
                         {t.reserveTour}
                       </button>
