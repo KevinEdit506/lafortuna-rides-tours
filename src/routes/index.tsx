@@ -581,7 +581,9 @@ function Index() {
           </div>
         </header>
 
-        <div className="lg:grid lg:grid-cols-[minmax(0,0.9fr)_minmax(390px,0.72fr)] lg:gap-16">
+        <div
+          className={`lg:gap-16 ${mode === "transfers" ? "lg:grid lg:grid-cols-[minmax(0,0.9fr)_minmax(390px,0.72fr)]" : "lg:block"}`}
+        >
           <div>
             <section className="rise mt-8 [animation-delay:80ms]">
               <div className="flex items-center gap-2 text-leaf">
