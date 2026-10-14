@@ -1103,8 +1103,8 @@ function Index() {
                     </div>
                   </div>
                 )}
-                <p className="mt-3 flex items-center gap-2 text-xs italic text-mist/65">
-                  <ShieldCheck className="size-4" />
+                <p className="mt-3 flex items-center gap-2 rounded-xl bg-black/20 px-3 py-2 text-xs italic text-mist/85 ring-1 ring-white/10">
+                  <ShieldCheck className="size-4 shrink-0 text-leaf" />
                   {t.note}
                 </p>
                 <button
