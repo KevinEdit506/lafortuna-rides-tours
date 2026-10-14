@@ -1146,7 +1146,6 @@ function Index() {
                         ? "Volcán Arenal y aguas termales"
                         : "Arenal Volcano & hot springs",
                     meta: `5 ${t.hours}`,
-                    price: "$95",
                     rating: "4.9",
                     category: language === "es" ? "Arenal · Naturaleza" : "Arenal · Nature",
                     summary:
@@ -1159,7 +1158,6 @@ function Index() {
                     title:
                       language === "es" ? "Puentes Colgantes Místico" : "Mystic Hanging Bridges",
                     meta: `3.5 ${t.hours}`,
-                    price: "$85",
                     rating: "4.9",
                     category: language === "es" ? "Arenal · Naturaleza" : "Arenal · Nature",
                     summary:
@@ -1174,7 +1172,6 @@ function Index() {
                         ? "Escapada a playas del Pacífico"
                         : "Pacific coast beach escape",
                     meta: `10 ${t.hours}`,
-                    price: "$120",
                     rating: "4.8",
                     category: language === "es" ? "Playas · Día completo" : "Beaches · Full day",
                     summary:
@@ -1189,7 +1186,6 @@ function Index() {
                         ? "Parques nacionales de Costa Rica"
                         : "Costa Rica national parks",
                     meta: `8 ${t.hours}`,
-                    price: "$110",
                     rating: "4.9",
                     category: language === "es" ? "Parques · Aventura" : "Parks · Adventure",
                     summary:
@@ -1202,7 +1198,6 @@ function Index() {
                     title:
                       language === "es" ? "Safari Río Peñas Blancas" : "Peñas Blancas River Safari",
                     meta: `4 ${t.hours}`,
-                    price: "$60",
                     rating: "4.8",
                     category: language === "es" ? "La Fortuna · Río" : "La Fortuna · River",
                     summary:
@@ -1217,7 +1212,6 @@ function Index() {
                         ? "Ríos y aventura tropical"
                         : "Rivers & tropical adventure",
                     meta: `6 ${t.hours}`,
-                    price: "$75",
                     rating: "4.7",
                     category: language === "es" ? "Ríos · Aire libre" : "Rivers · Outdoors",
                     summary:
@@ -1247,9 +1241,7 @@ function Index() {
                         {tour.summary}
                       </p>
                       <div className="mt-2 flex items-center justify-between text-xs text-muted-foreground">
-                        <span>
-                          {tour.meta} · {tour.price}
-                        </span>
+                        <span>{tour.meta}</span>
                         <span className="flex items-center gap-1 font-bold text-leaf">
                           <Star className="size-3 fill-current" />
                           {tour.rating}
