@@ -587,7 +587,7 @@ function Index() {
           className={`lg:gap-16 ${mode === "transfers" ? "lg:grid lg:grid-cols-[minmax(0,0.9fr)_minmax(390px,0.72fr)]" : "lg:block"}`}
         >
           <div>
-            <section className="rise mt-8 [animation-delay:80ms]">
+            <section className="rise mt-8 rounded-[28px] bg-black/10 px-5 py-5 shadow-[0_12px_28px_rgba(24,38,32,0.16)] ring-1 ring-black/10 [animation-delay:80ms]">
               <div className="flex items-center gap-2 text-leaf">
                 <span className="h-px w-4 bg-leaf/50" />
                 <p className="text-[11px] font-semibold uppercase tracking-[0.22em]">{t.eyebrow}</p>
