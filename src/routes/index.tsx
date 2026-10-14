@@ -1123,7 +1123,7 @@ function Index() {
             )}
 
             <section id="tours" className="mt-10 scroll-mt-6">
-              <div className="mb-4 flex items-end justify-between">
+              <div className="mb-4">
                 <div>
                   <div className="flex items-center gap-2 text-leaf">
                     <span className="size-1.5 rounded-full bg-leaf" />
@@ -1131,12 +1131,6 @@ function Index() {
                   </div>
                   <h2 className="mt-1 font-display text-[22px]">{t.escapes}</h2>
                 </div>
-                <button
-                  onClick={() => scrollToSection("tours")}
-                  className="rounded-full px-2 py-1 text-xs font-bold text-leaf transition-colors hover:bg-leaf/10"
-                >
-                  {t.explore}
-                </button>
               </div>
               <p className="mb-3 text-sm leading-relaxed text-muted-foreground">
                 {language === "es"
