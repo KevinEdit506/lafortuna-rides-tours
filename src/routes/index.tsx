@@ -97,6 +97,7 @@ const copy = {
     subtitle: "Traslados puntuales y experiencias seleccionadas en el corazón del Arenal.",
     transfers: "Traslados",
     tours: "Tours",
+    mobilityTitle: "Transportes y tour",
     origin: "Origen",
     destination: "Destino",
     private: "Privado",
@@ -158,6 +159,7 @@ const copy = {
     subtitle: "Punctual transfers and curated experiences in the heart of Arenal.",
     transfers: "Transfers",
     tours: "Tours",
+    mobilityTitle: "Transfers & tours",
     origin: "Pickup",
     destination: "Destination",
     private: "Private",
@@ -598,22 +600,8 @@ function Index() {
               </p>
             </section>
 
-            <div className="rise mt-7 grid grid-cols-2 gap-2 rounded-3xl bg-mist/20 p-1.5 ring-1 ring-border [animation-delay:140ms]">
-              <button
-                onClick={() => setMode("transfers")}
-                className={`rounded-[18px] py-3.5 text-sm font-bold transition-all ${mode === "transfers" ? "bg-jungle text-primary-foreground shadow-lg shadow-primary/20" : "text-muted-foreground"}`}
-              >
-                {t.transfers}
-              </button>
-              <button
-                onClick={() => {
-                  setMode("tours");
-                  scrollToSection("tours");
-                }}
-                className={`rounded-[18px] py-3.5 text-sm font-bold transition-all ${mode === "tours" ? "bg-jungle text-primary-foreground shadow-lg shadow-primary/20" : "text-muted-foreground"}`}
-              >
-                {t.tours}
-              </button>
+            <div className="rise mt-7 rounded-3xl bg-mist/20 px-5 py-3.5 text-center ring-1 ring-border [animation-delay:140ms]">
+              <p className="text-sm font-bold tracking-wide text-primary">{t.mobilityTitle}</p>
             </div>
 
             {mode === "transfers" && (
@@ -1028,10 +1016,7 @@ function Index() {
                     : "Choose an experience with transport and bilingual assistance included."}
                 </p>
                 <button
-                  onClick={() => {
-                    setMode("tours");
-                    scrollToSection("tours");
-                  }}
+                  onClick={() => scrollToSection("tours")}
                   className="mt-5 w-full rounded-2xl bg-jungle py-4 text-sm font-bold text-primary-foreground transition-transform active:scale-[0.98]"
                 >
                   {t.explore}
@@ -1147,10 +1132,7 @@ function Index() {
                   <h2 className="mt-1 font-display text-[22px]">{t.escapes}</h2>
                 </div>
                 <button
-                  onClick={() => {
-                    setMode("tours");
-                    scrollToSection("tours");
-                  }}
+                  onClick={() => scrollToSection("tours")}
                   className="rounded-full px-2 py-1 text-xs font-bold text-leaf transition-colors hover:bg-leaf/10"
                 >
                   {t.explore}
