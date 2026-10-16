@@ -557,11 +557,13 @@ function Index() {
       <div className="relative mx-auto min-h-screen w-full max-w-[430px] px-6 pb-32 pt-6 lg:max-w-6xl lg:px-10">
         <header className="rise flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="grid size-10 place-items-center rounded-2xl bg-jungle text-primary-foreground shadow-lg shadow-primary/20">
-              <span className="font-display text-xl">V</span>
+            <div className="flex items-center gap-2 rounded-full bg-jungle px-3 py-2 text-primary-foreground shadow-[0_4px_0_rgba(9,35,26,0.45),0_8px_16px_rgba(9,35,26,0.2)] ring-1 ring-white/25">
+              <span className="grid size-7 place-items-center rounded-full bg-leaf/30 font-display text-sm ring-1 ring-white/20">
+                V
+              </span>
+              <span className="font-display text-base">Vía</span>
             </div>
             <div className="leading-tight">
-              <p className="font-display text-lg">Via</p>
               <p className="text-[9px] font-semibold uppercase tracking-[0.25em] text-muted-foreground">
                 {t.place}
               </p>
@@ -762,7 +764,7 @@ function Index() {
             )}
 
             {mode === "transfers" ? (
-              <section className="rise mt-4 rounded-[30px] bg-surface p-4 shadow-xl shadow-primary/10 ring-1 ring-border [animation-delay:200ms]">
+              <section className="control-relief rise mt-4 rounded-[30px] bg-surface p-4 [animation-delay:200ms]">
                 <div className="rounded-2xl bg-background/70 p-4 ring-1 ring-border">
                   <div className="flex items-center gap-4">
                     <MapPin className="size-4 shrink-0 text-leaf" />
