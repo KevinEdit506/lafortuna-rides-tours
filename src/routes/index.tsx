@@ -607,7 +607,7 @@ function Index() {
             {mode === "transfers" && (
               <section
                 id="route-preview"
-                className="mt-3 overflow-hidden rounded-[28px] bg-jungle p-4 text-primary-foreground shadow-lg shadow-primary/15"
+                className="mt-3 overflow-hidden rounded-[28px] bg-gradient-to-r from-[#163128] via-[#275a48] to-[#438365] p-4 text-white shadow-lg shadow-primary/15 ring-1 ring-white/15"
               >
                 <div
                   className="relative h-44 overflow-hidden rounded-[22px] bg-[#e8eee8] ring-1 ring-white/10"
@@ -1027,7 +1027,7 @@ function Index() {
 
           <div>
             {mode === "transfers" && (
-              <section className="rise mt-4 overflow-hidden rounded-[28px] bg-jungle p-5 text-primary-foreground shadow-2xl shadow-primary/25 lg:mt-8 [animation-delay:260ms]">
+              <section className="rise mt-4 overflow-hidden rounded-[28px] bg-gradient-to-r from-[#163128] via-[#275a48] to-[#438365] p-5 text-white shadow-2xl shadow-primary/25 ring-1 ring-white/15 lg:mt-8 [animation-delay:260ms]">
                 <div className="flex items-center justify-between">
                   <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-mist/70">
                     {t.estimate}
