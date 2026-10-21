@@ -10,7 +10,6 @@ import {
   Home,
   MapPin,
   MessageCircle,
-  Navigation,
   Minus,
   Plus,
   Route as RouteIcon,
@@ -24,6 +23,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 
 import misticoImage from "../assets/mistico-bridges.jpg";
 import riverImage from "../assets/penas-blancas.jpg";
+import { MiniRouteMap } from "../components/MiniRouteMap";
 
 type MapsWindow = Window & {
   google?: {
@@ -115,7 +115,8 @@ const copy = {
     distance: "Distancia",
     duration: "Tiempo estimado",
     mapsLoading: "Conectando con Google Maps…",
-    mapsFallback: "Activa Google Maps para calcular la ruta exacta",
+    mapsFallback: "Distancia y tiempo aproximados. Confirma el recorrido en Google Maps.",
+    mapsExact: "Distancia por carretera · Google Maps",
     routeUpdating: "Actualizando ruta y tarifa…",
     routeUpdated: "Ruta y tarifa actualizadas",
     baseFare: "Tarifa base",
@@ -177,7 +178,8 @@ const copy = {
     distance: "Distance",
     duration: "Estimated time",
     mapsLoading: "Connecting to Google Maps…",
-    mapsFallback: "Enable Google Maps for exact routing",
+    mapsFallback: "Approximate distance and time. Confirm your route in Google Maps.",
+    mapsExact: "Road distance · Google Maps",
     routeUpdating: "Updating route and fare…",
     routeUpdated: "Route and fare updated",
     baseFare: "Base fare",
@@ -611,131 +613,18 @@ function Index() {
                 id="route-preview"
                 className="dark-green-panel mt-3 overflow-hidden rounded-[28px] p-4 text-white ring-1 ring-white/15"
               >
-                <div
-                  className="relative h-44 overflow-hidden rounded-[22px] bg-[#e8eee8] ring-1 ring-white/10"
-                  role="img"
-                  aria-label={`${t.routePreview}: ${origin} a ${destination}`}
-                >
-                  <svg
-                    viewBox="0 0 640 300"
-                    preserveAspectRatio="none"
-                    className="absolute inset-0 size-full"
-                    aria-hidden="true"
-                  >
-                    <rect width="640" height="300" fill="#e8eee8" />
-                    <path
-                      d="M-30 245 C120 210 150 120 285 135 S490 240 670 180"
-                      fill="none"
-                      stroke="#cbd8ce"
-                      strokeWidth="34"
-                    />
-                    <path
-                      d="M-30 245 C120 210 150 120 285 135 S490 240 670 180"
-                      fill="none"
-                      stroke="#ffffff"
-                      strokeWidth="26"
-                    />
-                    <path
-                      d="M100 -20 C125 70 215 80 240 155 S300 265 350 320"
-                      fill="none"
-                      stroke="#d1ddd3"
-                      strokeWidth="24"
-                    />
-                    <path
-                      d="M100 -20 C125 70 215 80 240 155 S300 265 350 320"
-                      fill="none"
-                      stroke="#ffffff"
-                      strokeWidth="17"
-                    />
-                    <path
-                      d="M460 -20 C430 70 470 125 410 175 S390 250 450 320"
-                      fill="none"
-                      stroke="#d1ddd3"
-                      strokeWidth="22"
-                    />
-                    <path
-                      d="M460 -20 C430 70 470 125 410 175 S390 250 450 320"
-                      fill="none"
-                      stroke="#ffffff"
-                      strokeWidth="15"
-                    />
-                    <path
-                      d="M0 65 L640 65 M0 275 L640 275 M35 0 L35 300 M570 0 L570 300"
-                      stroke="#d5e1d7"
-                      strokeWidth="8"
-                      opacity=".8"
-                    />
-                    <path
-                      d="M128 218 C185 185 214 150 258 142 S340 151 386 190 S444 218 504 164"
-                      fill="none"
-                      stroke="#ffffff"
-                      strokeWidth="12"
-                      strokeLinecap="round"
-                    />
-                    <path
-                      d="M128 218 C185 185 214 150 258 142 S340 151 386 190 S444 218 504 164"
-                      fill="none"
-                      stroke="#4d9d7d"
-                      strokeWidth="6"
-                      strokeLinecap="round"
-                    />
-                    <circle
-                      cx="128"
-                      cy="218"
-                      r="13"
-                      fill="#ffffff"
-                      stroke="#173b2b"
-                      strokeWidth="6"
-                    />
-                    <circle
-                      cx="504"
-                      cy="164"
-                      r="13"
-                      fill="#ffffff"
-                      stroke="#ef625d"
-                      strokeWidth="6"
-                    />
-                    <text x="145" y="215" fill="#173b2b" fontSize="15" fontWeight="700">
-                      A
-                    </text>
-                    <text x="522" y="160" fill="#9b3836" fontSize="15" fontWeight="700">
-                      B
-                    </text>
-                  </svg>
-                  <div className="absolute left-3 top-3 rounded-full bg-white/90 px-2.5 py-1 text-[9px] font-bold uppercase tracking-[0.15em] text-[#173b2b] shadow-sm">
-                    {t.routePreview}
-                  </div>
-                  <div className="absolute right-3 top-3 grid gap-1 rounded-xl bg-white/90 p-1 text-[#173b2b] shadow-sm">
-                    <button
-                      aria-label="Acercar mapa"
-                      className="grid size-6 place-items-center rounded-lg text-sm"
-                    >
-                      +
-                    </button>
-                    <button
-                      aria-label="Alejar mapa"
-                      className="grid size-6 place-items-center rounded-lg text-sm"
-                    >
-                      −
-                    </button>
-                  </div>
-                  <div className="absolute bottom-3 left-3 flex items-center gap-2 rounded-full bg-white/90 px-2.5 py-1 text-[9px] font-semibold text-[#173b2b] shadow-sm">
-                    <span className="h-1.5 w-5 rounded-full bg-[#4d9d7d]" />
-                    {distanceKm.toFixed(1)} km · {durationMinutes} min
-                  </div>
-                  <Navigation className="absolute bottom-3 right-3 size-4 text-[#2c8365]" />
-                </div>
+                <MiniRouteMap origin={origin} destination={destination} language={language} />
                 <div className="mt-3 flex items-center justify-between gap-3 text-xs">
                   <div className="min-w-0">
                     <p className="text-[10px] uppercase tracking-[0.16em] text-panel-muted-foreground">
-                      {t.pickupShort}
+                      A · {t.pickupShort}
                     </p>
                     <p className="truncate font-semibold">{origin}</p>
                   </div>
                   <ArrowDownUp className="size-4 shrink-0 text-leaf" />
                   <div className="min-w-0 text-right">
                     <p className="text-[10px] uppercase tracking-[0.16em] text-panel-muted-foreground">
-                      {t.destinationShort}
+                      B · {t.destinationShort}
                     </p>
                     <p className="truncate font-semibold">{destination}</p>
                   </div>
@@ -749,11 +638,7 @@ function Index() {
                   </span>
                 </div>
                 <p className="mt-2 text-[10px] text-panel-muted-foreground">
-                  {mapsStatus === "ready"
-                    ? "Google Maps · ruta en automóvil"
-                    : mapsStatus === "loading"
-                      ? t.mapsLoading
-                      : t.mapsFallback}
+                  {mapsStatus === "ready" ? t.mapsExact : t.mapsFallback}
                 </p>
                 {routeStatus !== "idle" && (
                   <p className="mt-1 text-[10px] font-semibold text-leaf">
