@@ -1,10 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
 import {
-  ArrowDownUp,
   CalendarDays,
   CarFront,
   CheckCircle2,
   ChevronDown,
+  Circle,
   Clock3,
   Compass,
   Home,
@@ -635,11 +635,16 @@ function Index() {
 
             {mode === "transfers" ? (
               <section className="control-relief rise mt-4 rounded-[30px] bg-surface p-4 [animation-delay:200ms]">
-                <div className="rounded-2xl bg-background/70 p-4 ring-1 ring-border">
-                  <div className="flex items-center gap-4">
-                    <MapPin className="size-4 shrink-0 text-leaf" />
-                    <label className="flex-1">
-                      <span className="block text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
+                <div className="address-fields dark-green-panel rounded-[24px] p-3.5 text-white ring-1 ring-white/15">
+                  <div className="flex items-center gap-3">
+                    <span
+                      className="grid size-8 shrink-0 place-items-center rounded-full bg-white/10 ring-1 ring-white/10"
+                      aria-hidden="true"
+                    >
+                      <Circle className="size-3.5 text-panel-muted-foreground" />
+                    </span>
+                    <label className="min-w-0 flex-1">
+                      <span className="block text-[11px] font-semibold uppercase tracking-[0.14em] text-panel-muted-foreground">
                         {t.origin}
                       </span>
                       <input
@@ -651,16 +656,20 @@ function Index() {
                           setRouteStatus("updating");
                         }}
                         list="place-suggestions"
-                        className="mt-0.5 w-full rounded-full bg-surface px-4 py-2 text-[15px] font-semibold outline-none ring-1 ring-border transition focus:ring-2 focus:ring-leaf"
+                        className="address-input mt-1.5 min-h-12 w-full min-w-0 rounded-full bg-surface px-4 py-2.5 text-base font-semibold text-foreground outline-none"
                       />
                     </label>
-                    <ArrowDownUp className="size-4 text-muted-foreground" />
                   </div>
-                  <div className="my-3 ml-2 h-5 w-px bg-border" />
-                  <div className="flex items-center gap-4">
-                    <MapPin className="size-4 shrink-0 text-primary" />
-                    <label className="flex-1">
-                      <span className="block text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
+                  <div className="my-3.5 border-t border-white/12" aria-hidden="true" />
+                  <div className="flex items-center gap-3">
+                    <span
+                      className="grid size-8 shrink-0 place-items-center rounded-full bg-white/10 ring-1 ring-white/10"
+                      aria-hidden="true"
+                    >
+                      <MapPin className="size-4 text-panel-muted-foreground" />
+                    </span>
+                    <label className="min-w-0 flex-1">
+                      <span className="block text-[11px] font-semibold uppercase tracking-[0.14em] text-panel-muted-foreground">
                         {t.destination}
                       </span>
                       <input
@@ -672,7 +681,7 @@ function Index() {
                           setRouteStatus("updating");
                         }}
                         list="place-suggestions"
-                        className="mt-0.5 w-full rounded-full bg-surface px-4 py-2 text-[15px] font-semibold outline-none ring-1 ring-border transition focus:ring-2 focus:ring-leaf"
+                        className="address-input mt-1.5 min-h-12 w-full min-w-0 rounded-full bg-surface px-4 py-2.5 text-base font-semibold text-foreground outline-none"
                       />
                     </label>
                   </div>
