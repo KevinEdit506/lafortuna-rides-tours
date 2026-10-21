@@ -1,5 +1,5 @@
-import { ExternalLink, LocateFixed, LoaderCircle, Minus, Plus, RefreshCw } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { ExternalLink, LoaderCircle, RefreshCw } from "lucide-react";
+import { useEffect, useState } from "react";
 
 type MiniRouteMapProps = {
   origin: string;
@@ -20,17 +20,11 @@ function mapsAddress(address: string) {
 
 export function MiniRouteMap({ origin, destination, language }: MiniRouteMapProps) {
   const [visibleRoute, setVisibleRoute] = useState({ origin, destination, language });
-  const [zoom, setZoom] = useState<number | null>(null);
   const [loaded, setLoaded] = useState(false);
   const [loadError, setLoadError] = useState(false);
   const [retry, setRetry] = useState(0);
-  const lastZoom = useRef(12);
   const isSpanish = language === "es";
   const complete = Boolean(origin.trim() && destination.trim());
-  const updating =
-    visibleRoute.origin !== origin ||
-    visibleRoute.destination !== destination ||
-    visibleRoute.language !== language;
 
   useEffect(() => {
     if (
@@ -43,8 +37,6 @@ export function MiniRouteMap({ origin, destination, language }: MiniRouteMapProp
     const timeout = window.setTimeout(() => {
       setLoaded(false);
       setLoadError(false);
-      setZoom(null);
-      lastZoom.current = 12;
       setVisibleRoute({ origin, destination, language });
     }, 650);
     return () => window.clearTimeout(timeout);
@@ -57,7 +49,6 @@ export function MiniRouteMap({ origin, destination, language }: MiniRouteMapProp
     hl: visibleRoute.language,
     dirflg: "d",
   });
-  if (zoom !== null) parameters.set("z", String(zoom));
   const mapSource = `https://maps.google.com/maps?${parameters.toString()}`;
   const fullMapSource = `https://www.google.com/maps/dir/?${new URLSearchParams({
     api: "1",
@@ -73,20 +64,9 @@ export function MiniRouteMap({ origin, destination, language }: MiniRouteMapProp
     return () => window.clearTimeout(timeout);
   }, [loaded, complete, mapSource, retry]);
 
-  const changeZoom = (delta: number) => {
-    const nextZoom = Math.max(5, Math.min(19, (zoom ?? lastZoom.current) + delta));
-    if (nextZoom === zoom) return;
+  const retryMap = () => {
     setLoaded(false);
     setLoadError(false);
-    lastZoom.current = nextZoom;
-    setZoom(nextZoom);
-  };
-
-  const centerRoute = () => {
-    setLoaded(false);
-    setLoadError(false);
-    setZoom(null);
-    lastZoom.current = 12;
     setRetry((current) => current + 1);
   };
 
@@ -151,7 +131,7 @@ export function MiniRouteMap({ origin, destination, language }: MiniRouteMapProp
                 </p>
                 <button
                   type="button"
-                  onClick={centerRoute}
+                  onClick={retryMap}
                   className="flex items-center gap-2 rounded-full bg-jungle px-4 py-3 font-semibold text-primary-foreground"
                 >
                   <RefreshCw className="size-4" />
@@ -167,54 +147,6 @@ export function MiniRouteMap({ origin, destination, language }: MiniRouteMapProp
           </div>
         )}
       </div>
-      <div className="mt-3 flex items-center justify-between gap-2">
-        <button
-          type="button"
-          onClick={centerRoute}
-          disabled={!complete || updating}
-          className="flex min-h-11 items-center gap-2 rounded-full bg-surface px-3 py-2 text-xs font-semibold text-foreground disabled:opacity-60"
-          aria-label={isSpanish ? "Centrar toda la ruta" : "Center the full route"}
-        >
-          <LocateFixed className="size-4" />
-          {isSpanish ? "Centrar" : "Center"}
-        </button>
-        <div
-          className="flex gap-2"
-          role="group"
-          aria-label={isSpanish ? "Zoom del mapa" : "Map zoom"}
-        >
-          <button
-            type="button"
-            onClick={() => changeZoom(-1)}
-            disabled={!complete || !loaded || updating || zoom === 5}
-            aria-label={isSpanish ? "Alejar mapa" : "Zoom out"}
-            className="grid size-11 place-items-center rounded-full bg-surface text-foreground disabled:opacity-60"
-          >
-            <Minus className="size-4" />
-          </button>
-          <button
-            type="button"
-            onClick={() => changeZoom(1)}
-            disabled={!complete || !loaded || updating || zoom === 19}
-            aria-label={isSpanish ? "Acercar mapa" : "Zoom in"}
-            className="grid size-11 place-items-center rounded-full bg-surface text-foreground disabled:opacity-60"
-          >
-            <Plus className="size-4" />
-          </button>
-        </div>
-      </div>
-      <p
-        className="mt-2 text-[11px] leading-relaxed text-panel-muted-foreground"
-        aria-live="polite"
-      >
-        {updating
-          ? isSpanish
-            ? "Actualizando el mapa con tu nueva ruta…"
-            : "Updating the map with your new route…"
-          : isSpanish
-            ? "Mapa interactivo: desliza para explorar las calles y toca los controles para acercarte."
-            : "Interactive map: drag to explore the streets and tap the controls to zoom."}
-      </p>
     </div>
   );
 }

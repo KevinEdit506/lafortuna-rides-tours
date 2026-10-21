@@ -614,21 +614,6 @@ function Index() {
                 className="dark-green-panel mt-3 overflow-hidden rounded-[28px] p-4 text-white ring-1 ring-white/15"
               >
                 <MiniRouteMap origin={origin} destination={destination} language={language} />
-                <div className="mt-3 flex items-center justify-between gap-3 text-xs">
-                  <div className="min-w-0">
-                    <p className="text-[10px] uppercase tracking-[0.16em] text-panel-muted-foreground">
-                      A · {t.pickupShort}
-                    </p>
-                    <p className="truncate font-semibold">{origin}</p>
-                  </div>
-                  <ArrowDownUp className="size-4 shrink-0 text-leaf" />
-                  <div className="min-w-0 text-right">
-                    <p className="text-[10px] uppercase tracking-[0.16em] text-panel-muted-foreground">
-                      B · {t.destinationShort}
-                    </p>
-                    <p className="truncate font-semibold">{destination}</p>
-                  </div>
-                </div>
                 <div className="mt-3 flex items-center justify-between border-t border-mist/15 pt-3 text-[11px] text-panel-muted-foreground">
                   <span>
                     {t.distance}: {distanceKm.toFixed(1)} km
