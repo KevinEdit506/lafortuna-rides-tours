@@ -727,20 +727,20 @@ function Index() {
                 </div>
                 <div className="mt-3 flex items-center justify-between gap-3 text-xs">
                   <div className="min-w-0">
-                    <p className="text-[10px] uppercase tracking-[0.16em] text-mist/60">
+                    <p className="text-[10px] uppercase tracking-[0.16em] text-panel-muted-foreground">
                       {t.pickupShort}
                     </p>
                     <p className="truncate font-semibold">{origin}</p>
                   </div>
                   <ArrowDownUp className="size-4 shrink-0 text-leaf" />
                   <div className="min-w-0 text-right">
-                    <p className="text-[10px] uppercase tracking-[0.16em] text-mist/60">
+                    <p className="text-[10px] uppercase tracking-[0.16em] text-panel-muted-foreground">
                       {t.destinationShort}
                     </p>
                     <p className="truncate font-semibold">{destination}</p>
                   </div>
                 </div>
-                <div className="mt-3 flex items-center justify-between border-t border-mist/15 pt-3 text-[11px] text-mist/70">
+                <div className="mt-3 flex items-center justify-between border-t border-mist/15 pt-3 text-[11px] text-panel-muted-foreground">
                   <span>
                     {t.distance}: {distanceKm.toFixed(1)} km
                   </span>
@@ -748,7 +748,7 @@ function Index() {
                     {t.duration}: {durationMinutes} min
                   </span>
                 </div>
-                <p className="mt-2 text-[10px] text-mist/50">
+                <p className="mt-2 text-[10px] text-panel-muted-foreground">
                   {mapsStatus === "ready"
                     ? "Google Maps · ruta en automóvil"
                     : mapsStatus === "loading"
@@ -818,7 +818,7 @@ function Index() {
                     <button
                       key={value}
                       onClick={() => setRideType(value)}
-                      className={`rounded-full py-2.5 text-[13px] font-bold ${rideType === value ? "bg-leaf text-accent-foreground shadow-sm" : "text-muted-foreground"}`}
+                      className={`rounded-full py-2.5 text-[13px] font-bold ${rideType === value ? "bg-leaf text-leaf-foreground shadow-sm" : "text-muted-foreground"}`}
                     >
                       {t[value]}
                     </button>
@@ -883,7 +883,7 @@ function Index() {
                     </div>
                     <button
                       onClick={scheduleTrip}
-                      className="mt-2 w-full rounded-full bg-leaf py-2 text-xs font-bold text-accent-foreground transition-transform active:scale-[0.98]"
+                      className="mt-2 w-full rounded-full bg-leaf py-2 text-xs font-bold text-leaf-foreground transition-transform active:scale-[0.98]"
                     >
                       {t.agenda}
                     </button>
@@ -983,7 +983,7 @@ function Index() {
                         key={method}
                         disabled={confirmed}
                         onClick={() => setPaymentMethod(method)}
-                        className={`rounded-xl py-2.5 text-sm font-bold transition-colors ${paymentMethod === method ? "bg-leaf text-accent-foreground" : "text-muted-foreground"} ${confirmed ? "cursor-not-allowed opacity-60" : ""}`}
+                        className={`rounded-xl py-2.5 text-sm font-bold transition-colors ${paymentMethod === method ? "bg-leaf text-leaf-foreground" : "text-muted-foreground"} ${confirmed ? "cursor-not-allowed opacity-60" : ""}`}
                       >
                         {method === "card" ? t.card : t.cash}
                       </button>
@@ -1031,29 +1031,29 @@ function Index() {
             {mode === "transfers" && (
               <section className="dark-green-panel rise mt-4 overflow-hidden rounded-[28px] p-5 text-white ring-1 ring-white/15 lg:mt-8 [animation-delay:260ms]">
                 <div className="flex items-center justify-between">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-mist/70">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-panel-muted-foreground">
                     {t.estimate}
                   </p>
                   <ShieldCheck className="size-5 text-leaf" />
                 </div>
                 <div className="mt-2 flex items-baseline gap-2">
                   <p className="font-display text-[38px] leading-none">${fare.total}</p>
-                  <p className="text-xs text-mist/60">USD</p>
+                  <p className="text-xs text-panel-muted-foreground">USD</p>
                 </div>
-                <p className="mt-1 text-sm font-semibold text-mist/85">
+                <p className="mt-1 text-sm font-semibold text-panel-muted-foreground">
                   {formatColones(fare.total)} {exchangeRate ? "CRC" : ""}
                 </p>
-                <p className="mt-2 text-[10px] text-mist/55">
+                <p className="mt-2 text-[10px] text-panel-muted-foreground">
                   {rideType === "private" ? t.privateFixed : t.perPassenger}
                 </p>
-                <p className="mt-1 text-[10px] text-mist/55">
+                <p className="mt-1 text-[10px] text-panel-muted-foreground">
                   {exchangeRate
                     ? `${t.exchangeSource}: ₡${exchangeRate.toLocaleString("es-CR")} / USD`
                     : t.exchangeLoading}
                 </p>
                 <button
                   onClick={() => setFareExpanded(!fareExpanded)}
-                  className="mt-4 flex w-full items-center justify-between border-t border-mist/15 pt-4 text-xs font-semibold text-mist/80"
+                  className="mt-4 flex w-full items-center justify-between border-t border-mist/15 pt-4 text-xs font-semibold text-panel-muted-foreground"
                 >
                   <span>{t.details}</span>
                   <ChevronDown
@@ -1068,7 +1068,7 @@ function Index() {
                           key={`${item.destination}-${index}`}
                           className="flex justify-between gap-3"
                         >
-                          <span className="truncate text-mist/75">
+                          <span className="truncate text-panel-muted-foreground">
                             Pasajero {index + 1} · {item.destination} · {item.distance.toFixed(1)}{" "}
                             km · {item.duration} min
                           </span>
@@ -1076,27 +1076,27 @@ function Index() {
                         </div>
                       ))}
                     <div className="flex justify-between">
-                      <span className="text-mist/75">{t.baseFare}</span>
+                      <span className="text-panel-muted-foreground">{t.baseFare}</span>
                       <strong>${fare.base.toFixed(2)}</strong>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-mist/75">
+                      <span className="text-panel-muted-foreground">
                         {t.timeFare} · {durationMinutes} min
                       </span>
                       <strong>${fare.timeCharge.toFixed(2)}</strong>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-mist/75">
+                      <span className="text-panel-muted-foreground">
                         {t.distanceFare} · {distanceKm.toFixed(1)} km
                       </span>
                       <strong>${fare.distanceCharge.toFixed(2)}</strong>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-mist/75">{t.dynamicFare}</span>
+                      <span className="text-panel-muted-foreground">{t.dynamicFare}</span>
                       <strong>{fare.dynamicMultiplier.toFixed(1)}x</strong>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-mist/75">{t.tolls}</span>
+                      <span className="text-panel-muted-foreground">{t.tolls}</span>
                       <strong>${fare.tollsAndFees.toFixed(2)}</strong>
                     </div>
                     <div className="flex justify-between border-t border-mist/15 pt-2">
@@ -1105,13 +1105,13 @@ function Index() {
                     </div>
                   </div>
                 )}
-                <p className="mt-3 flex items-center gap-2 rounded-xl bg-black/20 px-3 py-2 text-xs italic text-mist/85 ring-1 ring-white/10">
+                <p className="mt-3 flex items-center gap-2 rounded-xl bg-black/20 px-3 py-2 text-xs italic text-panel-muted-foreground ring-1 ring-white/10">
                   <ShieldCheck className="size-4 shrink-0 text-leaf" />
                   {t.note}
                 </p>
                 <button
                   onClick={() => openWhatsApp()}
-                  className="mt-4 w-full rounded-2xl bg-leaf py-3.5 text-sm font-bold text-accent-foreground transition-transform active:scale-[0.98]"
+                  className="mt-4 w-full rounded-2xl bg-leaf py-3.5 text-sm font-bold text-leaf-foreground transition-transform active:scale-[0.98]"
                 >
                   {confirmed
                     ? language === "es"
@@ -1130,7 +1130,7 @@ function Index() {
             >
               <div className="mb-4">
                 <div>
-                  <div className="flex items-center gap-2 text-leaf">
+                  <div className="flex items-center gap-2 text-leaf-ink">
                     <span className="size-1.5 rounded-full bg-leaf" />
                     <p className="text-[11px] font-bold uppercase tracking-[0.2em]">{t.curation}</p>
                   </div>
@@ -1239,7 +1239,7 @@ function Index() {
                     />
                     <div className="flex min-h-0 flex-1 flex-col px-2 pb-2 pt-4">
                       <h3 className="font-display text-[17px] leading-snug">{tour.title}</h3>
-                      <p className="mt-1 text-[10px] font-bold uppercase tracking-[0.12em] text-leaf">
+                      <p className="mt-1 text-[10px] font-bold uppercase tracking-[0.12em] text-leaf-ink">
                         {tour.category}
                       </p>
                       <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
@@ -1247,14 +1247,14 @@ function Index() {
                       </p>
                       <div className="mt-2 flex items-center justify-between text-xs text-muted-foreground">
                         <span>{tour.meta}</span>
-                        <span className="flex items-center gap-1 font-bold text-leaf">
+                        <span className="flex items-center gap-1 font-bold text-leaf-ink">
                           <Star className="size-3 fill-current" />
                           {tour.rating}
                         </span>
                       </div>
                       <button
                         onClick={() => openWhatsApp(tour.title)}
-                        className="mt-auto w-full rounded-xl bg-leaf py-2.5 text-xs font-bold text-accent-foreground shadow-[0_3px_0_color-mix(in_oklch,var(--color-jungle)_35%,transparent)]"
+                        className="mt-auto w-full rounded-xl bg-leaf py-2.5 text-xs font-bold text-leaf-foreground shadow-[0_3px_0_color-mix(in_oklch,var(--color-jungle)_35%,transparent)]"
                       >
                         {t.reserveTour}
                       </button>
@@ -1293,10 +1293,10 @@ function Index() {
             <button
               key={label}
               onClick={action}
-              className={`flex min-w-12 flex-col items-center gap-1 text-[10px] font-bold ${active ? "text-primary-foreground" : "text-mist/45"}`}
+              className={`flex min-w-12 flex-col items-center gap-1 text-[10px] font-bold ${active ? "text-primary-foreground" : "text-panel-muted-foreground"}`}
             >
               <span
-                className={`grid size-8 place-items-center rounded-xl ${active ? "bg-leaf" : "bg-primary-foreground/5"}`}
+                className={`grid size-8 place-items-center rounded-xl ${active ? "bg-leaf text-leaf-foreground" : "bg-primary-foreground/5"}`}
               >
                 <Icon className="size-4" />
               </span>

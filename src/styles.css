@@ -63,6 +63,9 @@
   --color-sidebar-ring: var(--sidebar-ring);
   --color-jungle: var(--jungle);
   --color-leaf: var(--leaf);
+  --color-leaf-ink: var(--leaf-ink);
+  --color-leaf-foreground: var(--leaf-foreground);
+  --color-panel-muted-foreground: var(--panel-muted-foreground);
   --color-surface: var(--surface);
   --color-mist: var(--mist);
 }
@@ -80,7 +83,7 @@
   --secondary: oklch(0.72 0.014 160);
   --secondary-foreground: oklch(0.18 0.02 155);
   --muted: oklch(0.7 0.03 160);
-  --muted-foreground: oklch(0.48 0.025 160);
+  --muted-foreground: oklch(0.34 0.022 160);
   --accent: oklch(0.52 0.09 165);
   --accent-foreground: oklch(0.86 0.028 160);
   --destructive: oklch(0.577 0.245 27.325);
@@ -90,6 +93,9 @@
   --ring: oklch(0.52 0.09 165);
   --jungle: oklch(0.24 0.045 162);
   --leaf: oklch(0.59 0.08 166);
+  --leaf-ink: oklch(0.36 0.065 166);
+  --leaf-foreground: oklch(0.14 0.008 162);
+  --panel-muted-foreground: oklch(0.82 0.014 162);
   --surface: oklch(0.84 0.03 160);
   --mist: oklch(0.72 0.035 160);
   --dark-panel-start: oklch(0.17 0.006 162);
@@ -227,6 +233,19 @@
     inset 0 -1px 0 oklch(0 0 0 / 22%),
     0 2px 0 oklch(0 0 0 / 18%),
     0 10px 22px var(--dark-panel-shadow);
+}
+
+.dark-green-panel .text-leaf {
+  color: oklch(0.74 0.075 166);
+}
+
+.control-relief .text-leaf {
+  color: var(--leaf-ink);
+}
+
+input::placeholder {
+  color: var(--muted-foreground);
+  opacity: 1;
 }
 
 .control-relief {
