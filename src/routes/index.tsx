@@ -589,7 +589,7 @@ function Index() {
           className={`lg:gap-16 ${mode === "transfers" ? "lg:grid lg:grid-cols-[minmax(0,0.9fr)_minmax(390px,0.72fr)]" : "lg:block"}`}
         >
           <div>
-            <section className="rise mt-8 rounded-[28px] bg-gradient-to-br from-[#101714] via-[#1b4033] to-[#2d6952] px-5 py-5 text-white shadow-[0_14px_32px_rgba(8,14,11,0.34)] ring-1 ring-white/15 [animation-delay:80ms]">
+            <section className="dark-green-panel rise mt-8 rounded-[28px] px-5 py-5 text-white ring-1 ring-white/15 [animation-delay:80ms]">
               <div className="flex items-center gap-2 text-white">
                 <span className="h-px w-4 bg-white/55" />
                 <p className="text-[11px] font-semibold uppercase tracking-[0.22em]">{t.eyebrow}</p>
@@ -602,14 +602,14 @@ function Index() {
               </p>
             </section>
 
-            <div className="rise mt-7 rounded-3xl bg-gradient-to-r from-[#163128] via-[#275a48] to-[#438365] px-5 py-3.5 text-center shadow-[0_8px_18px_rgba(16,38,29,0.28)] ring-1 ring-white/15 [animation-delay:140ms]">
+            <div className="dark-green-panel rise mt-7 rounded-3xl px-5 py-3.5 text-center ring-1 ring-white/15 [animation-delay:140ms]">
               <p className="text-sm font-bold tracking-wide text-white">{t.mobilityTitle}</p>
             </div>
 
             {mode === "transfers" && (
               <section
                 id="route-preview"
-                className="mt-3 overflow-hidden rounded-[28px] bg-gradient-to-r from-[#163128] via-[#275a48] to-[#438365] p-4 text-white shadow-lg shadow-primary/15 ring-1 ring-white/15"
+                className="dark-green-panel mt-3 overflow-hidden rounded-[28px] p-4 text-white ring-1 ring-white/15"
               >
                 <div
                   className="relative h-44 overflow-hidden rounded-[22px] bg-[#e8eee8] ring-1 ring-white/10"
@@ -1029,7 +1029,7 @@ function Index() {
 
           <div>
             {mode === "transfers" && (
-              <section className="rise mt-4 overflow-hidden rounded-[28px] bg-gradient-to-r from-[#163128] via-[#275a48] to-[#438365] p-5 text-white shadow-2xl shadow-primary/25 ring-1 ring-white/15 lg:mt-8 [animation-delay:260ms]">
+              <section className="dark-green-panel rise mt-4 overflow-hidden rounded-[28px] p-5 text-white ring-1 ring-white/15 lg:mt-8 [animation-delay:260ms]">
                 <div className="flex items-center justify-between">
                   <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-mist/70">
                     {t.estimate}
@@ -1061,7 +1061,7 @@ function Index() {
                   />
                 </button>
                 {fareExpanded && (
-                  <div className="mt-3 space-y-2 rounded-2xl bg-primary-foreground/5 p-3 text-[13px] ring-1 ring-primary-foreground/10">
+                  <div className="mt-3 space-y-2 rounded-2xl bg-white/5 p-3 text-[13px] ring-1 ring-white/10">
                     {fare.perPassenger.length > 0 &&
                       fare.perPassenger.map((item, index) => (
                         <div
