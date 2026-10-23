@@ -227,6 +227,9 @@
   background-size: cover;
   background-attachment: fixed;
   filter: saturate(0.82) contrast(0.92);
+  transform: translate3d(0, var(--arenal-parallax-y, 0px), 0) scale(1.06);
+  transform-origin: center;
+  will-change: transform;
 }
 
 .app-shell::after {
@@ -239,6 +242,13 @@
       transparent 52%,
       oklch(0.08 0.018 160 / 36%)
     );
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .app-shell::before {
+    transform: none;
+    will-change: auto;
+  }
 }
 
 @keyframes rise {

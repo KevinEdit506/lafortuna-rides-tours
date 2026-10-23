@@ -264,7 +264,37 @@ function Index() {
   const mapsScriptLoaded = useRef(false);
   const originInputRef = useRef<HTMLInputElement>(null);
   const destinationInputRef = useRef<HTMLInputElement>(null);
+  const shellRef = useRef<HTMLElement>(null);
   const t = copy[language];
+
+  useEffect(() => {
+    const shell = shellRef.current;
+    if (!shell) return;
+
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+    let frame = 0;
+    const updateParallax = () => {
+      const offset = reducedMotion.matches ? 0 : Math.min(34, window.scrollY * 0.035);
+      shell.style.setProperty("--arenal-parallax-y", `${-offset}px`);
+    };
+    const handleScroll = () => {
+      if (frame) return;
+      frame = window.requestAnimationFrame(() => {
+        frame = 0;
+        updateParallax();
+      });
+    };
+
+    updateParallax();
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    reducedMotion.addEventListener?.("change", updateParallax);
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      reducedMotion.removeEventListener?.("change", updateParallax);
+      if (frame) window.cancelAnimationFrame(frame);
+    };
+  }, []);
+
   useEffect(() => {
     const key = import.meta.env["VITE_GOOGLE_MAPS_API_KEY"];
     if (!key) {
@@ -556,9 +586,11 @@ function Index() {
   return (
     <main
       className="app-shell min-h-screen text-foreground selection:bg-accent selection:text-accent-foreground"
+      ref={shellRef}
       style={
         {
           "--arenal-background": `url("${import.meta.env.BASE_URL}category-arenal.jpg")`,
+          "--arenal-parallax-y": "0px",
         } as CSSProperties
       }
     >
