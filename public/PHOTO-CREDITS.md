@@ -11,6 +11,8 @@ Las imágenes de categorías del sitio son fotografías reales descargadas y opt
 
 Las imágenes fueron recortadas u optimizadas para su uso como miniaturas de interfaz. No se presentan como imágenes generadas por IA.
 
+El fondo fijo actual del Volcán Arenal utiliza la imagen proporcionada por el propietario del proyecto (`public/arenal-background-current.jpg`).
+
 ## Licencias
 
 Las licencias Creative Commons permiten reutilizar las obras conforme a sus condiciones. Para las imágenes con **BY**, se conserva la atribución y el enlace a la licencia. Para las imágenes con **SA**, cualquier adaptación debe mantenerse bajo la misma licencia o una compatible.

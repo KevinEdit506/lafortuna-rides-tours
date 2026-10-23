@@ -204,8 +204,8 @@
   }
 }
 
-/* Fondo fotográfico: Volcán Arenal desde La Fortuna — Matthias Prinke, CC BY-SA 2.5.
- * Fuente y atribución completa: public/PHOTO-CREDITS.md. */
+/* Fondo fotográfico actual del Volcán Arenal proporcionado por el propietario del proyecto.
+ * La imagen de fondo y sus créditos operativos se registran en public/PHOTO-CREDITS.md. */
 .app-shell {
   position: relative;
   isolation: isolate;

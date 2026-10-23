@@ -589,7 +589,7 @@ function Index() {
       ref={shellRef}
       style={
         {
-          "--arenal-background": `url("${import.meta.env.BASE_URL}category-arenal.jpg")`,
+          "--arenal-background": `url("${import.meta.env.BASE_URL}arenal-background-current.jpg")`,
           "--arenal-parallax-y": "0px",
         } as CSSProperties
       }
@@ -605,20 +605,20 @@ function Index() {
               <span className="font-display text-base">Vía</span>
             </div>
             <div className="leading-tight">
-              <p className="text-[9px] font-semibold uppercase tracking-[0.25em] text-muted-foreground">
+              <p className="text-[9px] font-semibold uppercase tracking-[0.25em] text-white/80">
                 {t.place}
               </p>
             </div>
           </div>
           <div
-            className="flex rounded-full bg-mist/25 p-1 ring-1 ring-border"
+            className="flex rounded-full bg-jungle/85 p-1 ring-1 ring-white/20"
             aria-label="Language"
           >
             {(["es", "en"] as const).map((lang) => (
               <button
                 key={lang}
                 onClick={() => setLanguage(lang)}
-                className={`rounded-full px-3 py-1 text-[11px] font-bold uppercase transition-colors ${language === lang ? "bg-jungle text-primary-foreground" : "text-muted-foreground"}`}
+                className={`rounded-full px-3 py-1 text-[11px] font-bold uppercase transition-colors ${language === lang ? "bg-leaf text-leaf-foreground" : "text-white/75"}`}
               >
                 {lang}
               </button>
@@ -1044,18 +1044,18 @@ function Index() {
 
             <section
               id="tours"
-              className="mt-10 scroll-mt-6 rounded-[30px] bg-leaf/10 p-4 ring-1 ring-leaf/20"
+              className="dark-green-panel mt-10 scroll-mt-6 rounded-[30px] p-4 text-white ring-1 ring-white/15"
             >
               <div className="mb-4">
                 <div>
-                  <div className="flex items-center gap-2 text-leaf-ink">
+                  <div className="flex items-center gap-2 text-leaf">
                     <span className="size-1.5 rounded-full bg-leaf" />
                     <p className="text-[11px] font-bold uppercase tracking-[0.2em]">{t.curation}</p>
                   </div>
-                  <h2 className="mt-1 font-display text-[22px]">{t.escapes}</h2>
+                  <h2 className="mt-1 font-display text-[22px] text-white">{t.escapes}</h2>
                 </div>
               </div>
-              <p className="mb-3 text-sm leading-relaxed text-muted-foreground">
+              <p className="mb-3 text-sm leading-relaxed text-white/80">
                 {language === "es"
                   ? "Descubre experiencias locales y escapadas por Costa Rica: playas, parques nacionales, ríos y bosque tropical."
                   : "Discover local experiences and Costa Rica escapes: beaches, national parks, rivers, and tropical forest."}
@@ -1145,7 +1145,7 @@ function Index() {
                 ].map((tour) => (
                   <article
                     key={tour.title}
-                    className="flex h-[500px] w-full flex-col rounded-[26px] bg-gradient-to-br from-surface via-surface to-leaf/10 p-3 shadow-xl shadow-primary/10 ring-1 ring-border lg:h-[510px]"
+                    className="experience-card flex h-[500px] w-full flex-col rounded-[26px] bg-gradient-to-br from-surface via-surface to-leaf/10 p-3 text-foreground shadow-xl shadow-primary/10 ring-1 ring-border lg:h-[510px]"
                   >
                     <img
                       src={tour.image}
@@ -1156,7 +1156,9 @@ function Index() {
                       className="h-44 w-full rounded-[19px] object-cover"
                     />
                     <div className="flex min-h-0 flex-1 flex-col px-2 pb-2 pt-4">
-                      <h3 className="font-display text-[17px] leading-snug">{tour.title}</h3>
+                      <h3 className="font-display text-[17px] leading-snug text-foreground">
+                        {tour.title}
+                      </h3>
                       <p className="mt-1 text-[10px] font-bold uppercase tracking-[0.12em] text-leaf-ink">
                         {tour.category}
                       </p>
@@ -1165,7 +1167,7 @@ function Index() {
                       </p>
                       <div className="mt-2 flex items-center justify-between text-xs text-muted-foreground">
                         <span>{tour.meta}</span>
-                        <span className="flex items-center gap-1 font-bold text-leaf-ink">
+                        <span className="flex items-center gap-1 rounded-md bg-surface px-1.5 py-0.5 font-bold text-foreground">
                           <Star className="size-3 fill-current" />
                           {tour.rating}
                         </span>
