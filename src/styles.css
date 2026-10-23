@@ -225,7 +225,6 @@
   background-image: var(--arenal-background);
   background-position: center;
   background-size: cover;
-  background-attachment: fixed;
   filter: saturate(0.82) contrast(0.92);
   transform: translate3d(0, var(--arenal-parallax-y, 0px), 0) scale(1.06);
   transform-origin: center;
