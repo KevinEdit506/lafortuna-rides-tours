@@ -19,7 +19,7 @@ import {
   UserRound,
   UsersRound,
 } from "lucide-react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 
 import misticoImage from "../assets/mistico-bridges.jpg";
 import riverImage from "../assets/penas-blancas.jpg";
@@ -554,7 +554,14 @@ function Index() {
   };
 
   return (
-    <main className="min-h-screen bg-background text-foreground selection:bg-accent selection:text-accent-foreground">
+    <main
+      className="app-shell min-h-screen text-foreground selection:bg-accent selection:text-accent-foreground"
+      style={
+        {
+          "--arenal-background": `url("${import.meta.env.BASE_URL}category-arenal.jpg")`,
+        } as CSSProperties
+      }
+    >
       <div className="pointer-events-none fixed inset-0 bg-[radial-gradient(circle_at_0%_0%,color-mix(in_oklab,var(--leaf)_10%,transparent)_0%,transparent_48%)]" />
       <div className="relative mx-auto min-h-screen w-full max-w-[430px] px-6 pb-32 pt-6 lg:max-w-6xl lg:px-10">
         <header className="rise flex items-center justify-between">

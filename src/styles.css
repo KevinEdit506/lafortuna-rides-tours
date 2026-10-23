@@ -204,6 +204,43 @@
   }
 }
 
+/* Fondo fotográfico: Volcán Arenal desde La Fortuna — Matthias Prinke, CC BY-SA 2.5.
+ * Fuente y atribución completa: public/PHOTO-CREDITS.md. */
+.app-shell {
+  position: relative;
+  isolation: isolate;
+  background: transparent;
+}
+
+.app-shell::before,
+.app-shell::after {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  content: "";
+}
+
+.app-shell::before {
+  z-index: -2;
+  background-image: var(--arenal-background);
+  background-position: center;
+  background-size: cover;
+  background-attachment: fixed;
+  filter: saturate(0.82) contrast(0.92);
+}
+
+.app-shell::after {
+  z-index: -1;
+  background:
+    linear-gradient(180deg, oklch(0.08 0.015 160 / 56%), oklch(0.12 0.02 160 / 72%)),
+    linear-gradient(
+      90deg,
+      oklch(0.08 0.018 160 / 38%),
+      transparent 52%,
+      oklch(0.08 0.018 160 / 36%)
+    );
+}
+
 @keyframes rise {
   from {
     opacity: 0;
