@@ -148,6 +148,11 @@ const copy = {
     exchangeLoading: "Consultando tipo de cambio BCCR…",
     exchangeSource: "Tipo de cambio de referencia BCCR",
     hours: "horas",
+    reviewsEyebrow: "Experiencias compartidas",
+    reviewsTitle: "Reseñas recientes",
+    reviewsIntro: "Historias de viajeros que descubrieron La Fortuna con atención local.",
+    reviewDisclosure:
+      "Contenido de muestra para el diseño · reemplazar por reseñas autorizadas antes de publicar.",
     home: "Inicio",
     routes: "Viajes",
     chat: "Ayuda",
@@ -211,6 +216,11 @@ const copy = {
     exchangeLoading: "Checking BCCR exchange rate…",
     exchangeSource: "BCCR reference exchange rate",
     hours: "hours",
+    reviewsEyebrow: "Shared experiences",
+    reviewsTitle: "Recent reviews",
+    reviewsIntro: "Stories from travelers who discovered La Fortuna with local care.",
+    reviewDisclosure:
+      "Sample content for layout · replace with authorized reviews before publishing.",
     home: "Home",
     routes: "Trips",
     chat: "Help",
@@ -1182,6 +1192,71 @@ function Index() {
                   </article>
                 ))}
               </div>
+            </section>
+
+            <section
+              id="reviews"
+              className="dark-green-panel rise mt-5 rounded-[30px] p-4 text-white ring-1 ring-white/15 [animation-delay:320ms]"
+            >
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <div className="flex items-center gap-2 text-leaf">
+                    <span className="size-1.5 rounded-full bg-leaf" />
+                    <p className="text-[11px] font-bold uppercase tracking-[0.2em]">
+                      {t.reviewsEyebrow}
+                    </p>
+                  </div>
+                  <h2 className="mt-1 font-display text-[22px] text-white">{t.reviewsTitle}</h2>
+                </div>
+                <Star className="mt-1 size-5 shrink-0 fill-leaf text-leaf" aria-hidden="true" />
+              </div>
+              <p className="mt-2 text-sm leading-relaxed text-white/80">{t.reviewsIntro}</p>
+
+              <div className="mt-4 grid gap-3 lg:grid-cols-3">
+                {[
+                  {
+                    quote:
+                      language === "es"
+                        ? "El traslado fue puntual y muy tranquilo. La comunicación antes del viaje nos dio mucha confianza."
+                        : "The transfer was punctual and relaxed. The communication before the ride gave us real peace of mind.",
+                    name: language === "es" ? "Cliente de La Fortuna" : "La Fortuna traveler",
+                    detail: language === "es" ? "Traslado local" : "Local transfer",
+                  },
+                  {
+                    quote:
+                      language === "es"
+                        ? "Nos ayudaron a organizar una visita al Arenal sin complicaciones y con información clara."
+                        : "They helped us plan an Arenal visit without complications and with clear information.",
+                    name: language === "es" ? "Visitante internacional" : "International visitor",
+                    detail: language === "es" ? "Experiencia Arenal" : "Arenal experience",
+                  },
+                  {
+                    quote:
+                      language === "es"
+                        ? "La reserva por WhatsApp fue sencilla y el servicio se sintió cercano desde el primer mensaje."
+                        : "Booking through WhatsApp was simple, and the service felt personal from the first message.",
+                    name: language === "es" ? "Familia viajera" : "Traveling family",
+                    detail: language === "es" ? "Tour y traslado" : "Tour and transfer",
+                  },
+                ].map((review) => (
+                  <article
+                    key={review.name}
+                    className="flex min-h-[190px] flex-col rounded-[22px] bg-black/25 p-4 ring-1 ring-white/10"
+                  >
+                    <div className="flex items-center gap-1 text-leaf" aria-label="5 estrellas">
+                      {Array.from({ length: 5 }).map((_, index) => (
+                        <Star key={index} className="size-3.5 fill-current" aria-hidden="true" />
+                      ))}
+                    </div>
+                    <p className="mt-3 text-sm leading-relaxed text-white/90">“{review.quote}”</p>
+                    <div className="mt-auto pt-4">
+                      <p className="text-xs font-bold text-white">{review.name}</p>
+                      <p className="mt-1 text-[11px] text-white/65">{review.detail}</p>
+                    </div>
+                  </article>
+                ))}
+              </div>
+              <p className="mt-4 text-[11px] leading-relaxed text-white/60">{t.reviewDisclosure}</p>
             </section>
           </div>
         </div>
