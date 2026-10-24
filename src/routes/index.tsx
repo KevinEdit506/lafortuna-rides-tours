@@ -267,7 +267,7 @@ function Index() {
   const [passengerDurations, setPassengerDurations] = useState<number[]>([18, 18]);
   const [mapsStatus, setMapsStatus] = useState<"loading" | "ready" | "fallback">("loading");
   const [routeStatus, setRouteStatus] = useState<"idle" | "updating" | "updated">("idle");
-  const dynamicMultiplier = 1;
+  const dynamicMultiplier = 2;
   const tollsAndFees = 0;
   const mapsScriptLoaded = useRef(false);
   const originInputRef = useRef<HTMLInputElement>(null);
