@@ -97,7 +97,6 @@ const copy = {
     subtitle: "Traslados puntuales y experiencias seleccionadas en el corazón del Arenal.",
     transfers: "Traslados",
     tours: "Tours",
-    mobilityTitle: "Transportes y tour",
     origin: "Origen",
     destination: "Destino",
     private: "Privado",
@@ -165,7 +164,6 @@ const copy = {
     subtitle: "Punctual transfers and curated experiences in the heart of Arenal.",
     transfers: "Transfers",
     tours: "Tours",
-    mobilityTitle: "Transfers & tours",
     origin: "Pickup",
     destination: "Destination",
     private: "Private",
@@ -653,9 +651,101 @@ function Index() {
               </p>
             </section>
 
-            <div className="dark-green-panel rise mt-7 rounded-3xl px-5 py-3.5 text-center ring-1 ring-white/15 [animation-delay:140ms]">
-              <p className="text-sm font-bold tracking-wide text-white">{t.mobilityTitle}</p>
-            </div>
+            {mode === "transfers" && (
+              <section className="dark-green-panel rise mt-3 overflow-hidden rounded-[28px] p-5 text-white ring-1 ring-white/15 [animation-delay:140ms]">
+                <div className="flex items-center justify-between">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-panel-muted-foreground">
+                    {t.estimate}
+                  </p>
+                  <ShieldCheck className="size-5 text-leaf" />
+                </div>
+                <div className="mt-2 flex items-baseline gap-2">
+                  <p className="font-display text-[38px] leading-none">${fare.total}</p>
+                  <p className="text-xs text-panel-muted-foreground">USD</p>
+                </div>
+                <p className="mt-1 text-sm font-semibold text-panel-muted-foreground">
+                  {formatColones(fare.total)} {exchangeRate ? "CRC" : ""}
+                </p>
+                <p className="mt-2 text-[10px] text-panel-muted-foreground">
+                  {rideType === "private" ? t.privateFixed : t.perPassenger}
+                </p>
+                <p className="mt-1 text-[10px] text-panel-muted-foreground">
+                  {exchangeRate
+                    ? `${t.exchangeSource}: ₡${exchangeRate.toLocaleString("es-CR")} / USD`
+                    : t.exchangeLoading}
+                </p>
+                <button
+                  onClick={() => setFareExpanded(!fareExpanded)}
+                  className="mt-4 flex w-full items-center justify-between border-t border-mist/15 pt-4 text-xs font-semibold text-panel-muted-foreground"
+                >
+                  <span>{t.details}</span>
+                  <ChevronDown
+                    className={`size-4 transition-transform ${fareExpanded ? "rotate-180" : ""}`}
+                  />
+                </button>
+                {fareExpanded && (
+                  <div className="mt-3 space-y-2 rounded-2xl bg-white/5 p-3 text-[13px] ring-1 ring-white/10">
+                    {fare.perPassenger.length > 0 &&
+                      fare.perPassenger.map((item, index) => (
+                        <div
+                          key={`${item.destination}-${index}`}
+                          className="flex justify-between gap-3"
+                        >
+                          <span className="truncate text-panel-muted-foreground">
+                            Pasajero {index + 1} · {item.destination} · {item.distance.toFixed(1)}{" "}
+                            km · {item.duration} min
+                          </span>
+                          <strong>${item.total.toFixed(2)}</strong>
+                        </div>
+                      ))}
+                    <div className="flex justify-between">
+                      <span className="text-panel-muted-foreground">{t.baseFare}</span>
+                      <strong>${fare.base.toFixed(2)}</strong>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-panel-muted-foreground">
+                        {t.timeFare} · {durationMinutes} min
+                      </span>
+                      <strong>${fare.timeCharge.toFixed(2)}</strong>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-panel-muted-foreground">
+                        {t.distanceFare} · {distanceKm.toFixed(1)} km
+                      </span>
+                      <strong>${fare.distanceCharge.toFixed(2)}</strong>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-panel-muted-foreground">{t.dynamicFare}</span>
+                      <strong>{fare.dynamicMultiplier.toFixed(1)}x</strong>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-panel-muted-foreground">{t.tolls}</span>
+                      <strong>${fare.tollsAndFees.toFixed(2)}</strong>
+                    </div>
+                    <div className="flex justify-between border-t border-mist/15 pt-2">
+                      <span>{t.total}</span>
+                      <strong className="font-display text-lg">${fare.total}</strong>
+                    </div>
+                  </div>
+                )}
+                <p className="mt-3 flex items-center gap-2 rounded-xl bg-black/20 px-3 py-2 text-xs italic text-panel-muted-foreground ring-1 ring-white/10">
+                  <ShieldCheck className="size-4 shrink-0 text-leaf" />
+                  {t.note}
+                </p>
+                <button
+                  onClick={() => openWhatsApp()}
+                  className="mt-4 w-full rounded-2xl bg-leaf py-3.5 text-sm font-bold text-leaf-foreground transition-transform active:scale-[0.98]"
+                >
+                  {confirmed
+                    ? language === "es"
+                      ? "Solicitud confirmada"
+                      : "Request confirmed"
+                    : language === "es"
+                      ? "Confirmar reserva"
+                      : "Confirm booking"}
+                </button>
+              </section>
+            )}
 
             {mode === "transfers" && (
               <section
@@ -956,102 +1046,6 @@ function Index() {
           </div>
 
           <div>
-            {mode === "transfers" && (
-              <section className="dark-green-panel rise mt-4 overflow-hidden rounded-[28px] p-5 text-white ring-1 ring-white/15 lg:mt-8 [animation-delay:260ms]">
-                <div className="flex items-center justify-between">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-panel-muted-foreground">
-                    {t.estimate}
-                  </p>
-                  <ShieldCheck className="size-5 text-leaf" />
-                </div>
-                <div className="mt-2 flex items-baseline gap-2">
-                  <p className="font-display text-[38px] leading-none">${fare.total}</p>
-                  <p className="text-xs text-panel-muted-foreground">USD</p>
-                </div>
-                <p className="mt-1 text-sm font-semibold text-panel-muted-foreground">
-                  {formatColones(fare.total)} {exchangeRate ? "CRC" : ""}
-                </p>
-                <p className="mt-2 text-[10px] text-panel-muted-foreground">
-                  {rideType === "private" ? t.privateFixed : t.perPassenger}
-                </p>
-                <p className="mt-1 text-[10px] text-panel-muted-foreground">
-                  {exchangeRate
-                    ? `${t.exchangeSource}: ₡${exchangeRate.toLocaleString("es-CR")} / USD`
-                    : t.exchangeLoading}
-                </p>
-                <button
-                  onClick={() => setFareExpanded(!fareExpanded)}
-                  className="mt-4 flex w-full items-center justify-between border-t border-mist/15 pt-4 text-xs font-semibold text-panel-muted-foreground"
-                >
-                  <span>{t.details}</span>
-                  <ChevronDown
-                    className={`size-4 transition-transform ${fareExpanded ? "rotate-180" : ""}`}
-                  />
-                </button>
-                {fareExpanded && (
-                  <div className="mt-3 space-y-2 rounded-2xl bg-white/5 p-3 text-[13px] ring-1 ring-white/10">
-                    {fare.perPassenger.length > 0 &&
-                      fare.perPassenger.map((item, index) => (
-                        <div
-                          key={`${item.destination}-${index}`}
-                          className="flex justify-between gap-3"
-                        >
-                          <span className="truncate text-panel-muted-foreground">
-                            Pasajero {index + 1} · {item.destination} · {item.distance.toFixed(1)}{" "}
-                            km · {item.duration} min
-                          </span>
-                          <strong>${item.total.toFixed(2)}</strong>
-                        </div>
-                      ))}
-                    <div className="flex justify-between">
-                      <span className="text-panel-muted-foreground">{t.baseFare}</span>
-                      <strong>${fare.base.toFixed(2)}</strong>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-panel-muted-foreground">
-                        {t.timeFare} · {durationMinutes} min
-                      </span>
-                      <strong>${fare.timeCharge.toFixed(2)}</strong>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-panel-muted-foreground">
-                        {t.distanceFare} · {distanceKm.toFixed(1)} km
-                      </span>
-                      <strong>${fare.distanceCharge.toFixed(2)}</strong>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-panel-muted-foreground">{t.dynamicFare}</span>
-                      <strong>{fare.dynamicMultiplier.toFixed(1)}x</strong>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-panel-muted-foreground">{t.tolls}</span>
-                      <strong>${fare.tollsAndFees.toFixed(2)}</strong>
-                    </div>
-                    <div className="flex justify-between border-t border-mist/15 pt-2">
-                      <span>{t.total}</span>
-                      <strong className="font-display text-lg">${fare.total}</strong>
-                    </div>
-                  </div>
-                )}
-                <p className="mt-3 flex items-center gap-2 rounded-xl bg-black/20 px-3 py-2 text-xs italic text-panel-muted-foreground ring-1 ring-white/10">
-                  <ShieldCheck className="size-4 shrink-0 text-leaf" />
-                  {t.note}
-                </p>
-                <button
-                  onClick={() => openWhatsApp()}
-                  className="mt-4 w-full rounded-2xl bg-leaf py-3.5 text-sm font-bold text-leaf-foreground transition-transform active:scale-[0.98]"
-                >
-                  {confirmed
-                    ? language === "es"
-                      ? "Solicitud confirmada"
-                      : "Request confirmed"
-                    : language === "es"
-                      ? "Confirmar reserva"
-                      : "Confirm booking"}
-                </button>
-              </section>
-            )}
-
             <section
               id="tours"
               className="dark-green-panel mt-10 scroll-mt-6 rounded-[30px] p-4 text-white ring-1 ring-white/15"
