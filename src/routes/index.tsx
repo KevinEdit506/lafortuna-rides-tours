@@ -252,7 +252,7 @@ function Index() {
   ]);
   const [paymentMethod, setPaymentMethod] = useState<"card" | "cash">("card");
   const [exchangeRate, setExchangeRate] = useState<number | null>(null);
-  const [fareExpanded, setFareExpanded] = useState(true);
+  const [fareExpanded, setFareExpanded] = useState(false);
   const [confirmed, setConfirmed] = useState(false);
   const [scheduledTrips, setScheduledTrips] = useState<string[]>([]);
   const [scheduleDate, setScheduleDate] = useState(() => {
@@ -282,7 +282,7 @@ function Index() {
     const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
     let frame = 0;
     const updateParallax = () => {
-      const offset = reducedMotion.matches ? 0 : Math.min(34, window.scrollY * 0.035);
+      const offset = reducedMotion.matches ? 0 : Math.min(18, window.scrollY * 0.02);
       shell.style.setProperty("--arenal-parallax-y", `${-offset}px`);
     };
     const handleScroll = () => {
@@ -613,7 +613,7 @@ function Index() {
               <span className="font-display text-base">Vía</span>
             </div>
             <div className="leading-tight">
-              <p className="text-[9px] font-semibold uppercase tracking-[0.25em] text-white/80">
+              <p className="text-[9px] font-semibold uppercase tracking-[0.25em] text-white">
                 {t.place}
               </p>
             </div>
