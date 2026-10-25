@@ -282,7 +282,7 @@ function Index() {
     const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
     let frame = 0;
     const updateParallax = () => {
-      const offset = reducedMotion.matches ? 0 : Math.min(18, window.scrollY * 0.02);
+      const offset = reducedMotion.matches ? 0 : Math.min(10, window.scrollY * 0.012);
       shell.style.setProperty("--arenal-parallax-y", `${-offset}px`);
     };
     const handleScroll = () => {
