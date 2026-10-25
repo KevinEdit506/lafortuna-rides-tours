@@ -213,6 +213,11 @@
   zoom: 0.97;
 }
 
+.address-fields > div > span {
+  background-color: color-mix(in oklch, var(--color-primary) 10%, transparent) !important;
+  border-color: var(--color-border) !important;
+}
+
 .app-shell::before,
 .app-shell::after {
   position: fixed;

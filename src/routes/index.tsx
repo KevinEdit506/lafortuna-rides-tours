@@ -514,9 +514,16 @@ function Index() {
   ]);
 
   const formatColones = (amount: number) =>
-    exchangeRate
-      ? `₡${Math.round(amount * exchangeRate).toLocaleString("es-CR")}`
-      : t.exchangeLoading;
+    exchangeRate ? `₡${Math.round(amount * exchangeRate).toLocaleString("es-CR")}` : "₡—";
+  const formatDollars = (amount: number) => `$${amount.toFixed(2)}`;
+  const formatFareAmount = (amount: number) =>
+    language === "es" ? formatColones(amount) : formatDollars(amount);
+  const formatFareSecondary = (amount: number) =>
+    language === "es" ? `${formatDollars(amount)} USD` : `${formatColones(amount)} CRC`;
+  const formatFareForMessage = (amount: number) =>
+    language === "es"
+      ? `${formatColones(amount)} CRC (${formatDollars(amount)} USD)`
+      : `${formatDollars(amount)} USD (${formatColones(amount)} CRC)`;
 
   const updatePassengers = (nextPassengers: number) => {
     setPassengers(nextPassengers);
@@ -551,8 +558,8 @@ function Index() {
         ? `Hola Via La Fortuna, me gustaría reservar el tour ${tourName}. ¿Podrían ayudarme con disponibilidad y próximos pasos?`
         : `Hello Via La Fortuna, I would like to book the ${tourName} tour. Could you help me with availability and next steps?`
       : isSpanish
-        ? `Hola Via La Fortuna, me gustaría reservar un traslado.\n\nOrigen: ${origin}\nDestino: ${destination}\n${rideType === "shared" ? `Rutas por pasajero:\n${passengerDestinations.map((item, index) => `Pasajero ${index + 1}: ${passengerOrigins[index]} → ${item}`).join("\n")}` : ""}\nTipo: ${rideType === "private" ? "Privado" : "Compartido"}\nHorario: ${timing === "now" ? "Ahora" : `${scheduleDate} · ${scheduleTime}`}\nPasajeros: ${passengers}\nPago: ${paymentMethod === "card" ? "Tarjeta" : "Efectivo"}\nTarifa estimada: $${fare.total} USD (${formatColones(fare.total)})`
-        : `Hello Via La Fortuna, I would like to book a transfer.\n\nPickup: ${origin}\nDestination: ${destination}\n${rideType === "shared" ? `Passenger routes:\n${passengerDestinations.map((item, index) => `Passenger ${index + 1}: ${passengerOrigins[index]} → ${item}`).join("\n")}` : ""}\nType: ${rideType === "private" ? "Private" : "Shared"}\nTiming: ${timing === "now" ? "Now" : `${scheduleDate} · ${scheduleTime}`}\nPassengers: ${passengers}\nPayment: ${paymentMethod === "card" ? "Card" : "Cash"}\nEstimated fare: $${fare.total} USD (${formatColones(fare.total)})`;
+        ? `Hola Via La Fortuna, me gustaría reservar un traslado.\n\nOrigen: ${origin}\nDestino: ${destination}\n${rideType === "shared" ? `Rutas por pasajero:\n${passengerDestinations.map((item, index) => `Pasajero ${index + 1}: ${passengerOrigins[index]} → ${item}`).join("\n")}` : ""}\nTipo: ${rideType === "private" ? "Privado" : "Compartido"}\nHorario: ${timing === "now" ? "Ahora" : `${scheduleDate} · ${scheduleTime}`}\nPasajeros: ${passengers}\nPago: ${paymentMethod === "card" ? "Tarjeta" : "Efectivo"}\nTarifa estimada: ${formatFareForMessage(fare.total)}`
+        : `Hello Via La Fortuna, I would like to book a transfer.\n\nPickup: ${origin}\nDestination: ${destination}\n${rideType === "shared" ? `Passenger routes:\n${passengerDestinations.map((item, index) => `Passenger ${index + 1}: ${passengerOrigins[index]} → ${item}`).join("\n")}` : ""}\nType: ${rideType === "private" ? "Private" : "Shared"}\nTiming: ${timing === "now" ? "Now" : `${scheduleDate} · ${scheduleTime}`}\nPassengers: ${passengers}\nPayment: ${paymentMethod === "card" ? "Card" : "Cash"}\nEstimated fare: ${formatFareForMessage(fare.total)}`;
 
     window.open(
       `https://wa.me/50663135655?text=${encodeURIComponent(message)}`,
@@ -629,11 +636,15 @@ function Index() {
                   <ShieldCheck className="size-5 text-leaf" />
                 </div>
                 <div className="mt-2 flex items-baseline gap-2">
-                  <p className="font-display text-[38px] leading-none">${fare.total}</p>
-                  <p className="text-xs text-panel-muted-foreground">USD</p>
+                  <p className="font-display text-[38px] leading-none">
+                    {formatFareAmount(fare.total)}
+                  </p>
+                  <p className="text-xs text-panel-muted-foreground">
+                    {language === "es" ? "CRC" : "USD"}
+                  </p>
                 </div>
                 <p className="mt-1 text-sm font-semibold text-panel-muted-foreground">
-                  {formatColones(fare.total)} {exchangeRate ? "CRC" : ""}
+                  {formatFareSecondary(fare.total)}
                 </p>
                 <p className="mt-2 text-[10px] text-panel-muted-foreground">
                   {rideType === "private" ? t.privateFixed : t.perPassenger}
@@ -664,24 +675,24 @@ function Index() {
                             Pasajero {index + 1} · {item.destination} · {item.distance.toFixed(1)}{" "}
                             km · {item.duration} min
                           </span>
-                          <strong>${item.total.toFixed(2)}</strong>
+                          <strong>{formatFareAmount(item.total)}</strong>
                         </div>
                       ))}
                     <div className="flex justify-between">
                       <span className="text-panel-muted-foreground">{t.baseFare}</span>
-                      <strong>${fare.base.toFixed(2)}</strong>
+                      <strong>{formatFareAmount(fare.base)}</strong>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-panel-muted-foreground">
                         {t.timeFare} · {durationMinutes} min
                       </span>
-                      <strong>${fare.timeCharge.toFixed(2)}</strong>
+                      <strong>{formatFareAmount(fare.timeCharge)}</strong>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-panel-muted-foreground">
                         {t.distanceFare} · {distanceKm.toFixed(1)} km
                       </span>
-                      <strong>${fare.distanceCharge.toFixed(2)}</strong>
+                      <strong>{formatFareAmount(fare.distanceCharge)}</strong>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-panel-muted-foreground">{t.dynamicFare}</span>
@@ -689,11 +700,13 @@ function Index() {
                     </div>
                     <div className="flex justify-between">
                       <span className="text-panel-muted-foreground">{t.tolls}</span>
-                      <strong>${fare.tollsAndFees.toFixed(2)}</strong>
+                      <strong>{formatFareAmount(fare.tollsAndFees)}</strong>
                     </div>
                     <div className="flex justify-between border-t border-mist/15 pt-2">
                       <span>{t.total}</span>
-                      <strong className="font-display text-lg">${fare.total}</strong>
+                      <strong className="font-display text-lg">
+                        {formatFareAmount(fare.total)}
+                      </strong>
                     </div>
                   </div>
                 )}
@@ -743,16 +756,16 @@ function Index() {
 
             {mode === "transfers" ? (
               <section className="control-relief rise mt-4 rounded-[30px] bg-surface p-4 [animation-delay:200ms]">
-                <div className="address-fields dark-green-panel rounded-[24px] p-3.5 text-white ring-1 ring-white/15">
+                <div className="address-fields rounded-[24px] bg-background p-3.5 text-foreground ring-1 ring-border">
                   <div className="flex items-center gap-3">
                     <span
                       className="grid size-8 shrink-0 place-items-center rounded-full bg-white/10 ring-1 ring-white/10"
                       aria-hidden="true"
                     >
-                      <Circle className="size-3.5 text-panel-muted-foreground" />
+                      <Circle className="size-3.5 text-muted-foreground" />
                     </span>
                     <label className="min-w-0 flex-1">
-                      <span className="block text-[11px] font-semibold uppercase tracking-[0.14em] text-panel-muted-foreground">
+                      <span className="block text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
                         {t.origin}
                       </span>
                       <input
@@ -768,16 +781,16 @@ function Index() {
                       />
                     </label>
                   </div>
-                  <div className="my-3.5 border-t border-white/12" aria-hidden="true" />
+                  <div className="my-3.5 border-t border-border" aria-hidden="true" />
                   <div className="flex items-center gap-3">
                     <span
                       className="grid size-8 shrink-0 place-items-center rounded-full bg-white/10 ring-1 ring-white/10"
                       aria-hidden="true"
                     >
-                      <MapPin className="size-4 text-panel-muted-foreground" />
+                      <MapPin className="size-4 text-muted-foreground" />
                     </span>
                     <label className="min-w-0 flex-1">
-                      <span className="block text-[11px] font-semibold uppercase tracking-[0.14em] text-panel-muted-foreground">
+                      <span className="block text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
                         {t.destination}
                       </span>
                       <input
