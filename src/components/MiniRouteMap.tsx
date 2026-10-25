@@ -99,7 +99,7 @@ export function MiniRouteMap({ origin, destination, language }: MiniRouteMapProp
                 ? `Google Maps: ruta de ${origin} a ${destination}`
                 : `Google Maps: route from ${origin} to ${destination}`
             }
-            className="block size-full border-0"
+            className="map-embed-clean block size-full border-0"
             width="100%"
             height="300"
             allowFullScreen
