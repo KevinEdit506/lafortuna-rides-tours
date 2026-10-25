@@ -210,6 +210,7 @@
   position: relative;
   isolation: isolate;
   background: transparent;
+  zoom: 0.97;
 }
 
 .app-shell::before,
