@@ -272,36 +272,7 @@ function Index() {
   const mapsScriptLoaded = useRef(false);
   const originInputRef = useRef<HTMLInputElement>(null);
   const destinationInputRef = useRef<HTMLInputElement>(null);
-  const shellRef = useRef<HTMLElement>(null);
   const t = copy[language];
-
-  useEffect(() => {
-    const shell = shellRef.current;
-    if (!shell) return;
-
-    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
-    let frame = 0;
-    const updateParallax = () => {
-      const offset = reducedMotion.matches ? 0 : Math.min(10, window.scrollY * 0.012);
-      shell.style.setProperty("--arenal-parallax-y", `${-offset}px`);
-    };
-    const handleScroll = () => {
-      if (frame) return;
-      frame = window.requestAnimationFrame(() => {
-        frame = 0;
-        updateParallax();
-      });
-    };
-
-    updateParallax();
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    reducedMotion.addEventListener?.("change", updateParallax);
-    return () => {
-      window.removeEventListener("scroll", handleScroll);
-      reducedMotion.removeEventListener?.("change", updateParallax);
-      if (frame) window.cancelAnimationFrame(frame);
-    };
-  }, []);
 
   useEffect(() => {
     const key = import.meta.env["VITE_GOOGLE_MAPS_API_KEY"];
@@ -594,11 +565,9 @@ function Index() {
   return (
     <main
       className="app-shell min-h-screen text-foreground selection:bg-accent selection:text-accent-foreground"
-      ref={shellRef}
       style={
         {
           "--arenal-background": `url("${import.meta.env.BASE_URL}arenal-background-current.jpg")`,
-          "--arenal-parallax-y": "0px",
         } as CSSProperties
       }
     >
@@ -1256,8 +1225,8 @@ function Index() {
         </div>
       </div>
 
-      <nav className="pointer-events-none fixed bottom-0 left-1/2 z-20 w-full max-w-[430px] -translate-x-1/2 px-6 pb-5 lg:max-w-xl">
-        <div className="pointer-events-auto flex items-center justify-between rounded-[26px] bg-jungle/95 px-7 py-3 text-primary-foreground shadow-2xl ring-1 ring-primary-foreground/10 backdrop-blur-md">
+      <nav className="pointer-events-none fixed bottom-0 left-1/2 z-20 w-full max-w-[400px] -translate-x-1/2 px-8 pb-4 lg:max-w-lg">
+        <div className="pointer-events-auto flex scale-[0.94] items-center justify-between rounded-[26px] bg-jungle/95 px-6 py-2.5 text-primary-foreground shadow-2xl ring-1 ring-primary-foreground/10 backdrop-blur-md">
           {[
             {
               label: t.home,
