@@ -46,6 +46,15 @@ type MapsWindow = Window & {
   };
 };
 
+type TourCard = {
+  image: string;
+  title: string;
+  meta: string;
+  rating: string;
+  category: string;
+  summary: string;
+};
+
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
@@ -267,12 +276,22 @@ function Index() {
   const [passengerDurations, setPassengerDurations] = useState<number[]>([18, 18]);
   const [mapsStatus, setMapsStatus] = useState<"loading" | "ready" | "fallback">("loading");
   const [routeStatus, setRouteStatus] = useState<"idle" | "updating" | "updated">("idle");
+  const [selectedTour, setSelectedTour] = useState<TourCard | null>(null);
   const dynamicMultiplier = 2;
   const tollsAndFees = 0;
   const mapsScriptLoaded = useRef(false);
   const originInputRef = useRef<HTMLInputElement>(null);
   const destinationInputRef = useRef<HTMLInputElement>(null);
   const t = copy[language];
+
+  useEffect(() => {
+    if (!selectedTour) return;
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setSelectedTour(null);
+    };
+    window.addEventListener("keydown", closeOnEscape);
+    return () => window.removeEventListener("keydown", closeOnEscape);
+  }, [selectedTour]);
 
   useEffect(() => {
     const key = import.meta.env["VITE_GOOGLE_MAPS_API_KEY"];
@@ -1131,7 +1150,16 @@ function Index() {
                 ].map((tour) => (
                   <article
                     key={tour.title}
-                    className="experience-card flex h-[500px] w-full flex-col rounded-[26px] bg-gradient-to-br from-surface via-surface to-leaf/10 p-3 text-foreground shadow-xl shadow-primary/10 ring-1 ring-border lg:h-[510px]"
+                    role="button"
+                    tabIndex={0}
+                    onClick={() => setSelectedTour(tour)}
+                    onKeyDown={(event) => {
+                      if (event.key === "Enter" || event.key === " ") {
+                        event.preventDefault();
+                        setSelectedTour(tour);
+                      }
+                    }}
+                    className="experience-card flex h-[500px] w-full cursor-pointer flex-col rounded-[26px] bg-gradient-to-br from-surface via-surface to-leaf/10 p-3 text-foreground shadow-xl shadow-primary/10 ring-1 ring-border outline-none transition-transform hover:-translate-y-0.5 focus-visible:ring-2 focus-visible:ring-leaf lg:h-[510px]"
                   >
                     <img
                       src={tour.image}
@@ -1159,10 +1187,13 @@ function Index() {
                         </span>
                       </div>
                       <button
-                        onClick={() => openWhatsApp(tour.title)}
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          setSelectedTour(tour);
+                        }}
                         className="mt-auto w-full rounded-xl bg-leaf py-2.5 text-xs font-bold text-leaf-foreground shadow-[0_3px_0_color-mix(in_oklch,var(--color-jungle)_35%,transparent)]"
                       >
-                        {t.reserveTour}
+                        {language === "es" ? "Ver tours disponibles" : "View available tours"}
                       </button>
                     </div>
                   </article>
@@ -1237,6 +1268,102 @@ function Index() {
           </div>
         </div>
       </div>
+
+      {selectedTour && (
+        <div
+          className="fixed inset-0 z-40 flex items-end justify-center bg-black/55 p-3 backdrop-blur-sm sm:items-center"
+          role="presentation"
+          onClick={() => setSelectedTour(null)}
+        >
+          <section
+            className="max-h-[92vh] w-full max-w-lg overflow-y-auto rounded-[28px] bg-surface p-4 text-foreground shadow-2xl ring-1 ring-border sm:p-5"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="tour-detail-title"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-leaf-ink">
+                  {language === "es" ? "Detalle de actividad" : "Activity details"}
+                </p>
+                <h2 id="tour-detail-title" className="mt-1 font-display text-2xl leading-tight">
+                  {selectedTour.title}
+                </h2>
+              </div>
+              <button
+                type="button"
+                aria-label={language === "es" ? "Cerrar detalles" : "Close details"}
+                onClick={() => setSelectedTour(null)}
+                className="grid size-9 shrink-0 place-items-center rounded-full bg-background text-muted-foreground ring-1 ring-border"
+              >
+                <X className="size-4" />
+              </button>
+            </div>
+            <img
+              src={selectedTour.image}
+              alt={selectedTour.title}
+              className="mt-4 h-44 w-full rounded-[20px] object-cover"
+            />
+            <div className="mt-3 flex items-center justify-between gap-3 text-xs text-muted-foreground">
+              <span className="font-bold uppercase tracking-[0.12em] text-leaf-ink">
+                {selectedTour.category}
+              </span>
+              <span>
+                {selectedTour.meta} · ★ {selectedTour.rating}
+              </span>
+            </div>
+            <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
+              {selectedTour.summary}
+            </p>
+
+            <div className="mt-5 rounded-[22px] bg-background p-3 ring-1 ring-border">
+              <h3 className="text-sm font-bold">
+                {language === "es" ? "Tours disponibles por tipo" : "Available tours by type"}
+              </h3>
+              <div className="mt-3 space-y-3">
+                {(language === "es"
+                  ? [
+                      ["Naturaleza", "Volcán Arenal y aguas termales · Puentes Colgantes Místico"],
+                      ["Playas", "Escapada a playas del Pacífico"],
+                      ["Parques", "Parques nacionales de Costa Rica"],
+                      ["Ríos y aventura", "Safari Río Peñas Blancas · Ríos y aventura tropical"],
+                    ]
+                  : [
+                      ["Nature", "Arenal Volcano & hot springs · Mystic Hanging Bridges"],
+                      ["Beaches", "Pacific coast beach escape"],
+                      ["Parks", "Costa Rica national parks"],
+                      [
+                        "Rivers & adventure",
+                        "Peñas Blancas River Safari · Rivers & tropical adventure",
+                      ],
+                    ]
+                ).map(([type, activities]) => (
+                  <div key={type} className="border-b border-border pb-2 last:border-0 last:pb-0">
+                    <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-leaf-ink">
+                      {type}
+                    </p>
+                    <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
+                      {activities}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => {
+                const tourName = selectedTour.title;
+                setSelectedTour(null);
+                openWhatsApp(tourName);
+              }}
+              className="mt-4 w-full rounded-2xl bg-leaf py-3.5 text-sm font-bold text-leaf-foreground shadow-[0_3px_0_color-mix(in_oklch,var(--color-jungle)_35%,transparent)]"
+            >
+              {t.reserveTour}
+            </button>
+          </section>
+        </div>
+      )}
 
       <nav className="pointer-events-none fixed bottom-0 left-1/2 z-20 w-full max-w-[400px] -translate-x-1/2 px-8 pb-4 lg:max-w-lg">
         <div className="pointer-events-auto flex scale-[0.94] items-center justify-between rounded-[26px] bg-jungle/95 px-6 py-2.5 text-primary-foreground shadow-2xl ring-1 ring-primary-foreground/10 backdrop-blur-md">

@@ -221,8 +221,8 @@
 /* Google Maps places its origin/destination legend at the top of the embed.
  * Start the iframe above the viewport so only the clean route map is visible. */
 .map-embed-clean {
-  height: calc(100% + 88px);
-  margin-top: -88px;
+  height: calc(100% + 96px);
+  margin-top: -96px;
 }
 
 .app-shell::before,
