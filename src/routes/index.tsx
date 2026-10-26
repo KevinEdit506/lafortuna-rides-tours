@@ -291,7 +291,7 @@ function Index() {
   const [mapsStatus, setMapsStatus] = useState<"loading" | "ready" | "fallback">("loading");
   const [routeStatus, setRouteStatus] = useState<"idle" | "updating" | "updated">("idle");
   const [selectedTour, setSelectedTour] = useState<TourCard | null>(null);
-  const dynamicMultiplier = 1.2;
+  const dynamicMultiplier = 2.8;
   const returnMultiplier = returnEmpty ? 2 : 1;
   const roadMultiplier = badRoad ? 1.2 : 1;
   const tollsAndFees = 0;
