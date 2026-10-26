@@ -131,6 +131,12 @@ const copy = {
     timeFare: "Tiempo",
     distanceFare: "Distancia",
     dynamicFare: "Multiplicador dinámico",
+    returnEmpty: "Regreso vacío",
+    badRoad: "Camino malo",
+    noReturn: "Solo ida",
+    returnIncluded: "Ida y vuelta",
+    roadNormal: "Camino normal",
+    roadRough: "Recargo 20%",
     tolls: "Peajes y cuotas",
     paymentLocked: "Pago bloqueado después de confirmar",
     scheduledSuccess: "Viaje añadido a tu agenda",
@@ -198,6 +204,12 @@ const copy = {
     timeFare: "Time",
     distanceFare: "Distance",
     dynamicFare: "Dynamic multiplier",
+    returnEmpty: "Empty return",
+    badRoad: "Rough road",
+    noReturn: "One way",
+    returnIncluded: "Round trip",
+    roadNormal: "Normal road",
+    roadRough: "20% surcharge",
     tolls: "Tolls and fees",
     paymentLocked: "Payment locked after confirmation",
     scheduledSuccess: "Trip added to your schedule",
@@ -249,6 +261,8 @@ function Index() {
   const [timing, setTiming] = useState<"now" | "schedule">("now");
   const [rideType, setRideType] = useState<"private" | "shared">("private");
   const [passengers, setPassengers] = useState(2);
+  const [returnEmpty, setReturnEmpty] = useState(false);
+  const [badRoad, setBadRoad] = useState(false);
   const [origin, setOrigin] = useState("Centro de La Fortuna");
   const [destination, setDestination] = useState("Parque Nacional Volcán Arenal");
   const [passengerOrigins, setPassengerOrigins] = useState([
@@ -277,7 +291,9 @@ function Index() {
   const [mapsStatus, setMapsStatus] = useState<"loading" | "ready" | "fallback">("loading");
   const [routeStatus, setRouteStatus] = useState<"idle" | "updating" | "updated">("idle");
   const [selectedTour, setSelectedTour] = useState<TourCard | null>(null);
-  const dynamicMultiplier = 2;
+  const dynamicMultiplier = 1.2;
+  const returnMultiplier = returnEmpty ? 2 : 1;
+  const roadMultiplier = badRoad ? 1.2 : 1;
   const tollsAndFees = 0;
   const mapsScriptLoaded = useRef(false);
   const originInputRef = useRef<HTMLInputElement>(null);
@@ -464,24 +480,27 @@ function Index() {
     };
   }, []);
   const fare = useMemo(() => {
+    const crcToUsd = (amount: number) => amount / (exchangeRate ?? 500);
+    const calculateCrc = (distance: number) => {
+      const tripKm = distance * returnMultiplier;
+      return Math.round(((tripKm / 11) * 764 + tripKm * 40) * dynamicMultiplier * roadMultiplier);
+    };
     if (rideType === "private") {
-      const base = 1.5;
-      const distanceCharge = distanceKm * 0.6;
-      const timeCharge = durationMinutes * 0.2;
-      const routeSubtotal = base + distanceCharge + timeCharge;
-      const service = Math.round(routeSubtotal * dynamicMultiplier * 100) / 100;
-      const operations = 0;
-      const platform = tollsAndFees;
+      const totalCrc = calculateCrc(distanceKm);
+      const service = Math.round(crcToUsd(totalCrc) * 100) / 100;
       return {
-        base,
-        timeCharge,
-        distanceCharge,
+        base: 0,
+        timeCharge: 0,
+        distanceCharge: service,
         dynamicMultiplier,
+        returnMultiplier,
+        roadMultiplier,
         tollsAndFees,
         service,
-        operations,
-        platform,
-        total: Math.round((service + platform) * 100) / 100,
+        operations: 0,
+        platform: tollsAndFees,
+        total: Math.round((service + tollsAndFees) * 100) / 100,
+        totalCrc,
         perPassenger: [] as Array<{
           destination: string;
           distance: number;
@@ -494,41 +513,43 @@ function Index() {
       .slice(0, passengers)
       .map((passengerDestination, index) => {
         const passengerDistance = passengerDistances[index] ?? distanceKm;
-        const base = 1.5;
-        const distanceCharge = passengerDistance * 0.6;
-        const passengerDuration = passengerDurations[index] ?? durationMinutes;
-        const timeCharge = passengerDuration * 0.2;
-        const routeSubtotal = base + distanceCharge + timeCharge;
-        const total = Math.round((routeSubtotal * dynamicMultiplier + tollsAndFees) * 100) / 100;
+        const totalCrc = calculateCrc(passengerDistance);
+        const total = Math.round((crcToUsd(totalCrc) + tollsAndFees) * 100) / 100;
         return {
           destination: passengerDestination,
           distance: passengerDistance,
-          duration: passengerDuration,
+          duration: passengerDurations[index] ?? durationMinutes,
           total,
         };
       });
     const total = perPassenger.reduce((sum, item) => sum + item.total, 0);
     return {
-      base: 1.5,
-      timeCharge: durationMinutes * 0.2,
-      distanceCharge: distanceKm * 0.6,
+      base: 0,
+      timeCharge: 0,
+      distanceCharge: Math.round(crcToUsd(calculateCrc(distanceKm)) * 100) / 100,
       dynamicMultiplier,
+      returnMultiplier,
+      roadMultiplier,
       tollsAndFees,
       service: total,
       operations: 0,
       platform: 0,
       total: Math.round(total * 100) / 100,
+      totalCrc: Math.round(total * (exchangeRate ?? 500)),
       perPassenger,
     };
   }, [
     distanceKm,
     durationMinutes,
+    exchangeRate,
     passengerDestinations,
     passengerDistances,
     passengerDurations,
     passengers,
     rideType,
     dynamicMultiplier,
+    returnMultiplier,
+    roadMultiplier,
     tollsAndFees,
   ]);
 
@@ -718,6 +739,14 @@ function Index() {
                       <strong>{fare.dynamicMultiplier.toFixed(1)}x</strong>
                     </div>
                     <div className="flex justify-between">
+                      <span className="text-panel-muted-foreground">{t.returnEmpty}</span>
+                      <strong>{fare.returnMultiplier.toFixed(1)}x</strong>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-panel-muted-foreground">{t.badRoad}</span>
+                      <strong>{fare.roadMultiplier.toFixed(1)}x</strong>
+                    </div>
+                    <div className="flex justify-between">
                       <span className="text-panel-muted-foreground">{t.tolls}</span>
                       <strong>{formatFareAmount(fare.tollsAndFees)}</strong>
                     </div>
@@ -842,6 +871,32 @@ function Index() {
                       {t[value]}
                     </button>
                   ))}
+                </div>
+                <div className="mt-3 grid grid-cols-2 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setReturnEmpty((current) => !current)}
+                    className={`rounded-2xl px-3 py-2.5 text-left text-xs font-semibold ring-1 transition-colors ${returnEmpty ? "bg-leaf text-leaf-foreground ring-leaf" : "bg-background text-muted-foreground ring-border"}`}
+                  >
+                    <span className="block text-[10px] font-bold uppercase tracking-[0.1em]">
+                      {t.returnEmpty}
+                    </span>
+                    <span className="mt-1 block text-[11px] opacity-100">
+                      {returnEmpty ? t.returnIncluded : t.noReturn}
+                    </span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setBadRoad((current) => !current)}
+                    className={`rounded-2xl px-3 py-2.5 text-left text-xs font-semibold ring-1 transition-colors ${badRoad ? "bg-leaf text-leaf-foreground ring-leaf" : "bg-background text-muted-foreground ring-border"}`}
+                  >
+                    <span className="block text-[10px] font-bold uppercase tracking-[0.1em]">
+                      {t.badRoad}
+                    </span>
+                    <span className="mt-1 block text-[11px] opacity-100">
+                      {badRoad ? t.roadRough : t.roadNormal}
+                    </span>
+                  </button>
                 </div>
                 <div className="mt-3 grid grid-cols-2 gap-3">
                   <div className="rounded-2xl bg-background px-3 py-2.5 ring-1 ring-border">
