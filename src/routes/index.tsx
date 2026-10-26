@@ -135,7 +135,7 @@ const copy = {
     badRoad: "Camino malo",
     noReturn: "Solo ida",
     returnIncluded: "Ida y vuelta",
-    roadNormal: "Camino normal",
+    roadNormal: "Recargo 50%",
     roadRough: "Recargo 20%",
     tolls: "Peajes y cuotas",
     paymentLocked: "Pago bloqueado después de confirmar",
@@ -208,7 +208,7 @@ const copy = {
     badRoad: "Rough road",
     noReturn: "One way",
     returnIncluded: "Round trip",
-    roadNormal: "Normal road",
+    roadNormal: "50% surcharge",
     roadRough: "20% surcharge",
     tolls: "Tolls and fees",
     paymentLocked: "Payment locked after confirmation",
@@ -293,7 +293,7 @@ function Index() {
   const [selectedTour, setSelectedTour] = useState<TourCard | null>(null);
   const dynamicMultiplier = 2.8;
   const returnMultiplier = returnEmpty ? 2 : 1;
-  const roadMultiplier = badRoad ? 1.2 : 1;
+  const roadMultiplier = badRoad ? 1.2 : 1.5;
   const tollsAndFees = 0;
   const mapsScriptLoaded = useRef(false);
   const originInputRef = useRef<HTMLInputElement>(null);
