@@ -3,7 +3,6 @@ import {
   CalendarDays,
   CarFront,
   CheckCircle2,
-  ChevronDown,
   Circle,
   Clock3,
   Compass,
@@ -150,7 +149,6 @@ const copy = {
     confirmedBody: "El mensaje fue preparado con tu ruta, horario y forma de pago.",
     remove: "Eliminar",
     estimate: "Tarifa estimada",
-    details: "Ver desglose",
     trip: "Servicio de traslado",
     operations: "Costos operativos",
     platform: "Gestión y cobertura",
@@ -229,7 +227,6 @@ const copy = {
     confirmedBody: "Your message was prepared with the route, timing, and payment method.",
     remove: "Remove",
     estimate: "Estimated fare",
-    details: "View breakdown",
     trip: "Transfer service",
     operations: "Operating costs",
     platform: "Management and coverage",
@@ -287,7 +284,6 @@ function Index() {
   ]);
   const [paymentMethod, setPaymentMethod] = useState<"card" | "cash">("card");
   const [exchangeRate, setExchangeRate] = useState<number | null>(null);
-  const [fareExpanded, setFareExpanded] = useState(false);
   const [confirmed, setConfirmed] = useState(false);
   const [scheduledTrips, setScheduledTrips] = useState<string[]>([]);
   const [scheduleDate, setScheduleDate] = useState(() => {
@@ -717,70 +713,6 @@ function Index() {
                     ? `${t.exchangeSource}: ₡${exchangeRate.toLocaleString("es-CR")} / USD`
                     : t.exchangeLoading}
                 </p>
-                <button
-                  onClick={() => setFareExpanded(!fareExpanded)}
-                  className="mt-4 flex w-full items-center justify-between border-t border-mist/15 pt-4 text-xs font-semibold text-panel-muted-foreground"
-                >
-                  <span>{t.details}</span>
-                  <ChevronDown
-                    className={`size-4 transition-transform ${fareExpanded ? "rotate-180" : ""}`}
-                  />
-                </button>
-                {fareExpanded && (
-                  <div className="mt-3 space-y-2 rounded-2xl bg-white/5 p-3 text-[13px] ring-1 ring-white/10">
-                    {fare.perPassenger.length > 0 &&
-                      fare.perPassenger.map((item, index) => (
-                        <div
-                          key={`${item.destination}-${index}`}
-                          className="flex justify-between gap-3"
-                        >
-                          <span className="truncate text-panel-muted-foreground">
-                            Pasajero {index + 1} · {item.destination} · {item.distance.toFixed(1)}{" "}
-                            km · {item.duration} min
-                          </span>
-                          <strong>{formatFareAmount(item.total)}</strong>
-                        </div>
-                      ))}
-                    <div className="flex justify-between">
-                      <span className="text-panel-muted-foreground">{t.baseFare}</span>
-                      <strong>{formatFareAmount(fare.base)}</strong>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-panel-muted-foreground">
-                        {t.timeFare} · {durationMinutes} min
-                      </span>
-                      <strong>{formatFareAmount(fare.timeCharge)}</strong>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-panel-muted-foreground">
-                        {t.distanceFare} · {distanceKm.toFixed(1)} km
-                      </span>
-                      <strong>{formatFareAmount(fare.distanceCharge)}</strong>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-panel-muted-foreground">{t.dynamicFare}</span>
-                      <strong>{fare.dynamicMultiplier.toFixed(1)}x</strong>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-panel-muted-foreground">{t.returnEmpty}</span>
-                      <strong>{fare.returnMultiplier.toFixed(1)}x</strong>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-panel-muted-foreground">{t.badRoad}</span>
-                      <strong>{fare.roadMultiplier.toFixed(1)}x</strong>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-panel-muted-foreground">{t.tolls}</span>
-                      <strong>{formatFareAmount(fare.tollsAndFees)}</strong>
-                    </div>
-                    <div className="flex justify-between border-t border-mist/15 pt-2">
-                      <span>{t.total}</span>
-                      <strong className="font-display text-lg">
-                        {formatFareAmount(fare.total)}
-                      </strong>
-                    </div>
-                  </div>
-                )}
                 <p className="mt-3 flex items-center gap-2 rounded-xl bg-black/20 px-3 py-2 text-xs italic text-panel-muted-foreground ring-1 ring-white/10">
                   <ShieldCheck className="size-4 shrink-0 text-leaf" />
                   {t.note}
