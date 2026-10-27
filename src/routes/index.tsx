@@ -124,8 +124,6 @@ const copy = {
     mapsLoading: "Conectando con Google Maps…",
     mapsFallback: "Distancia y tiempo aproximados. Confirma el recorrido en Google Maps.",
     mapsExact: "Distancia por carretera · Google Maps",
-    routeUpdating: "Actualizando ruta y tarifa…",
-    routeUpdated: "Ruta y tarifa actualizadas",
     baseFare: "Tarifa base",
     timeFare: "Tiempo",
     distanceFare: "Distancia",
@@ -196,8 +194,6 @@ const copy = {
     mapsLoading: "Connecting to Google Maps…",
     mapsFallback: "Approximate distance and time. Confirm your route in Google Maps.",
     mapsExact: "Road distance · Google Maps",
-    routeUpdating: "Updating route and fare…",
-    routeUpdated: "Route and fare updated",
     baseFare: "Base fare",
     timeFare: "Time",
     distanceFare: "Distance",
@@ -715,22 +711,6 @@ function Index() {
                 className="dark-green-panel mt-3 overflow-hidden rounded-[28px] p-4 text-white ring-1 ring-white/15"
               >
                 <MiniRouteMap origin={origin} destination={destination} language={language} />
-                <div className="mt-3 flex items-center justify-between border-t border-mist/15 pt-3 text-[11px] text-panel-muted-foreground">
-                  <span>
-                    {t.distance}: {distanceKm.toFixed(1)} km
-                  </span>
-                  <span>
-                    {t.duration}: {durationMinutes} min
-                  </span>
-                </div>
-                <p className="mt-2 text-[10px] text-panel-muted-foreground">
-                  {mapsStatus === "ready" ? t.mapsExact : t.mapsFallback}
-                </p>
-                {routeStatus !== "idle" && (
-                  <p className="mt-1 text-[10px] font-semibold text-leaf">
-                    {routeStatus === "updating" ? t.routeUpdating : t.routeUpdated}
-                  </p>
-                )}
               </section>
             )}
 
@@ -803,32 +783,6 @@ function Index() {
                       {t[value]}
                     </button>
                   ))}
-                </div>
-                <div className="mt-3 grid grid-cols-2 gap-2">
-                  <button
-                    type="button"
-                    onClick={() => setReturnEmpty((current) => !current)}
-                    className={`rounded-2xl px-3 py-2.5 text-left text-xs font-semibold ring-1 transition-colors ${returnEmpty ? "bg-leaf text-leaf-foreground ring-leaf" : "bg-background text-muted-foreground ring-border"}`}
-                  >
-                    <span className="block text-[10px] font-bold uppercase tracking-[0.1em]">
-                      {t.returnEmpty}
-                    </span>
-                    <span className="mt-1 block text-[11px] opacity-100">
-                      {returnEmpty ? t.returnIncluded : t.noReturn}
-                    </span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setBadRoad((current) => !current)}
-                    className={`rounded-2xl px-3 py-2.5 text-left text-xs font-semibold ring-1 transition-colors ${badRoad ? "bg-leaf text-leaf-foreground ring-leaf" : "bg-background text-muted-foreground ring-border"}`}
-                  >
-                    <span className="block text-[10px] font-bold uppercase tracking-[0.1em]">
-                      {t.badRoad}
-                    </span>
-                    <span className="mt-1 block text-[11px] opacity-100">
-                      {badRoad ? t.roadRough : t.roadNormal}
-                    </span>
-                  </button>
                 </div>
                 <div className="mt-3 grid grid-cols-2 gap-3">
                   <div className="rounded-2xl bg-background px-3 py-2.5 ring-1 ring-border">
