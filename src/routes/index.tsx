@@ -136,12 +136,6 @@ const copy = {
     returnIncluded: "Ida y vuelta",
     roadNormal: "Recargo 50%",
     roadRough: "Recargo 20%",
-    profitability: "Ganancia neta estimada",
-    grossRevenue: "Ingreso bruto",
-    fuelCost: "Combustible",
-    wearCost: "Desgaste",
-    netProfit: "Ganancia neta",
-    basedOnVehicle: "Estimación operativa basada en 11 km/l y ₡40/km de desgaste.",
     tolls: "Peajes y cuotas",
     paymentLocked: "Pago bloqueado después de confirmar",
     scheduledSuccess: "Viaje añadido a tu agenda",
@@ -214,12 +208,6 @@ const copy = {
     returnIncluded: "Round trip",
     roadNormal: "50% surcharge",
     roadRough: "20% surcharge",
-    profitability: "Estimated net profit",
-    grossRevenue: "Gross revenue",
-    fuelCost: "Fuel",
-    wearCost: "Wear",
-    netProfit: "Net profit",
-    basedOnVehicle: "Operating estimate based on 11 km/l and ₡40/km wear.",
     tolls: "Tolls and fees",
     paymentLocked: "Payment locked after confirmation",
     scheduledSuccess: "Trip added to your schedule",
@@ -572,17 +560,6 @@ function Index() {
     language === "es"
       ? `${formatColones(amount)} CRC (${formatDollars(amount)} USD)`
       : `${formatDollars(amount)} USD (${formatColones(amount)} CRC)`;
-  const formatCrc = (amount: number) => `₡${Math.round(amount).toLocaleString("es-CR")}`;
-  const operatingKm = distanceKm * returnMultiplier;
-  const fuelCostCrc = Math.round((operatingKm / 11) * 764);
-  const wearCostCrc = Math.round(operatingKm * 40);
-  const netProfitCrc = fare.totalCrc - fuelCostCrc - wearCostCrc;
-  const formatNetAmount = (amount: number) =>
-    language === "es" ? formatCrc(amount) : formatDollars(amount / (exchangeRate ?? 500));
-  const formatNetSecondary = (amount: number) =>
-    language === "es"
-      ? `${formatDollars(amount / (exchangeRate ?? 500))} USD`
-      : `${formatCrc(amount)} CRC`;
 
   const updatePassengers = (nextPassengers: number) => {
     setPassengers(nextPassengers);
@@ -729,53 +706,6 @@ function Index() {
                       ? "Confirmar reserva"
                       : "Confirm booking"}
                 </button>
-              </section>
-            )}
-
-            {mode === "transfers" && (
-              <section className="mt-3 rounded-[28px] bg-surface p-4 text-foreground shadow-lg shadow-primary/10 ring-1 ring-border">
-                <div className="flex items-center justify-between gap-3">
-                  <div>
-                    <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-leaf-ink">
-                      {t.profitability}
-                    </p>
-                    <p className="mt-1 text-xs text-muted-foreground">{t.basedOnVehicle}</p>
-                  </div>
-                  <span className="rounded-full bg-leaf/15 px-2.5 py-1 text-[10px] font-bold text-leaf-ink">
-                    {operatingKm.toFixed(1)} km
-                  </span>
-                </div>
-                <div className="mt-4 space-y-2 text-sm">
-                  <div className="flex justify-between gap-3">
-                    <span className="text-muted-foreground">{t.grossRevenue}</span>
-                    <strong>{formatNetAmount(fare.totalCrc)}</strong>
-                  </div>
-                  <div className="flex justify-between gap-3">
-                    <span className="text-muted-foreground">{t.fuelCost}</span>
-                    <strong className="text-muted-foreground">
-                      −{formatNetAmount(fuelCostCrc)}
-                    </strong>
-                  </div>
-                  <div className="flex justify-between gap-3">
-                    <span className="text-muted-foreground">{t.wearCost}</span>
-                    <strong className="text-muted-foreground">
-                      −{formatNetAmount(wearCostCrc)}
-                    </strong>
-                  </div>
-                  <div className="flex items-end justify-between gap-3 border-t border-border pt-3">
-                    <span className="font-bold">{t.netProfit}</span>
-                    <div className="text-right">
-                      <strong
-                        className={`font-display text-xl ${netProfitCrc < 0 ? "text-destructive" : "text-leaf-ink"}`}
-                      >
-                        {formatNetAmount(netProfitCrc)}
-                      </strong>
-                      <p className="text-[10px] text-muted-foreground">
-                        {formatNetSecondary(netProfitCrc)}
-                      </p>
-                    </div>
-                  </div>
-                </div>
               </section>
             )}
 
