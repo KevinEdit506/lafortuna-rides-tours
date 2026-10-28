@@ -1,4 +1,4 @@
-import { ExternalLink, LoaderCircle, RefreshCw } from "lucide-react";
+import { LoaderCircle, RefreshCw } from "lucide-react";
 import { useEffect, useState } from "react";
 
 type MiniRouteMapProps = {
@@ -50,13 +50,6 @@ export function MiniRouteMap({ origin, destination, language }: MiniRouteMapProp
     dirflg: "d",
   });
   const mapSource = `https://maps.google.com/maps?${parameters.toString()}`;
-  const fullMapSource = `https://www.google.com/maps/dir/?${new URLSearchParams({
-    api: "1",
-    origin: mapsAddress(origin),
-    destination: mapsAddress(destination),
-    travelmode: "driving",
-    hl: language,
-  }).toString()}`;
 
   useEffect(() => {
     if (loaded || !complete) return;
@@ -72,22 +65,10 @@ export function MiniRouteMap({ origin, destination, language }: MiniRouteMapProp
 
   return (
     <div className="mini-route-map">
-      <div className="mb-3 flex items-center justify-between gap-2">
+      <div className="mb-3">
         <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-panel-muted-foreground">
           {isSpanish ? "Ruta del viaje" : "Trip route"}
         </p>
-        <a
-          href={fullMapSource}
-          target="_blank"
-          rel="noopener noreferrer"
-          aria-label={
-            isSpanish ? "Abrir ruta completa en Google Maps" : "Open full route in Google Maps"
-          }
-          className="flex shrink-0 items-center gap-1.5 rounded-full bg-white/10 px-3 py-2 text-[11px] font-semibold text-white ring-1 ring-white/15"
-        >
-          {isSpanish ? "Ampliar" : "Expand"}
-          <ExternalLink className="size-3.5" />
-        </a>
       </div>
       <div className="relative h-[300px] overflow-hidden rounded-[22px] bg-surface ring-1 ring-white/15 sm:h-[320px]">
         {complete ? (

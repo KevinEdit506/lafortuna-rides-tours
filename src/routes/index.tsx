@@ -7,7 +7,6 @@ import {
   Clock3,
   Compass,
   Home,
-  History,
   MapPin,
   MessageCircle,
   Minus,
@@ -53,16 +52,6 @@ type TourCard = {
   rating: string;
   category: string;
   summary: string;
-};
-
-type RecentTrip = {
-  id: string;
-  createdAt: string;
-  origin: string;
-  destination: string;
-  fare: number;
-  rideType: "private" | "shared";
-  timing: string;
 };
 
 export const Route = createFileRoute("/")({
@@ -151,11 +140,6 @@ const copy = {
     confirmedTitle: "Solicitud lista para WhatsApp",
     confirmedBody: "El mensaje fue preparado con tu ruta, horario y forma de pago.",
     remove: "Eliminar",
-    recentTrips: "Historial de viajes recientes",
-    recentTripsIntro: "Consulta tus solicitudes más recientes en este dispositivo.",
-    noRecentTrips: "Aún no tienes viajes recientes. Confirma una reserva para verla aquí.",
-    requestSent: "Solicitud enviada",
-    clearHistory: "Borrar historial",
     estimate: "Tarifa estimada",
     trip: "Servicio de traslado",
     operations: "Costos operativos",
@@ -226,11 +210,6 @@ const copy = {
     confirmedTitle: "Request ready for WhatsApp",
     confirmedBody: "Your message was prepared with the route, timing, and payment method.",
     remove: "Remove",
-    recentTrips: "Recent trip history",
-    recentTripsIntro: "Review your latest requests on this device.",
-    noRecentTrips: "You have no recent trips yet. Confirm a booking to see it here.",
-    requestSent: "Request sent",
-    clearHistory: "Clear history",
     estimate: "Estimated fare",
     trip: "Transfer service",
     operations: "Operating costs",
@@ -291,15 +270,6 @@ function Index() {
   const [exchangeRate, setExchangeRate] = useState<number | null>(null);
   const [confirmed, setConfirmed] = useState(false);
   const [scheduledTrips, setScheduledTrips] = useState<string[]>([]);
-  const [recentTrips, setRecentTrips] = useState<RecentTrip[]>(() => {
-    if (typeof window === "undefined") return [];
-    try {
-      const stored = window.localStorage.getItem("via-la-fortuna-recent-trips");
-      return stored ? (JSON.parse(stored) as RecentTrip[]) : [];
-    } catch {
-      return [];
-    }
-  });
   const [scheduleDate, setScheduleDate] = useState(() => {
     const today = new Date();
     const offset = today.getTimezoneOffset();
@@ -321,10 +291,6 @@ function Index() {
   const originInputRef = useRef<HTMLInputElement>(null);
   const destinationInputRef = useRef<HTMLInputElement>(null);
   const t = copy[language];
-
-  useEffect(() => {
-    window.localStorage.setItem("via-la-fortuna-recent-trips", JSON.stringify(recentTrips));
-  }, [recentTrips]);
 
   useEffect(() => {
     if (!selectedTour) return;
@@ -633,20 +599,6 @@ function Index() {
       "noopener,noreferrer",
     );
     if (!tourName) {
-      setRecentTrips((current) =>
-        [
-          {
-            id: `${Date.now()}`,
-            createdAt: new Date().toISOString(),
-            origin,
-            destination,
-            fare: fare.total,
-            rideType,
-            timing: timing === "now" ? t.now : `${scheduleDate} · ${scheduleTime}`,
-          },
-          ...current,
-        ].slice(0, 5),
-      );
       setConfirmed(true);
     }
   };
@@ -1035,90 +987,6 @@ function Index() {
                 </button>
               </section>
             )}
-
-            <section
-              id="recent-trips"
-              className="rise mt-4 rounded-[30px] bg-surface p-4 shadow-xl shadow-primary/10 ring-1 ring-border [animation-delay:240ms]"
-            >
-              <div className="flex items-start justify-between gap-3">
-                <div className="flex items-start gap-3">
-                  <span className="grid size-9 shrink-0 place-items-center rounded-2xl bg-leaf/15 text-leaf-ink">
-                    <History className="size-4" />
-                  </span>
-                  <div>
-                    <h2 className="font-display text-xl">{t.recentTrips}</h2>
-                    <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
-                      {t.recentTripsIntro}
-                    </p>
-                  </div>
-                </div>
-                {recentTrips.length > 0 && (
-                  <button
-                    type="button"
-                    onClick={() => setRecentTrips([])}
-                    className="shrink-0 rounded-full px-2 py-1 text-[10px] font-bold text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
-                  >
-                    {t.clearHistory}
-                  </button>
-                )}
-              </div>
-              {recentTrips.length === 0 ? (
-                <div className="mt-4 rounded-2xl bg-background px-3 py-4 text-center text-xs leading-relaxed text-muted-foreground ring-1 ring-border">
-                  {t.noRecentTrips}
-                </div>
-              ) : (
-                <div className="mt-4 space-y-2">
-                  {recentTrips.map((trip) => (
-                    <article
-                      key={trip.id}
-                      className="rounded-2xl bg-background p-3 ring-1 ring-border"
-                    >
-                      <div className="flex items-start gap-3">
-                        <span className="mt-0.5 grid size-8 shrink-0 place-items-center rounded-full bg-leaf/15 text-leaf-ink">
-                          <RouteIcon className="size-3.5" />
-                        </span>
-                        <div className="min-w-0 flex-1">
-                          <div className="flex items-start justify-between gap-2">
-                            <p className="truncate text-xs font-bold">
-                              {trip.origin} → {trip.destination}
-                            </p>
-                            <button
-                              type="button"
-                              aria-label={`${t.remove}: ${trip.destination}`}
-                              onClick={() =>
-                                setRecentTrips((current) =>
-                                  current.filter((item) => item.id !== trip.id),
-                                )
-                              }
-                              className="grid size-6 shrink-0 place-items-center rounded-full text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
-                            >
-                              <X className="size-3.5" />
-                            </button>
-                          </div>
-                          <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-[10px] text-muted-foreground">
-                            <span>
-                              {new Date(trip.createdAt).toLocaleDateString(
-                                language === "es" ? "es-CR" : "en-US",
-                              )}
-                            </span>
-                            <span>·</span>
-                            <span>{trip.rideType === "private" ? t.private : t.shared}</span>
-                            <span>·</span>
-                            <span>{trip.timing}</span>
-                          </div>
-                          <div className="mt-2 flex items-center justify-between gap-2">
-                            <span className="rounded-full bg-leaf/15 px-2 py-1 text-[10px] font-bold text-leaf-ink">
-                              {t.requestSent}
-                            </span>
-                            <span className="text-xs font-bold">{formatFareAmount(trip.fare)}</span>
-                          </div>
-                        </div>
-                      </div>
-                    </article>
-                  ))}
-                </div>
-              )}
-            </section>
           </div>
 
           <div>
