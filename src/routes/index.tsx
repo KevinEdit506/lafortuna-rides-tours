@@ -780,7 +780,7 @@ function Index() {
                     <button
                       key={value}
                       onClick={() => setRideType(value)}
-                      className={`rounded-full py-2.5 text-[13px] font-bold ${rideType === value ? "bg-leaf text-leaf-foreground shadow-sm" : "text-muted-foreground"}`}
+                      className={`rounded-full py-2.5 text-[13px] font-bold ${rideType === value ? "bg-leaf text-leaf-foreground shadow-sm" : "bg-leaf/15 text-leaf-ink"}`}
                     >
                       {t[value]}
                     </button>
@@ -945,7 +945,7 @@ function Index() {
                         key={method}
                         disabled={confirmed}
                         onClick={() => setPaymentMethod(method)}
-                        className={`rounded-xl py-2.5 text-sm font-bold transition-colors ${paymentMethod === method ? "bg-leaf text-leaf-foreground" : "text-muted-foreground"} ${confirmed ? "cursor-not-allowed opacity-60" : ""}`}
+                        className={`rounded-xl py-2.5 text-sm font-bold transition-colors ${paymentMethod === method ? "bg-leaf text-leaf-foreground" : "bg-leaf/15 text-leaf-ink"} ${confirmed ? "cursor-not-allowed opacity-60" : ""}`}
                       >
                         {method === "card" ? t.card : t.cash}
                       </button>
