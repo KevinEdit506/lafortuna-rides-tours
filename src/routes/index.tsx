@@ -940,7 +940,7 @@ function Index() {
                     {t.payment}
                   </p>
                   <div className="mt-1 grid grid-cols-2 gap-1">
-                    {(["card", "cash"] as const).map((method) => (
+                    {(["cash", "card"] as const).map((method) => (
                       <button
                         key={method}
                         disabled={confirmed}
