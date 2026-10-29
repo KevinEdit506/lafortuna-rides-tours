@@ -266,7 +266,7 @@ function Index() {
     "Parque Nacional Volcán Arenal",
     "Parque Nacional Volcán Arenal",
   ]);
-  const [paymentMethod, setPaymentMethod] = useState<"card" | "cash">("card");
+  const [paymentMethod, setPaymentMethod] = useState<"card" | "cash">("cash");
   const [exchangeRate, setExchangeRate] = useState<number | null>(null);
   const [confirmed, setConfirmed] = useState(false);
   const [scheduledTrips, setScheduledTrips] = useState<string[]>([]);
