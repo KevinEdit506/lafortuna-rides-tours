@@ -22,6 +22,28 @@ import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react"
 
 import misticoImage from "../assets/mistico-bridges.jpg";
 import riverImage from "../assets/penas-blancas.jpg";
+import { MiniRouteMap } from "../components/MiniRouteMap";
+
+type MapsWindow = Window & {
+  google?: {
+    maps?: {
+      DirectionsService: new () => {
+        route: (request: unknown, callback: (result: unknown, status: string) => void) => void;
+      };
+      DirectionsStatus: { OK: string };
+      TravelMode: { DRIVING: string };
+      places?: {
+        Autocomplete: new (
+          input: HTMLInputElement,
+          options?: unknown,
+        ) => {
+          addListener: (event: string, callback: () => void) => void;
+          getPlace: () => { formatted_address?: string; name?: string };
+        };
+      };
+    };
+  };
+};
 
 type TourCard = {
   image: string;
@@ -228,7 +250,46 @@ function Index() {
     "Río Peñas Blancas",
   ];
   const [language, setLanguage] = useState<"es" | "en">("es");
+  const [mode, setMode] = useState<"transfers" | "tours">("transfers");
+  const [timing, setTiming] = useState<"now" | "schedule">("now");
+  const [rideType, setRideType] = useState<"private" | "shared">("private");
+  const [passengers, setPassengers] = useState(2);
+  const [returnEmpty, setReturnEmpty] = useState(false);
+  const [badRoad, setBadRoad] = useState(false);
+  const [origin, setOrigin] = useState("Centro de La Fortuna");
+  const [destination, setDestination] = useState("Parque Nacional Volcán Arenal");
+  const [passengerOrigins, setPassengerOrigins] = useState([
+    "Centro de La Fortuna",
+    "Centro de La Fortuna",
+  ]);
+  const [passengerDestinations, setPassengerDestinations] = useState([
+    "Parque Nacional Volcán Arenal",
+    "Parque Nacional Volcán Arenal",
+  ]);
+  const [paymentMethod, setPaymentMethod] = useState<"card" | "cash">("cash");
+  const [exchangeRate, setExchangeRate] = useState<number | null>(null);
+  const [confirmed, setConfirmed] = useState(false);
+  const [scheduledTrips, setScheduledTrips] = useState<string[]>([]);
+  const [scheduleDate, setScheduleDate] = useState(() => {
+    const today = new Date();
+    const offset = today.getTimezoneOffset();
+    return new Date(today.getTime() - offset * 60_000).toISOString().slice(0, 10);
+  });
+  const [scheduleTime, setScheduleTime] = useState("09:30");
+  const [distanceKm, setDistanceKm] = useState(8);
+  const [durationMinutes, setDurationMinutes] = useState(18);
+  const [passengerDistances, setPassengerDistances] = useState<number[]>([8, 8]);
+  const [passengerDurations, setPassengerDurations] = useState<number[]>([18, 18]);
+  const [mapsStatus, setMapsStatus] = useState<"loading" | "ready" | "fallback">("loading");
+  const [routeStatus, setRouteStatus] = useState<"idle" | "updating" | "updated">("idle");
   const [selectedTour, setSelectedTour] = useState<TourCard | null>(null);
+  const dynamicMultiplier = 2.8;
+  const returnMultiplier = returnEmpty ? 2 : 1;
+  const roadMultiplier = badRoad ? 1.2 : 1.5;
+  const tollsAndFees = 0;
+  const mapsScriptLoaded = useRef(false);
+  const originInputRef = useRef<HTMLInputElement>(null);
+  const destinationInputRef = useRef<HTMLInputElement>(null);
   const t = copy[language];
 
   useEffect(() => {
@@ -240,21 +301,306 @@ function Index() {
     return () => window.removeEventListener("keydown", closeOnEscape);
   }, [selectedTour]);
 
+  useEffect(() => {
+    const key = import.meta.env["VITE_GOOGLE_MAPS_API_KEY"];
+    if (!key) {
+      setMapsStatus("fallback");
+      return;
+    }
+    if (mapsScriptLoaded.current || document.querySelector("script[data-google-maps]")) {
+      mapsScriptLoaded.current = true;
+      setMapsStatus("ready");
+      return;
+    }
+    const script = document.createElement("script");
+    script.dataset["googleMaps"] = "true";
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(key)}&libraries=places`;
+    script.async = true;
+    script.onload = () => {
+      mapsScriptLoaded.current = true;
+      setMapsStatus("ready");
+    };
+    script.onerror = () => setMapsStatus("fallback");
+    document.head.appendChild(script);
+  }, []);
+
+  useEffect(() => {
+    if (mapsStatus !== "ready" || !origin.trim() || !destination.trim()) return;
+    setRouteStatus("updating");
+    const maps = (window as MapsWindow).google?.maps;
+    if (!maps) return;
+    const service = new maps.DirectionsService();
+    service.route(
+      { origin, destination, travelMode: maps.TravelMode.DRIVING },
+      (result: unknown, status) => {
+        const leg = (
+          result as {
+            routes?: Array<{
+              legs?: Array<{ distance?: { value: number }; duration?: { value: number } }>;
+            }>;
+          }
+        )?.routes?.[0]?.legs?.[0];
+        if (status !== maps.DirectionsStatus.OK || !leg?.distance?.value || !leg.duration?.value) {
+          setRouteStatus("updated");
+          return;
+        }
+        setDistanceKm(Math.max(1, Number(leg.distance.value) / 1000));
+        setDurationMinutes(Math.max(1, Math.round(Number(leg.duration.value) / 60)));
+        setRouteStatus("updated");
+      },
+    );
+  }, [destination, mapsStatus, origin]);
+
+  useEffect(() => {
+    if (mapsStatus !== "fallback" || !origin.trim() || !destination.trim()) return;
+    const fallbackDistance = Math.max(
+      1,
+      4 + ((origin.length * 7 + destination.length * 11) % 120) / 10,
+    );
+    setDistanceKm(fallbackDistance);
+    setDurationMinutes(Math.max(3, Math.round(fallbackDistance * 2.2)));
+    setRouteStatus("updated");
+  }, [destination, mapsStatus, origin]);
+
+  useEffect(() => {
+    if (rideType !== "shared" || mapsStatus !== "fallback") return;
+    setPassengerDistances((current) =>
+      Array.from({ length: passengers }, (_, index) => {
+        const passengerOrigin = passengerOrigins[index] ?? origin;
+        const passengerDestination = passengerDestinations[index] ?? destination;
+        return Math.max(
+          1,
+          4 + ((passengerOrigin.length * 7 + passengerDestination.length * 11) % 120) / 10,
+        );
+      }),
+    );
+    setPassengerDurations(() =>
+      Array.from({ length: passengers }, (_, index) => {
+        const passengerOrigin = passengerOrigins[index] ?? origin;
+        const passengerDestination = passengerDestinations[index] ?? destination;
+        const fallbackDistance = Math.max(
+          1,
+          4 + ((passengerOrigin.length * 7 + passengerDestination.length * 11) % 120) / 10,
+        );
+        return Math.max(3, Math.round(fallbackDistance * 2.2));
+      }),
+    );
+  }, [
+    destination,
+    durationMinutes,
+    mapsStatus,
+    origin,
+    passengerDestinations,
+    passengerOrigins,
+    passengers,
+    rideType,
+  ]);
+
+  useEffect(() => {
+    if (rideType !== "shared" || mapsStatus !== "ready") return;
+    const maps = (window as MapsWindow).google?.maps;
+    if (!maps) return;
+    const service = new maps.DirectionsService();
+    passengerOrigins.slice(0, passengers).forEach((passengerOrigin, index) => {
+      const passengerDestination = passengerDestinations[index] ?? destination;
+      service.route(
+        {
+          origin: passengerOrigin,
+          destination: passengerDestination,
+          travelMode: maps.TravelMode.DRIVING,
+        },
+        (result: unknown, status) => {
+          const leg = (
+            result as {
+              routes?: Array<{
+                legs?: Array<{ distance?: { value: number }; duration?: { value: number } }>;
+              }>;
+            }
+          )?.routes?.[0]?.legs?.[0];
+          if (status === maps.DirectionsStatus.OK && leg?.distance?.value && leg.duration?.value) {
+            setPassengerDistances((current) => {
+              const next = [...current];
+              next[index] = Math.max(1, leg.distance!.value / 1000);
+              return next;
+            });
+            setPassengerDurations((current) => {
+              const next = [...current];
+              next[index] = Math.max(1, Math.round(leg.duration!.value / 60));
+              return next;
+            });
+          }
+        },
+      );
+    });
+  }, [destination, mapsStatus, passengerDestinations, passengerOrigins, passengers, rideType]);
+
+  useEffect(() => {
+    if (mapsStatus !== "ready") return;
+    const places = (window as MapsWindow).google?.maps?.places;
+    if (!places) return;
+    const setup = (input: HTMLInputElement | null, setter: (value: string) => void) => {
+      if (!input || input.dataset["autocompleteReady"] === "true") return;
+      const autocomplete = new places.Autocomplete(input, {
+        componentRestrictions: { country: "cr" },
+        types: ["geocode", "establishment"],
+        fields: ["formatted_address", "name"],
+      });
+      autocomplete.addListener("place_changed", () => {
+        const place = autocomplete.getPlace();
+        setter(place.formatted_address ?? place.name ?? input.value);
+      });
+      input.dataset["autocompleteReady"] = "true";
+    };
+    setup(originInputRef.current, setOrigin);
+    setup(destinationInputRef.current, setDestination);
+  }, [mapsStatus]);
+
+  useEffect(() => {
+    let active = true;
+    fetch("https://api.frankfurter.dev/v2/providers/bccr/rates?base=usd")
+      .then((response) => {
+        if (!response.ok) throw new Error("Exchange rate request failed");
+        return response.json() as Promise<Array<{ quote: string; rate: number }>>;
+      })
+      .then((rates) => {
+        const usdToCrc = rates.find((rate) => rate.quote === "CRC")?.rate;
+        if (active && usdToCrc) setExchangeRate(usdToCrc);
+      })
+      .catch(() => undefined);
+    return () => {
+      active = false;
+    };
+  }, []);
+  const fare = useMemo(() => {
+    const crcToUsd = (amount: number) => amount / (exchangeRate ?? 500);
+    const calculateCrc = (distance: number) => {
+      const tripKm = distance * returnMultiplier;
+      return Math.round(((tripKm / 11) * 764 + tripKm * 40) * dynamicMultiplier * roadMultiplier);
+    };
+    if (rideType === "private") {
+      const totalCrc = calculateCrc(distanceKm);
+      const service = Math.round(crcToUsd(totalCrc) * 100) / 100;
+      return {
+        base: 0,
+        timeCharge: 0,
+        distanceCharge: service,
+        dynamicMultiplier,
+        returnMultiplier,
+        roadMultiplier,
+        tollsAndFees,
+        service,
+        operations: 0,
+        platform: tollsAndFees,
+        total: Math.round((service + tollsAndFees) * 100) / 100,
+        totalCrc,
+        perPassenger: [] as Array<{
+          destination: string;
+          distance: number;
+          duration: number;
+          total: number;
+        }>,
+      };
+    }
+    const perPassenger = passengerDestinations
+      .slice(0, passengers)
+      .map((passengerDestination, index) => {
+        const passengerDistance = passengerDistances[index] ?? distanceKm;
+        const totalCrc = calculateCrc(passengerDistance);
+        const total = Math.round((crcToUsd(totalCrc) + tollsAndFees) * 100) / 100;
+        return {
+          destination: passengerDestination,
+          distance: passengerDistance,
+          duration: passengerDurations[index] ?? durationMinutes,
+          total,
+        };
+      });
+    const total = perPassenger.reduce((sum, item) => sum + item.total, 0);
+    return {
+      base: 0,
+      timeCharge: 0,
+      distanceCharge: Math.round(crcToUsd(calculateCrc(distanceKm)) * 100) / 100,
+      dynamicMultiplier,
+      returnMultiplier,
+      roadMultiplier,
+      tollsAndFees,
+      service: total,
+      operations: 0,
+      platform: 0,
+      total: Math.round(total * 100) / 100,
+      totalCrc: Math.round(total * (exchangeRate ?? 500)),
+      perPassenger,
+    };
+  }, [
+    distanceKm,
+    durationMinutes,
+    exchangeRate,
+    passengerDestinations,
+    passengerDistances,
+    passengerDurations,
+    passengers,
+    rideType,
+    dynamicMultiplier,
+    returnMultiplier,
+    roadMultiplier,
+    tollsAndFees,
+  ]);
+
+  const formatColones = (amount: number) =>
+    exchangeRate ? `₡${Math.round(amount * exchangeRate).toLocaleString("es-CR")}` : "₡—";
+  const formatDollars = (amount: number) => `$${amount.toFixed(2)}`;
+  const formatFareAmount = (amount: number) =>
+    language === "es" ? formatColones(amount) : formatDollars(amount);
+  const formatFareSecondary = (amount: number) =>
+    language === "es" ? `${formatDollars(amount)} USD` : `${formatColones(amount)} CRC`;
+  const formatFareForMessage = (amount: number) =>
+    language === "es"
+      ? `${formatColones(amount)} CRC (${formatDollars(amount)} USD)`
+      : `${formatDollars(amount)} USD (${formatColones(amount)} CRC)`;
+
+  const updatePassengers = (nextPassengers: number) => {
+    setPassengers(nextPassengers);
+    setPassengerOrigins((current) =>
+      Array.from({ length: nextPassengers }, (_, index) => current[index] ?? origin),
+    );
+    setPassengerDestinations((current) =>
+      Array.from({ length: nextPassengers }, (_, index) => current[index] ?? destination),
+    );
+    setPassengerDistances((current) =>
+      Array.from({ length: nextPassengers }, (_, index) => current[index] ?? distanceKm),
+    );
+    setPassengerDurations((current) =>
+      Array.from({ length: nextPassengers }, (_, index) => current[index] ?? durationMinutes),
+    );
+  };
+
+  const scheduleTrip = () => {
+    const label = `${scheduleDate} · ${scheduleTime} · ${origin} → ${destination}`;
+    setScheduledTrips((current) => (current.includes(label) ? current : [...current, label]));
+    setTiming("schedule");
+  };
+
   const scrollToSection = (id: string) => {
     document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
   const openWhatsApp = (tourName?: string) => {
-    if (!tourName) return;
-    const message =
-      language === "es"
+    const isSpanish = language === "es";
+    const message = tourName
+      ? isSpanish
         ? `Hola Via La Fortuna, me gustaría reservar el tour ${tourName}. ¿Podrían ayudarme con disponibilidad y próximos pasos?`
-        : `Hello Via La Fortuna, I would like to book the ${tourName} tour. Could you help me with availability and next steps?`;
+        : `Hello Via La Fortuna, I would like to book the ${tourName} tour. Could you help me with availability and next steps?`
+      : isSpanish
+        ? `Hola Via La Fortuna, me gustaría reservar un traslado.\n\nOrigen: ${origin}\nDestino: ${destination}\n${rideType === "shared" ? `Rutas por pasajero:\n${passengerDestinations.map((item, index) => `Pasajero ${index + 1}: ${passengerOrigins[index]} → ${item}`).join("\n")}` : ""}\nTipo: ${rideType === "private" ? "Privado" : "Compartido"}\nHorario: ${timing === "now" ? "Ahora" : `${scheduleDate} · ${scheduleTime}`}\nPasajeros: ${passengers}\nPago: ${paymentMethod === "card" ? "Tarjeta" : "Efectivo"}\nTarifa estimada: ${formatFareForMessage(fare.total)}`
+        : `Hello Via La Fortuna, I would like to book a transfer.\n\nPickup: ${origin}\nDestination: ${destination}\n${rideType === "shared" ? `Passenger routes:\n${passengerDestinations.map((item, index) => `Passenger ${index + 1}: ${passengerOrigins[index]} → ${item}`).join("\n")}` : ""}\nType: ${rideType === "private" ? "Private" : "Shared"}\nTiming: ${timing === "now" ? "Now" : `${scheduleDate} · ${scheduleTime}`}\nPassengers: ${passengers}\nPayment: ${paymentMethod === "card" ? "Card" : "Cash"}\nEstimated fare: ${formatFareForMessage(fare.total)}`;
+
     window.open(
       `https://wa.me/50663135655?text=${encodeURIComponent(message)}`,
       "_blank",
       "noopener,noreferrer",
     );
+    if (!tourName) {
+      setConfirmed(true);
+    }
   };
 
   return (
@@ -298,19 +644,350 @@ function Index() {
           </div>
         </header>
 
-        <div>
-          <section className="dark-green-panel rise mt-8 rounded-[28px] px-5 py-5 text-white ring-1 ring-white/15 [animation-delay:80ms]">
-            <div className="flex items-center gap-2 text-white">
-              <span className="h-px w-4 bg-white/55" />
-              <p className="text-[11px] font-semibold uppercase tracking-[0.22em]">{t.eyebrow}</p>
-            </div>
-            <h1 className="mt-2 max-w-xl font-display text-[32px] leading-[1.12] text-white lg:text-5xl">
-              {t.title}
-            </h1>
-            <p className="mt-3 max-w-xl text-sm leading-relaxed text-white/80 lg:text-base">
-              {t.subtitle}
-            </p>
-          </section>
+        <div
+          className={`lg:gap-16 ${mode === "transfers" ? "lg:grid lg:grid-cols-[minmax(0,0.9fr)_minmax(390px,0.72fr)]" : "lg:block"}`}
+        >
+          <div>
+            <section className="dark-green-panel rise mt-8 rounded-[28px] px-5 py-5 text-white ring-1 ring-white/15 [animation-delay:80ms]">
+              <div className="flex items-center gap-2 text-white">
+                <span className="h-px w-4 bg-white/55" />
+                <p className="text-[11px] font-semibold uppercase tracking-[0.22em]">{t.eyebrow}</p>
+              </div>
+              <h1 className="mt-2 max-w-xl font-display text-[32px] leading-[1.12] text-white lg:text-5xl">
+                {t.title}
+              </h1>
+              <p className="mt-3 max-w-xl text-sm leading-relaxed text-white/80 lg:text-base">
+                {t.subtitle}
+              </p>
+            </section>
+
+            {mode === "transfers" && (
+              <section className="dark-green-panel rise mt-3 overflow-hidden rounded-[28px] p-5 text-white ring-1 ring-white/15 [animation-delay:140ms]">
+                <div className="flex items-center justify-between">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-panel-muted-foreground">
+                    {t.estimate}
+                  </p>
+                  <ShieldCheck className="size-5 text-leaf" />
+                </div>
+                <div className="mt-2 flex items-baseline gap-2">
+                  <p className="font-display text-[38px] leading-none">
+                    {formatFareAmount(fare.total)}
+                  </p>
+                  <p className="text-xs text-panel-muted-foreground">
+                    {language === "es" ? "CRC" : "USD"}
+                  </p>
+                </div>
+                <p className="mt-1 text-sm font-semibold text-panel-muted-foreground">
+                  {formatFareSecondary(fare.total)}
+                </p>
+                <p className="mt-2 text-[10px] text-panel-muted-foreground">
+                  {rideType === "private" ? t.privateFixed : t.perPassenger}
+                </p>
+                <p className="mt-1 text-[10px] text-panel-muted-foreground">
+                  {exchangeRate
+                    ? `${t.exchangeSource}: ₡${exchangeRate.toLocaleString("es-CR")} / USD`
+                    : t.exchangeLoading}
+                </p>
+                <p className="mt-3 flex items-center gap-2 rounded-xl bg-black/20 px-3 py-2 text-xs italic text-panel-muted-foreground ring-1 ring-white/10">
+                  <ShieldCheck className="size-4 shrink-0 text-leaf" />
+                  {t.note}
+                </p>
+                <button
+                  onClick={() => openWhatsApp()}
+                  className="mt-4 w-full rounded-2xl bg-leaf py-3.5 text-sm font-bold text-leaf-foreground transition-transform active:scale-[0.98]"
+                >
+                  {confirmed
+                    ? language === "es"
+                      ? "Solicitud confirmada"
+                      : "Request confirmed"
+                    : language === "es"
+                      ? "Confirmar reserva"
+                      : "Confirm booking"}
+                </button>
+              </section>
+            )}
+
+            {mode === "transfers" && (
+              <section
+                id="route-preview"
+                className="dark-green-panel mt-3 overflow-hidden rounded-[28px] p-4 text-white ring-1 ring-white/15"
+              >
+                <MiniRouteMap origin={origin} destination={destination} language={language} />
+              </section>
+            )}
+
+            {mode === "transfers" ? (
+              <section className="control-relief rise mt-4 rounded-[30px] bg-surface p-4 [animation-delay:200ms]">
+                <div className="address-fields rounded-[24px] bg-background p-3.5 text-foreground ring-1 ring-border">
+                  <div className="flex items-center gap-3">
+                    <span
+                      className="grid size-8 shrink-0 place-items-center rounded-full bg-white/10 ring-1 ring-white/10"
+                      aria-hidden="true"
+                    >
+                      <Circle className="size-3.5 text-muted-foreground" />
+                    </span>
+                    <label className="min-w-0 flex-1">
+                      <span className="block text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+                        {t.origin}
+                      </span>
+                      <input
+                        ref={originInputRef}
+                        aria-label={t.origin}
+                        value={origin}
+                        onChange={(event) => {
+                          setOrigin(event.target.value);
+                          setRouteStatus("updating");
+                        }}
+                        list="place-suggestions"
+                        className="address-input mt-1.5 min-h-12 w-full min-w-0 rounded-full bg-surface px-4 py-2.5 text-base font-semibold text-foreground outline-none"
+                      />
+                    </label>
+                  </div>
+                  <div className="my-3.5 border-t border-border" aria-hidden="true" />
+                  <div className="flex items-center gap-3">
+                    <span
+                      className="grid size-8 shrink-0 place-items-center rounded-full bg-white/10 ring-1 ring-white/10"
+                      aria-hidden="true"
+                    >
+                      <MapPin className="size-4 text-muted-foreground" />
+                    </span>
+                    <label className="min-w-0 flex-1">
+                      <span className="block text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+                        {t.destination}
+                      </span>
+                      <input
+                        ref={destinationInputRef}
+                        aria-label={t.destination}
+                        value={destination}
+                        onChange={(event) => {
+                          setDestination(event.target.value);
+                          setRouteStatus("updating");
+                        }}
+                        list="place-suggestions"
+                        className="address-input mt-1.5 min-h-12 w-full min-w-0 rounded-full bg-surface px-4 py-2.5 text-base font-semibold text-foreground outline-none"
+                      />
+                    </label>
+                  </div>
+                </div>
+                <datalist id="place-suggestions">
+                  {localPlaceSuggestions.map((place) => (
+                    <option key={place} value={place} />
+                  ))}
+                </datalist>
+
+                <div className="mt-4 grid grid-cols-2 gap-2 rounded-full bg-background p-1 ring-1 ring-border">
+                  {(["private", "shared"] as const).map((value) => (
+                    <button
+                      key={value}
+                      onClick={() => setRideType(value)}
+                      className={`rounded-full py-2.5 text-[13px] font-bold ${rideType === value ? "bg-leaf text-leaf-foreground shadow-sm" : "bg-leaf/15 text-leaf-ink"}`}
+                    >
+                      {t[value]}
+                    </button>
+                  ))}
+                </div>
+                <div className="mt-3 grid grid-cols-2 gap-3">
+                  <div className="rounded-2xl bg-background px-3 py-2.5 ring-1 ring-border">
+                    <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">
+                      <Clock3 className="size-3.5" />
+                      {timing === "now" ? t.now : t.schedule}
+                    </div>
+                    <button
+                      onClick={() => setTiming(timing === "now" ? "schedule" : "now")}
+                      className="mt-1 flex w-full items-center justify-between text-sm font-semibold"
+                    >
+                      {timing === "now" ? t.now : `${scheduleDate} · ${scheduleTime}`}
+                      <CalendarDays className="size-4 text-leaf" />
+                    </button>
+                  </div>
+                  <div className="rounded-2xl bg-background px-3 py-2.5 ring-1 ring-border">
+                    <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">
+                      <UsersRound className="size-3.5" />
+                      {t.passengers}
+                    </div>
+                    <div className="mt-1 flex items-center justify-between">
+                      <button
+                        aria-label="Restar pasajero"
+                        onClick={() => updatePassengers(Math.max(1, passengers - 1))}
+                      >
+                        <Minus className="size-4" />
+                      </button>
+                      <span className="text-sm font-bold">{passengers}</span>
+                      <button
+                        aria-label="Agregar pasajero"
+                        onClick={() => updatePassengers(Math.min(8, passengers + 1))}
+                      >
+                        <Plus className="size-4 text-leaf" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+                {timing === "schedule" && (
+                  <div className="mt-3 rounded-[24px] bg-background p-3 ring-1 ring-border">
+                    <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">
+                      <CalendarDays className="size-3.5 text-leaf" />
+                      {t.scheduledTrip}
+                    </div>
+                    <div className="mt-2 grid grid-cols-2 gap-2">
+                      <input
+                        type="date"
+                        value={scheduleDate}
+                        min={scheduleDate}
+                        onChange={(event) => setScheduleDate(event.target.value)}
+                        className="rounded-full bg-surface px-3 py-2 text-sm font-semibold ring-1 ring-border outline-none"
+                      />
+                      <input
+                        type="time"
+                        value={scheduleTime}
+                        onChange={(event) => setScheduleTime(event.target.value)}
+                        className="rounded-full bg-surface px-3 py-2 text-sm font-semibold ring-1 ring-border outline-none"
+                      />
+                    </div>
+                    <button
+                      onClick={scheduleTrip}
+                      className="mt-2 w-full rounded-full bg-leaf py-2 text-xs font-bold text-leaf-foreground transition-transform active:scale-[0.98]"
+                    >
+                      {t.agenda}
+                    </button>
+                  </div>
+                )}
+                {scheduledTrips.length > 0 && (
+                  <div className="mt-3 rounded-[24px] bg-background p-3 ring-1 ring-border">
+                    <div className="flex items-center justify-between gap-3">
+                      <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">
+                        {t.agenda}
+                      </p>
+                      <span className="rounded-full bg-leaf/15 px-2 py-1 text-[10px] font-bold text-leaf">
+                        {scheduledTrips.length}
+                      </span>
+                    </div>
+                    <div className="mt-2 space-y-2">
+                      {scheduledTrips.map((trip, index) => (
+                        <div
+                          key={`${trip}-${index}`}
+                          className="flex items-center gap-2 rounded-2xl bg-surface px-3 py-2 text-xs font-semibold"
+                        >
+                          <CalendarDays className="size-3.5 shrink-0 text-leaf" />
+                          <span className="min-w-0 flex-1 truncate">{trip}</span>
+                          <button
+                            type="button"
+                            aria-label={`${t.remove}: ${trip}`}
+                            title={t.remove}
+                            onClick={() =>
+                              setScheduledTrips((current) =>
+                                current.filter((_, itemIndex) => itemIndex !== index),
+                              )
+                            }
+                            className="grid size-6 shrink-0 place-items-center rounded-full text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
+                          >
+                            <X className="size-3.5" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                {rideType === "shared" && (
+                  <div className="mt-3 rounded-2xl bg-background p-3 ring-1 ring-border">
+                    <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">
+                      <MapPin className="size-3.5 text-leaf" />
+                      {t.sharedDestinations}
+                    </div>
+                    <div className="mt-2 space-y-2">
+                      {Array.from({ length: passengers }, (_, index) => (
+                        <div key={index} className="space-y-1">
+                          <label className="block">
+                            <span className="text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
+                              {t.pickupShort} {index + 1}
+                            </span>
+                            <input
+                              value={passengerOrigins[index] ?? ""}
+                              onChange={(event) =>
+                                setPassengerOrigins((current) =>
+                                  current.map((item, itemIndex) =>
+                                    itemIndex === index ? event.target.value : item,
+                                  ),
+                                )
+                              }
+                              placeholder={origin}
+                              className="mt-0.5 w-full rounded-full bg-surface px-3 py-2 text-sm font-semibold outline-none ring-1 ring-border"
+                            />
+                          </label>
+                          <label className="block">
+                            <span className="text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
+                              {t.passengerDestination} {index + 1}
+                            </span>
+                            <input
+                              value={passengerDestinations[index] ?? ""}
+                              onChange={(event) =>
+                                setPassengerDestinations((current) =>
+                                  current.map((item, itemIndex) =>
+                                    itemIndex === index ? event.target.value : item,
+                                  ),
+                                )
+                              }
+                              placeholder={destination}
+                              className="mt-0.5 w-full rounded-full bg-surface px-3 py-2 text-sm font-semibold outline-none ring-1 ring-border"
+                            />
+                          </label>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                <div className="mt-3 rounded-2xl bg-background p-1 ring-1 ring-border">
+                  <p className="px-3 pt-2 text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">
+                    {t.payment}
+                  </p>
+                  <div className="mt-1 grid grid-cols-2 gap-1">
+                    {(["cash", "card"] as const).map((method) => (
+                      <button
+                        key={method}
+                        disabled={confirmed}
+                        onClick={() => setPaymentMethod(method)}
+                        className={`rounded-xl py-2.5 text-sm font-bold transition-colors ${paymentMethod === method ? "bg-leaf text-leaf-foreground" : "bg-leaf/15 text-leaf-ink"} ${confirmed ? "cursor-not-allowed opacity-60" : ""}`}
+                      >
+                        {method === "card" ? t.card : t.cash}
+                      </button>
+                    ))}
+                  </div>
+                  {confirmed && (
+                    <p className="px-3 pb-2 pt-1 text-[10px] font-semibold text-muted-foreground">
+                      {t.paymentLocked}
+                    </p>
+                  )}
+                </div>
+                {confirmed && (
+                  <div
+                    className="mt-3 flex items-start gap-2 rounded-2xl bg-leaf/15 p-3 text-xs text-primary ring-1 ring-leaf/25"
+                    role="status"
+                  >
+                    <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-leaf" />
+                    <div>
+                      <p className="font-bold">{t.confirmedTitle}</p>
+                      <p className="mt-0.5 text-muted-foreground">{t.confirmedBody}</p>
+                    </div>
+                  </div>
+                )}
+              </section>
+            ) : (
+              <section className="rise mt-4 rounded-[30px] bg-surface p-5 shadow-xl shadow-primary/10 ring-1 ring-border">
+                <Compass className="size-7 text-leaf" />
+                <h2 className="mt-3 font-display text-2xl">{t.escapes}</h2>
+                <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                  {language === "es"
+                    ? "Elija una experiencia con transporte y acompañamiento bilingüe incluidos."
+                    : "Choose an experience with transport and bilingual assistance included."}
+                </p>
+                <button
+                  onClick={() => scrollToSection("tours")}
+                  className="mt-5 w-full rounded-2xl bg-jungle py-4 text-sm font-bold text-primary-foreground transition-transform active:scale-[0.98]"
+                >
+                  {t.explore}
+                </button>
+              </section>
+            )}
+          </div>
 
           <div>
             <section
@@ -639,6 +1316,12 @@ function Index() {
               icon: Home,
               active: true,
               action: () => window.scrollTo({ top: 0, behavior: "smooth" }),
+            },
+            {
+              label: t.routes,
+              icon: RouteIcon,
+              active: false,
+              action: () => scrollToSection("route-preview"),
             },
             { label: t.chat, icon: MessageCircle, active: false, action: () => openWhatsApp() },
             {
