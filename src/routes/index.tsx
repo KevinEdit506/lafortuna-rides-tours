@@ -23,6 +23,7 @@ import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react"
 import misticoImage from "../assets/mistico-bridges.jpg";
 import riverImage from "../assets/penas-blancas.jpg";
 import { MiniRouteMap } from "../components/MiniRouteMap";
+import { saveBooking } from "../lib/firebase-bookings";
 
 type MapsWindow = Window & {
   google?: {
@@ -269,6 +270,7 @@ function Index() {
   const [paymentMethod, setPaymentMethod] = useState<"card" | "cash">("cash");
   const [exchangeRate, setExchangeRate] = useState<number | null>(null);
   const [confirmed, setConfirmed] = useState(false);
+  const [bookingStatus, setBookingStatus] = useState<"idle" | "saving" | "saved" | "error">("idle");
   const [scheduledTrips, setScheduledTrips] = useState<string[]>([]);
   const [scheduleDate, setScheduleDate] = useState(() => {
     const today = new Date();
@@ -603,6 +605,59 @@ function Index() {
     }
   };
 
+  const confirmTransferBooking = async () => {
+    if (confirmed || bookingStatus === "saving") return;
+    setBookingStatus("saving");
+    try {
+      const result = await saveBooking({
+        serviceType: "transfer",
+        origin,
+        destination,
+        rideType,
+        passengers,
+        paymentMethod,
+        timing,
+        scheduleDate,
+        scheduleTime,
+        fareCrc: fare.total,
+        fareUsd: exchangeRate ? fare.total / exchangeRate : null,
+        distanceKm,
+        durationMinutes,
+        language,
+      });
+      if (!result.ok) {
+        setBookingStatus("error");
+        return;
+      }
+      setConfirmed(true);
+      setBookingStatus("saved");
+    } catch {
+      setBookingStatus("error");
+    }
+  };
+
+  const confirmTourBooking = async (tour: TourCard) => {
+    if (bookingStatus === "saving") return;
+    setBookingStatus("saving");
+    try {
+      const result = await saveBooking({
+        serviceType: "tour",
+        tourName: tour.title,
+        language,
+      });
+      if (!result.ok) {
+        setBookingStatus("error");
+        openWhatsApp(tour.title);
+        return;
+      }
+      setBookingStatus("saved");
+      setSelectedTour(null);
+    } catch {
+      setBookingStatus("error");
+      openWhatsApp(tour.title);
+    }
+  };
+
   return (
     <main
       className="app-shell min-h-screen text-foreground selection:bg-accent selection:text-accent-foreground"
@@ -693,17 +748,43 @@ function Index() {
                   {t.note}
                 </p>
                 <button
-                  onClick={() => openWhatsApp()}
+                  onClick={() => void confirmTransferBooking()}
                   className="mt-4 w-full rounded-2xl bg-leaf py-3.5 text-sm font-bold text-leaf-foreground transition-transform active:scale-[0.98]"
                 >
-                  {confirmed
+                  {bookingStatus === "saving"
                     ? language === "es"
-                      ? "Solicitud confirmada"
-                      : "Request confirmed"
-                    : language === "es"
-                      ? "Confirmar reserva"
-                      : "Confirm booking"}
+                      ? "Guardando reserva…"
+                      : "Saving booking…"
+                    : confirmed
+                      ? language === "es"
+                        ? "Solicitud confirmada"
+                        : "Request confirmed"
+                      : language === "es"
+                        ? "Confirmar reserva"
+                        : "Confirm booking"}
                 </button>
+                {bookingStatus === "saved" && (
+                  <p className="mt-2 text-center text-xs text-leaf">
+                    {language === "es"
+                      ? "Reserva guardada y enviada al panel administrativo."
+                      : "Booking saved and sent to the admin panel."}
+                  </p>
+                )}
+                {bookingStatus === "error" && (
+                  <div className="mt-2 space-y-2">
+                    <p className="text-center text-xs text-amber-200">
+                      {language === "es"
+                        ? "No se pudo guardar ahora. Puedes enviarla por WhatsApp como respaldo."
+                        : "It could not be saved now. You can send it by WhatsApp as a fallback."}
+                    </p>
+                    <button
+                      onClick={() => openWhatsApp()}
+                      className="w-full rounded-2xl border border-white/20 bg-white/10 py-2.5 text-xs font-bold text-white"
+                    >
+                      {language === "es" ? "Enviar por WhatsApp" : "Send by WhatsApp"}
+                    </button>
+                  </div>
+                )}
               </section>
             )}
 
@@ -1295,14 +1376,14 @@ function Index() {
             </div>
             <button
               type="button"
-              onClick={() => {
-                const tourName = selectedTour.title;
-                setSelectedTour(null);
-                openWhatsApp(tourName);
-              }}
+              onClick={() => void confirmTourBooking(selectedTour)}
               className="mt-4 w-full rounded-2xl bg-leaf py-3.5 text-sm font-bold text-leaf-foreground shadow-[0_3px_0_color-mix(in_oklch,var(--color-jungle)_35%,transparent)]"
             >
-              {t.reserveTour}
+              {bookingStatus === "saving"
+                ? language === "es"
+                  ? "Guardando…"
+                  : "Saving…"
+                : t.reserveTour}
             </button>
           </section>
         </div>
