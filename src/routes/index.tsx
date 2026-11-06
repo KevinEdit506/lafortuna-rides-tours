@@ -101,9 +101,6 @@ export const Route = createFileRoute("/")({
 const copy = {
   es: {
     place: "La Fortuna",
-    eyebrow: "Movilidad local",
-    title: "Su viaje, bien cuidado.",
-    subtitle: "Traslados puntuales y experiencias seleccionadas en el corazón del Arenal.",
     transfers: "Traslados",
     tours: "Tours",
     origin: "Origen",
@@ -171,9 +168,6 @@ const copy = {
   },
   en: {
     place: "La Fortuna",
-    eyebrow: "Local mobility",
-    title: "Your journey, well cared for.",
-    subtitle: "Punctual transfers and curated experiences in the heart of Arenal.",
     transfers: "Transfers",
     tours: "Tours",
     origin: "Pickup",
@@ -703,19 +697,6 @@ function Index() {
           className={`lg:gap-16 ${mode === "transfers" ? "lg:grid lg:grid-cols-[minmax(0,0.9fr)_minmax(390px,0.72fr)]" : "lg:block"}`}
         >
           <div>
-            <section className="dark-green-panel rise mt-8 rounded-[28px] px-5 py-5 text-white ring-1 ring-white/15 [animation-delay:80ms]">
-              <div className="flex items-center gap-2 text-white">
-                <span className="h-px w-4 bg-white/55" />
-                <p className="text-[11px] font-semibold uppercase tracking-[0.22em]">{t.eyebrow}</p>
-              </div>
-              <h1 className="mt-2 max-w-xl font-display text-[32px] leading-[1.12] text-white lg:text-5xl">
-                {t.title}
-              </h1>
-              <p className="mt-3 max-w-xl text-sm leading-relaxed text-white/80 lg:text-base">
-                {t.subtitle}
-              </p>
-            </section>
-
             {mode === "transfers" && (
               <section className="dark-green-panel rise mt-3 overflow-hidden rounded-[28px] p-5 text-white ring-1 ring-white/15 [animation-delay:140ms]">
                 <div className="flex items-center justify-between">
