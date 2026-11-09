@@ -115,8 +115,6 @@ const copy = {
     scheduledTrip: "Viaje programado",
     pickupShort: "Origen",
     destinationShort: "Destino",
-    perPassenger: "Por pasajero",
-    privateFixed: "Tarifa privada fija por viaje",
     distance: "Distancia",
     duration: "Tiempo estimado",
     mapsLoading: "Conectando con Google Maps…",
@@ -143,7 +141,6 @@ const copy = {
     operations: "Costos operativos",
     platform: "Gestión y cobertura",
     total: "Total estimado",
-    note: "Precio claro antes de reservar",
     curation: "Selección local",
     escapes: "Experiencias en La Fortuna",
     explore: "Ver todas",
@@ -182,8 +179,6 @@ const copy = {
     scheduledTrip: "Scheduled trip",
     pickupShort: "Pickup",
     destinationShort: "Destination",
-    perPassenger: "Per passenger",
-    privateFixed: "Fixed private trip fare",
     distance: "Distance",
     duration: "Estimated time",
     mapsLoading: "Connecting to Google Maps…",
@@ -210,7 +205,6 @@ const copy = {
     operations: "Operating costs",
     platform: "Management and coverage",
     total: "Estimated total",
-    note: "Clear pricing before booking",
     curation: "Local selection",
     escapes: "Experiences in La Fortuna",
     explore: "View all",
@@ -698,7 +692,7 @@ function Index() {
         >
           <div>
             {mode === "transfers" && (
-              <section className="experience-panel rise mt-3 overflow-hidden rounded-[28px] p-5 ring-1 ring-border [animation-delay:140ms]">
+              <section className="experience-panel rise mt-3 overflow-hidden rounded-[28px] p-4 ring-1 ring-border [animation-delay:140ms]">
                 <div className="flex items-center justify-between">
                   <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-panel-muted-foreground">
                     {t.estimate}
@@ -716,21 +710,14 @@ function Index() {
                 <p className="mt-1 text-sm font-semibold text-panel-muted-foreground">
                   {formatFareSecondary(fare.total)}
                 </p>
-                <p className="mt-2 text-[10px] text-panel-muted-foreground">
-                  {rideType === "private" ? t.privateFixed : t.perPassenger}
-                </p>
                 <p className="mt-1 text-[10px] text-panel-muted-foreground">
                   {exchangeRate
                     ? `${t.exchangeSource}: ₡${exchangeRate.toLocaleString("es-CR")} / USD`
                     : t.exchangeLoading}
                 </p>
-                <p className="mt-3 flex items-center gap-2 rounded-xl bg-black/20 px-3 py-2 text-xs italic text-panel-muted-foreground ring-1 ring-white/10">
-                  <ShieldCheck className="size-4 shrink-0 text-leaf" />
-                  {t.note}
-                </p>
                 <button
                   onClick={() => void confirmTransferBooking()}
-                  className="mt-4 w-full rounded-2xl bg-leaf py-3.5 text-sm font-bold text-leaf-foreground transition-transform active:scale-[0.98]"
+                  className="mt-3 w-full rounded-2xl bg-leaf py-3.5 text-sm font-bold text-leaf-foreground transition-transform active:scale-[0.98]"
                 >
                   {bookingStatus === "saving"
                     ? language === "es"
