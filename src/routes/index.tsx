@@ -698,7 +698,7 @@ function Index() {
         >
           <div>
             {mode === "transfers" && (
-              <section className="dark-green-panel rise mt-3 overflow-hidden rounded-[28px] p-5 text-white ring-1 ring-white/15 [animation-delay:140ms]">
+              <section className="experience-panel rise mt-3 overflow-hidden rounded-[28px] p-5 ring-1 ring-border [animation-delay:140ms]">
                 <div className="flex items-center justify-between">
                   <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-panel-muted-foreground">
                     {t.estimate}
@@ -772,7 +772,7 @@ function Index() {
             {mode === "transfers" && (
               <section
                 id="route-preview"
-                className="dark-green-panel mt-3 overflow-hidden rounded-[28px] p-4 text-white ring-1 ring-white/15"
+                className="experience-panel mt-3 overflow-hidden rounded-[28px] p-4 ring-1 ring-border"
               >
                 <MiniRouteMap origin={origin} destination={destination} language={language} />
               </section>
@@ -1054,7 +1054,7 @@ function Index() {
           <div>
             <section
               id="tours"
-              className="dark-green-panel mt-10 scroll-mt-6 rounded-[30px] p-4 text-white ring-1 ring-white/15"
+              className="experience-panel mt-10 scroll-mt-6 rounded-[30px] p-4 ring-1 ring-border"
             >
               <div className="mb-4">
                 <div>
@@ -1208,7 +1208,7 @@ function Index() {
 
             <section
               id="reviews"
-              className="dark-green-panel rise mt-5 rounded-[30px] p-4 text-white ring-1 ring-white/15 [animation-delay:320ms]"
+              className="experience-panel rise mt-5 rounded-[30px] p-4 ring-1 ring-border [animation-delay:320ms]"
             >
               <div className="flex items-start justify-between gap-4">
                 <div>
