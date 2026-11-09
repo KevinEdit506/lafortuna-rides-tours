@@ -447,18 +447,24 @@ function Index() {
 
   useEffect(() => {
     let active = true;
-    fetch("https://api.frankfurter.dev/v2/providers/bccr/rates?base=usd")
-      .then((response) => {
-        if (!response.ok) throw new Error("Exchange rate request failed");
-        return response.json() as Promise<Array<{ quote: string; rate: number }>>;
-      })
-      .then((rates) => {
-        const usdToCrc = rates.find((rate) => rate.quote === "CRC")?.rate;
-        if (active && usdToCrc) setExchangeRate(usdToCrc);
-      })
-      .catch(() => undefined);
+    const refreshExchangeRate = () => {
+      fetch("https://api.frankfurter.dev/v2/providers/bccr/rates?base=usd")
+        .then((response) => {
+          if (!response.ok) throw new Error("Exchange rate request failed");
+          return response.json() as Promise<Array<{ quote: string; rate: number }>>;
+        })
+        .then((rates) => {
+          const usdToCrc = rates.find((rate) => rate.quote === "CRC")?.rate;
+          if (active && usdToCrc) setExchangeRate(usdToCrc);
+        })
+        .catch(() => undefined);
+    };
+
+    refreshExchangeRate();
+    const refreshTimer = window.setInterval(refreshExchangeRate, 15 * 60 * 1000);
     return () => {
       active = false;
+      window.clearInterval(refreshTimer);
     };
   }, []);
   const fare = useMemo(() => {
