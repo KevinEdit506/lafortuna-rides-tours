@@ -244,6 +244,7 @@ function Index() {
   ];
   const [language, setLanguage] = useState<"es" | "en">("es");
   const [mode, setMode] = useState<"transfers" | "tours">("transfers");
+  const [activeNav, setActiveNav] = useState<"home" | "routes" | "chat" | "profile">("home");
   const [timing, setTiming] = useState<"now" | "schedule">("now");
   const [rideType, setRideType] = useState<"private" | "shared">("private");
   const [passengers, setPassengers] = useState(2);
@@ -1459,40 +1460,59 @@ function Index() {
         </div>
       )}
 
-      <nav className="pointer-events-none fixed bottom-0 left-1/2 z-20 w-full max-w-[400px] -translate-x-1/2 px-8 pb-4 lg:max-w-lg">
-        <div className="pointer-events-auto flex scale-[0.94] items-center justify-between rounded-[26px] bg-jungle/95 px-6 py-2.5 text-primary-foreground shadow-2xl ring-1 ring-primary-foreground/10 backdrop-blur-md">
+      <nav
+        className="pointer-events-none fixed bottom-0 left-1/2 z-20 w-full max-w-[400px] -translate-x-1/2 px-8 pb-4 lg:max-w-lg"
+        aria-label={language === "es" ? "Navegación principal" : "Main navigation"}
+      >
+        <div className="bottom-nav-shell pointer-events-auto flex scale-[0.94] items-center justify-between rounded-[26px] bg-jungle/95 px-6 py-2.5 text-primary-foreground shadow-2xl ring-1 ring-primary-foreground/10 backdrop-blur-md">
           {[
             {
+              id: "home" as const,
               label: t.home,
               icon: Home,
-              active: true,
-              action: () => window.scrollTo({ top: 0, behavior: "smooth" }),
+              action: () => {
+                setActiveNav("home");
+                window.scrollTo({ top: 0, behavior: "smooth" });
+              },
             },
             {
+              id: "routes" as const,
               label: t.routes,
               icon: RouteIcon,
-              active: false,
-              action: () => scrollToSection("route-preview"),
+              action: () => {
+                setActiveNav("routes");
+                scrollToSection("route-preview");
+              },
             },
-            { label: t.chat, icon: MessageCircle, active: false, action: () => openWhatsApp() },
             {
+              id: "chat" as const,
+              label: t.chat,
+              icon: MessageCircle,
+              action: () => {
+                setActiveNav("chat");
+                openWhatsApp();
+              },
+            },
+            {
+              id: "profile" as const,
               label: t.profile,
               icon: UserRound,
-              active: false,
-              action: () => scrollToSection("tours"),
+              action: () => {
+                setActiveNav("profile");
+                scrollToSection("tours");
+              },
             },
-          ].map(({ label, icon: Icon, active, action }) => (
+          ].map(({ id, label, icon: Icon, action }) => (
             <button
               key={label}
               onClick={action}
-              className={`flex min-w-12 flex-col items-center gap-1 text-[10px] font-bold ${active ? "text-primary-foreground" : "text-panel-muted-foreground"}`}
+              aria-current={activeNav === id ? "page" : undefined}
+              className={`bottom-nav-item flex min-w-12 flex-col items-center gap-1 text-[10px] font-bold ${activeNav === id ? "is-active text-primary-foreground" : "text-panel-muted-foreground"}`}
             >
-              <span
-                className={`grid size-8 place-items-center rounded-xl ${active ? "bg-leaf text-leaf-foreground" : "bg-primary-foreground/5"}`}
-              >
+              <span className="bottom-nav-icon grid size-8 place-items-center rounded-xl">
                 <Icon className="size-4" />
               </span>
-              {label}
+              <span className="bottom-nav-label">{label}</span>
             </button>
           ))}
         </div>
