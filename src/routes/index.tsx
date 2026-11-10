@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import {
   CalendarDays,
+  Bike,
   CarFront,
   CheckCircle2,
   Circle,
@@ -10,12 +11,16 @@ import {
   MapPin,
   MessageCircle,
   Minus,
+  Package,
+  Plane,
   Plus,
   Route as RouteIcon,
+  Search,
   ShieldCheck,
   Star,
   X,
   UserRound,
+  Utensils,
   UsersRound,
 } from "lucide-react";
 import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
@@ -692,6 +697,65 @@ function Index() {
             ))}
           </div>
         </header>
+
+        {mode === "transfers" && (
+          <section
+            className="reference-shortcuts rise mt-5"
+            aria-label={language === "es" ? "Accesos rápidos" : "Quick actions"}
+          >
+            <div className="reference-location">
+              <MapPin className="size-4" />
+              <span>{origin || (language === "es" ? "Ubicación actual" : "Current location")}</span>
+            </div>
+            <div className="reference-shortcut-row">
+              {[
+                { label: language === "es" ? "Alimentos" : "Food", icon: Utensils, tone: "orange" },
+                { label: language === "es" ? "Viaje" : "Ride", icon: Plane, tone: "blue" },
+                { label: language === "es" ? "Envíos" : "Delivery", icon: Package, tone: "green" },
+                { label: language === "es" ? "Moto" : "Moto", icon: Bike, tone: "amber" },
+                {
+                  label: language === "es" ? "Reserva" : "Booking",
+                  icon: CalendarDays,
+                  tone: "purple",
+                },
+              ].map(({ label, icon: Icon, tone }) => (
+                <button
+                  key={label}
+                  type="button"
+                  className={`reference-shortcut reference-shortcut-${tone}`}
+                  onClick={() =>
+                    label === (language === "es" ? "Reserva" : "Booking")
+                      ? scrollToSection("route-preview")
+                      : undefined
+                  }
+                >
+                  <span className="reference-shortcut-icon">
+                    <Icon className="size-6" />
+                  </span>
+                  <span>{label}</span>
+                </button>
+              ))}
+            </div>
+            <button
+              type="button"
+              className="reference-search"
+              onClick={() => scrollToSection("route-preview")}
+            >
+              <Search className="size-7 shrink-0" />
+              <span>{language === "es" ? "¿A dónde vas?" : "Where are you going?"}</span>
+              <span className="reference-search-action">
+                <CalendarDays className="size-4" />
+                {timing === "now"
+                  ? language === "es"
+                    ? "Ahora"
+                    : "Now"
+                  : language === "es"
+                    ? "Programado"
+                    : "Scheduled"}
+              </span>
+            </button>
+          </section>
+        )}
 
         <div
           className={`lg:gap-16 ${mode === "transfers" ? "lg:grid lg:grid-cols-[minmax(0,0.9fr)_minmax(390px,0.72fr)]" : "lg:block"}`}
