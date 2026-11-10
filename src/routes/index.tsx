@@ -1,7 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import {
   CalendarDays,
-  Bike,
   CarFront,
   CheckCircle2,
   Circle,
@@ -711,8 +710,11 @@ function Index() {
               {[
                 { label: language === "es" ? "Alimentos" : "Food", icon: Utensils, tone: "orange" },
                 { label: language === "es" ? "Viaje" : "Ride", icon: Plane, tone: "blue" },
-                { label: language === "es" ? "Envíos" : "Delivery", icon: Package, tone: "green" },
-                { label: language === "es" ? "Moto" : "Moto", icon: Bike, tone: "amber" },
+                {
+                  label: language === "es" ? "Enviar artículos" : "Send items",
+                  icon: Package,
+                  tone: "green",
+                },
                 {
                   label: language === "es" ? "Reserva" : "Booking",
                   icon: CalendarDays,
@@ -835,8 +837,38 @@ function Index() {
               </section>
             )}
 
+            {mode === "transfers" && (
+              <section
+                className="promo-banner rise mt-4"
+                aria-label={language === "es" ? "Promoción" : "Promotion"}
+              >
+                <div>
+                  <p className="text-[10px] font-bold uppercase tracking-[0.18em]">
+                    {language === "es" ? "Promoción local" : "Local promotion"}
+                  </p>
+                  <h2 className="mt-1 font-display text-[22px] leading-tight">
+                    {language === "es" ? "Pizza La Fortuna" : "Pizza La Fortuna"}
+                  </h2>
+                  <p className="mt-1 text-sm font-bold">
+                    {language === "es" ? "2x1 · desde ₡9.990" : "2-for-1 · from ₡9,990"}
+                  </p>
+                  <p className="mt-1 text-[11px] opacity-80">
+                    {language === "es"
+                      ? "Consulta disponibilidad local"
+                      : "Ask about local availability"}
+                  </p>
+                </div>
+                <div className="promo-pizza" aria-hidden="true">
+                  🍕
+                </div>
+              </section>
+            )}
+
             {mode === "transfers" ? (
               <section className="control-relief rise mt-4 rounded-[30px] bg-surface p-4 [animation-delay:200ms]">
+                <h2 className="mb-3 rounded-full bg-jungle px-5 py-3 text-center font-display text-xl text-primary-foreground shadow-[0_4px_0_color-mix(in_oklch,var(--color-jungle)_35%,transparent)]">
+                  {language === "es" ? "Reservar Tours" : "Book Tours"}
+                </h2>
                 <div className="address-fields rounded-[24px] bg-background p-3.5 text-foreground ring-1 ring-border">
                   <div className="flex items-center gap-3">
                     <span
