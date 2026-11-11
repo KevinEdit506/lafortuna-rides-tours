@@ -11,7 +11,7 @@ Las imágenes de categorías del sitio son fotografías reales descargadas y opt
 
 Las imágenes fueron recortadas u optimizadas para su uso como miniaturas de interfaz. No se presentan como imágenes generadas por IA.
 
-El fondo fijo actual del Volcán Arenal utiliza la imagen proporcionada por el propietario del proyecto (`public/arenal-background-current.jpg`).
+El fondo fijo actual del Volcán Arenal (`public/arenal-background-light.jpg`) es una versión muy aclarada de la imagen proporcionada por el propietario del proyecto (`public/arenal-background-current.jpg`), editada para dejar el fondo casi blanco.
 
 ## Licencias
 
