@@ -662,7 +662,7 @@ function Index() {
       className="app-shell min-h-screen text-foreground selection:bg-accent selection:text-accent-foreground"
       style={
         {
-          "--arenal-background": `url("${import.meta.env.BASE_URL}arenal-background-current.jpg")`,
+          "--arenal-background": `url("${import.meta.env.BASE_URL}arenal-background-light.jpg")`,
         } as CSSProperties
       }
     >
@@ -677,7 +677,7 @@ function Index() {
               <span className="font-display text-base">Vía</span>
             </div>
             <div className="leading-tight">
-              <p className="text-[9px] font-semibold uppercase tracking-[0.25em] text-white">
+              <p className="text-[9px] font-semibold uppercase tracking-[0.25em] text-foreground/70">
                 {t.place}
               </p>
             </div>
