@@ -76,6 +76,16 @@ type TourCard = {
   summary: string;
 };
 
+type BlogArticle = {
+  slug: string;
+  image: string;
+  category: string;
+  readTime: string;
+  title: string;
+  excerpt: string;
+  paragraphs: string[];
+};
+
 type FeatureKey = "food" | "ride" | "send" | "motorbike" | "booking" | "promotion";
 
 function getFeatureContent(feature: FeatureKey, language: "es" | "en") {
@@ -368,6 +378,7 @@ function Index() {
   const [mapsStatus, setMapsStatus] = useState<"loading" | "ready" | "fallback">("loading");
   const [routeStatus, setRouteStatus] = useState<"idle" | "updating" | "updated">("idle");
   const [selectedTour, setSelectedTour] = useState<TourCard | null>(null);
+  const [selectedArticle, setSelectedArticle] = useState<BlogArticle | null>(null);
   const [selectedFeature, setSelectedFeature] = useState<FeatureKey | null>(() =>
     typeof window === "undefined" ? null : featureFromHash(window.location.hash),
   );
@@ -415,10 +426,23 @@ function Index() {
   }, [destinationSearchOpen]);
 
   useEffect(() => {
-    const handleBack = () => setSelectedTour(null);
+    const handleBack = () => {
+      const hash = window.location.hash;
+      if (!hash.startsWith("#tour/")) setSelectedTour(null);
+      if (!hash.startsWith("#blog/")) setSelectedArticle(null);
+    };
     window.addEventListener("popstate", handleBack);
     return () => window.removeEventListener("popstate", handleBack);
   }, []);
+
+  useEffect(() => {
+    if (!selectedArticle) return;
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") closeArticleDetail();
+    };
+    window.addEventListener("keydown", closeOnEscape);
+    return () => window.removeEventListener("keydown", closeOnEscape);
+  }, [selectedArticle]);
 
   useEffect(() => {
     const handleFeatureBack = () => {
@@ -905,6 +929,16 @@ function Index() {
     else setSelectedTour(null);
   };
 
+  const openArticleDetail = (article: BlogArticle) => {
+    window.history.pushState({ blog: article.slug }, "", `#blog/${article.slug}`);
+    setSelectedArticle(article);
+  };
+
+  const closeArticleDetail = () => {
+    if (window.location.hash.startsWith("#blog/")) window.history.back();
+    else setSelectedArticle(null);
+  };
+
   const openFeatureDetail = (feature: FeatureKey) => {
     window.history.pushState({ feature }, "", `#feature/${feature}`);
     setFeatureTransition("enter");
@@ -944,6 +978,44 @@ function Index() {
 
   const featureContent = selectedFeature ? getFeatureContent(selectedFeature, language) : null;
   const FeatureIcon = selectedFeature ? getFeatureIcon(selectedFeature) : Star;
+  const blogArticle: BlogArticle =
+    language === "es"
+      ? {
+          slug: "primer-dia-en-arenal",
+          image: `${import.meta.env.BASE_URL}category-arenal.jpg`,
+          category: "Guía local · Arenal",
+          readTime: "5 min de lectura",
+          title: "Tu primer día en Arenal: una ruta sencilla desde La Fortuna",
+          excerpt:
+            "Una guía práctica para combinar paisaje volcánico, agua dulce y tiempo suficiente para disfrutar sin correr.",
+          paragraphs: [
+            "La Fortuna funciona mejor cuando dejas espacio para mirar alrededor. Para un primer día, empieza con una salida tranquila desde el centro y reserva la mañana para conocer el entorno del Volcán Arenal.",
+            "Después de caminar, una parada junto al río o una visita a aguas termales permite bajar el ritmo. Lleva zapatos con buen agarre, una capa ligera para la lluvia y agua; el clima puede cambiar rápido cerca del bosque.",
+            "Si quieres aprovechar mejor el tiempo, coordina el traslado con anticipación. Así puedes concentrarte en la experiencia, elegir entre un viaje privado o compartido y terminar el día de regreso en La Fortuna sin preocuparte por la ruta.",
+          ],
+        }
+      : {
+          slug: "first-day-in-arenal",
+          image: `${import.meta.env.BASE_URL}category-arenal.jpg`,
+          category: "Local guide · Arenal",
+          readTime: "5 min read",
+          title: "Your first day around Arenal: an easy route from La Fortuna",
+          excerpt:
+            "A practical guide to combining volcanic scenery, fresh water, and enough time to enjoy the day without rushing.",
+          paragraphs: [
+            "La Fortuna is best experienced with room to look around. On your first day, start with a relaxed departure from town and use the morning to discover the landscape around Arenal Volcano.",
+            "After a walk, a riverside stop or a hot-springs visit is a good way to slow down. Bring shoes with reliable grip, a light rain layer, and water; weather can change quickly near the forest.",
+            "To make the most of your time, coordinate your transfer in advance. That lets you focus on the experience, choose a private or shared ride, and return to La Fortuna without worrying about the route.",
+          ],
+        };
+  useEffect(() => {
+    const hash = window.location.hash;
+    if (hash === "#blog/primer-dia-en-arenal" || hash === "#blog/first-day-in-arenal") {
+      setSelectedArticle(blogArticle);
+    }
+    // The article is static content; this effect only restores a shared deep link.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [language]);
   const destinationSuggestions = localPlaceSuggestions.filter((place) =>
     place.toLocaleLowerCase().includes(destinationQuery.trim().toLocaleLowerCase()),
   );
@@ -1715,9 +1787,123 @@ function Index() {
               </div>
               <p className="mt-4 text-[11px] leading-relaxed text-white/60">{t.reviewDisclosure}</p>
             </section>
+
+            <section
+              id="blog"
+              className="experience-panel rise mt-5 rounded-[30px] p-4 ring-1 ring-border [animation-delay:380ms]"
+            >
+              <div className="flex items-end justify-between gap-3">
+                <div>
+                  <div className="flex items-center gap-2 text-leaf">
+                    <span className="size-1.5 rounded-full bg-leaf" />
+                    <p className="text-[11px] font-bold uppercase tracking-[0.2em]">
+                      {language === "es" ? "Blog local" : "Local blog"}
+                    </p>
+                  </div>
+                  <h2 className="mt-1 font-display text-[22px] text-white">
+                    {language === "es" ? "Notas para tu viaje" : "Notes for your trip"}
+                  </h2>
+                </div>
+                <Compass className="size-5 text-leaf" aria-hidden="true" />
+              </div>
+              <article className="mt-4 overflow-hidden rounded-[24px] bg-white text-foreground shadow-xl ring-1 ring-white/20">
+                <img
+                  src={blogArticle.image}
+                  alt={blogArticle.title}
+                  width={1024}
+                  height={768}
+                  loading="lazy"
+                  className="h-44 w-full object-cover"
+                />
+                <div className="p-4">
+                  <div className="flex items-center justify-between gap-3 text-[10px] font-bold uppercase tracking-[0.12em] text-leaf-ink">
+                    <span>{blogArticle.category}</span>
+                    <span>{blogArticle.readTime}</span>
+                  </div>
+                  <h3 className="mt-2 font-display text-xl leading-tight">{blogArticle.title}</h3>
+                  <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                    {blogArticle.excerpt}
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => openArticleDetail(blogArticle)}
+                    className="mt-4 w-full rounded-2xl bg-leaf py-3 text-sm font-bold text-leaf-foreground shadow-[0_3px_0_color-mix(in_oklch,var(--color-jungle)_35%,transparent)] transition-transform active:scale-[0.98]"
+                  >
+                    {language === "es" ? "Leer artículo" : "Read article"}
+                  </button>
+                </div>
+              </article>
+            </section>
           </div>
         </div>
       </div>
+
+      {selectedArticle && (
+        <main className="fixed inset-0 z-40 overflow-y-auto bg-background px-4 pb-10 pt-4 sm:px-8 sm:pt-8">
+          <article
+            className="mx-auto min-h-[calc(100vh-2rem)] w-full max-w-2xl overflow-hidden rounded-[28px] bg-surface text-foreground shadow-xl ring-1 ring-border sm:min-h-[calc(100vh-4rem)]"
+            aria-labelledby="blog-article-title"
+          >
+            <div className="flex items-center gap-3 bg-white/90 p-4 backdrop-blur-sm sm:p-6">
+              <button
+                type="button"
+                aria-label={language === "es" ? "Volver al blog" : "Back to blog"}
+                onClick={closeArticleDetail}
+                className="grid size-10 shrink-0 place-items-center rounded-full bg-background text-muted-foreground ring-1 ring-border transition-transform active:scale-95"
+              >
+                <ArrowLeft className="size-4" />
+              </button>
+              <div>
+                <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-leaf-ink">
+                  {language === "es" ? "Blog local" : "Local blog"}
+                </p>
+                <p className="mt-1 text-xs text-muted-foreground">{selectedArticle.readTime}</p>
+              </div>
+            </div>
+            <img
+              src={selectedArticle.image}
+              alt={selectedArticle.title}
+              className="h-56 w-full object-cover sm:h-72"
+            />
+            <div className="p-5 sm:p-8">
+              <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-leaf-ink">
+                {selectedArticle.category}
+              </p>
+              <h1 id="blog-article-title" className="mt-2 font-display text-3xl leading-tight">
+                {selectedArticle.title}
+              </h1>
+              <p className="mt-4 text-base leading-relaxed text-muted-foreground">
+                {selectedArticle.excerpt}
+              </p>
+              <div className="mt-6 space-y-4 text-sm leading-relaxed text-foreground/85">
+                {selectedArticle.paragraphs.map((paragraph) => (
+                  <p key={paragraph}>{paragraph}</p>
+                ))}
+              </div>
+              <div className="mt-7 rounded-[22px] bg-background p-4 ring-1 ring-border">
+                <p className="text-sm font-bold">
+                  {language === "es" ? "¿Listo para conocer Arenal?" : "Ready to discover Arenal?"}
+                </p>
+                <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
+                  {language === "es"
+                    ? "Prepara tu ruta con Via Fortuna y coordina un traslado privado o compartido."
+                    : "Plan your route with Via Fortuna and coordinate a private or shared transfer."}
+                </p>
+                <button
+                  type="button"
+                  onClick={() => {
+                    closeArticleDetail();
+                    window.setTimeout(() => scrollToSection("route-preview"), 0);
+                  }}
+                  className="mt-3 w-full rounded-2xl bg-leaf py-3 text-sm font-bold text-leaf-foreground transition-transform active:scale-[0.98]"
+                >
+                  {language === "es" ? "Planificar traslado" : "Plan a transfer"}
+                </button>
+              </div>
+            </div>
+          </article>
+        </main>
+      )}
 
       {selectedTour && (
         <main className="fixed inset-0 z-40 overflow-y-auto bg-background px-4 pb-10 pt-4 sm:px-8 sm:pt-8">
