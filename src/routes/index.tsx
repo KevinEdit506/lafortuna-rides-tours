@@ -981,10 +981,12 @@ function Index() {
                 V
               </span>
               <span
-                className="flex h-7 flex-col justify-center leading-none"
+                className="flex min-w-0 h-7 flex-col justify-center leading-none"
                 aria-label="Via La Fortuna · Tours y Viajes"
               >
-                <span className="font-display text-base">Via La Fortuna</span>
+                <span className="whitespace-nowrap font-display text-[clamp(0.72rem,3.2vw,1rem)] font-extrabold leading-none tracking-[-0.025em]">
+                  Via La Fortuna
+                </span>
                 <span className="mt-0.5 text-[7px] font-bold uppercase tracking-[0.12em] text-white/75">
                   TOURS Y VIAJES
                 </span>
