@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import {
   ArrowLeft,
+  ArrowRight,
   CalendarDays,
   Bike,
   CarFront,
@@ -374,6 +375,10 @@ function Index() {
   const [selectedFeature, setSelectedFeature] = useState<FeatureKey | null>(() =>
     typeof window === "undefined" ? null : featureFromHash(window.location.hash),
   );
+  const [destinationSearchOpen, setDestinationSearchOpen] = useState(() =>
+    typeof window === "undefined" ? false : window.location.hash === "#destination-search",
+  );
+  const [destinationQuery, setDestinationQuery] = useState("");
   const [featureTransition, setFeatureTransition] = useState<"enter" | "exit">("enter");
   const [paymentOpen, setPaymentOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
@@ -410,6 +415,14 @@ function Index() {
     const handleBack = () => setSelectedTour(null);
     window.addEventListener("popstate", handleBack);
     return () => window.removeEventListener("popstate", handleBack);
+  }, []);
+
+  useEffect(() => {
+    const handleDestinationSearchBack = () => {
+      setDestinationSearchOpen(window.location.hash === "#destination-search");
+    };
+    window.addEventListener("popstate", handleDestinationSearchBack);
+    return () => window.removeEventListener("popstate", handleDestinationSearchBack);
   }, []);
 
   useEffect(() => {
@@ -912,6 +925,23 @@ function Index() {
     }
   }, [selectedFeature]);
 
+  const openDestinationSearch = () => {
+    setDestinationQuery("");
+    window.history.pushState({ destinationSearch: true }, "", "#destination-search");
+    setDestinationSearchOpen(true);
+  };
+
+  const closeDestinationSearch = () => {
+    if (window.location.hash === "#destination-search") window.history.back();
+    else setDestinationSearchOpen(false);
+  };
+
+  const selectDestination = (place: string) => {
+    setDestination(place);
+    setPassengerDestinations((items) => items.map(() => place));
+    closeDestinationSearch();
+  };
+
   const continueFromFeature = (feature: FeatureKey) => {
     if (feature === "promotion") {
       openWhatsApp();
@@ -923,6 +953,9 @@ function Index() {
 
   const featureContent = selectedFeature ? getFeatureContent(selectedFeature, language) : null;
   const FeatureIcon = selectedFeature ? getFeatureIcon(selectedFeature) : Star;
+  const destinationSuggestions = localPlaceSuggestions.filter((place) =>
+    place.toLocaleLowerCase().includes(destinationQuery.trim().toLocaleLowerCase()),
+  );
   const locationLabel = (
     currentLocation ??
     (locationStatus === "locating"
@@ -1035,12 +1068,6 @@ function Index() {
                   icon: Bike,
                   tone: "amber",
                 },
-                {
-                  key: "booking" as const,
-                  label: language === "es" ? "Reserva" : "Booking",
-                  icon: CalendarDays,
-                  tone: "purple",
-                },
               ].map(({ key, label, icon: Icon, tone }) => (
                 <button
                   key={label}
@@ -1055,11 +1082,7 @@ function Index() {
                 </button>
               ))}
             </div>
-            <button
-              type="button"
-              className="reference-search"
-              onClick={() => scrollToSection("route-preview")}
-            >
+            <button type="button" className="reference-search" onClick={openDestinationSearch}>
               <Search className="size-7 shrink-0" />
               <span>{language === "es" ? "¿A dónde vas?" : "Where are you going?"}</span>
               <span className="reference-search-action">
@@ -2039,6 +2062,73 @@ function Index() {
             >
               {featureContent.action}
             </button>
+          </section>
+        </main>
+      )}
+
+      {destinationSearchOpen && (
+        <main className="push-screen fixed inset-0 z-[60] overflow-y-auto bg-background px-4 pb-10 pt-4 text-foreground sm:px-8 sm:pt-8">
+          <section className="mx-auto min-h-[calc(100vh-2rem)] w-full max-w-2xl rounded-[30px] bg-surface p-5 shadow-xl ring-1 ring-border sm:min-h-[calc(100vh-4rem)] sm:p-8">
+            <header className="flex items-center gap-3 border-b border-border pb-5">
+              <button
+                type="button"
+                onClick={closeDestinationSearch}
+                aria-label={language === "es" ? "Volver" : "Go back"}
+                className="grid size-10 shrink-0 place-items-center rounded-full bg-background text-muted-foreground ring-1 ring-border transition-transform active:scale-95"
+              >
+                <ArrowLeft className="size-4" />
+              </button>
+              <div>
+                <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-leaf-ink">
+                  {language === "es" ? "Destino" : "Destination"}
+                </p>
+                <h1 className="font-display text-2xl font-bold">
+                  {language === "es" ? "¿A dónde vas?" : "Where are you going?"}
+                </h1>
+              </div>
+            </header>
+
+            <div className="mt-7 flex items-center gap-3 rounded-2xl bg-background px-4 py-3 ring-1 ring-border focus-within:ring-2 focus-within:ring-primary">
+              <Search className="size-5 shrink-0 text-muted-foreground" />
+              <input
+                autoFocus
+                value={destinationQuery}
+                onChange={(event) => setDestinationQuery(event.target.value)}
+                placeholder={
+                  language === "es" ? "Ingresa una dirección o lugar" : "Enter an address or place"
+                }
+                aria-label={language === "es" ? "Buscar destino" : "Search destination"}
+                className="min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
+              />
+            </div>
+
+            <div className="mt-6 space-y-2" aria-live="polite">
+              <p className="px-1 text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
+                {language === "es" ? "Sugerencias" : "Suggestions"}
+              </p>
+              {destinationSuggestions.length > 0 ? (
+                destinationSuggestions.map((place) => (
+                  <button
+                    key={place}
+                    type="button"
+                    onClick={() => selectDestination(place)}
+                    className="flex w-full items-center gap-3 rounded-2xl bg-background px-4 py-4 text-left ring-1 ring-border transition-colors hover:bg-muted active:scale-[0.99]"
+                  >
+                    <span className="grid size-9 shrink-0 place-items-center rounded-full bg-primary/10 text-primary">
+                      <MapPin className="size-4" />
+                    </span>
+                    <span className="min-w-0 flex-1 truncate text-sm font-semibold">{place}</span>
+                    <ArrowRight className="size-4 shrink-0 text-muted-foreground" />
+                  </button>
+                ))
+              ) : (
+                <p className="rounded-2xl bg-background px-4 py-5 text-sm text-muted-foreground ring-1 ring-border">
+                  {language === "es"
+                    ? "No encontramos una sugerencia. Puedes continuar con la dirección escrita."
+                    : "No suggestion found. You can continue with the address you entered."}
+                </p>
+              )}
+            </div>
           </section>
         </main>
       )}
