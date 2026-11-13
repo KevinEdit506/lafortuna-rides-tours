@@ -1,6 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import {
+  ArrowLeft,
   CalendarDays,
+  Bike,
   CarFront,
   CheckCircle2,
   Circle,
@@ -22,12 +24,20 @@ import {
   Utensils,
   UsersRound,
 } from "lucide-react";
-import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
+import type { User } from "firebase/auth";
 
 import misticoImage from "../assets/mistico-bridges.jpg";
 import riverImage from "../assets/penas-blancas.jpg";
 import { MiniRouteMap } from "../components/MiniRouteMap";
 import { saveBooking } from "../lib/firebase-bookings";
+import {
+  isFirebaseAuthConfigured,
+  registerUser,
+  signInUser,
+  signOutUser,
+  subscribeToUser,
+} from "../lib/firebase-auth";
 
 type MapsWindow = Window & {
   google?: {
@@ -46,6 +56,12 @@ type MapsWindow = Window & {
           getPlace: () => { formatted_address?: string; name?: string };
         };
       };
+      Geocoder?: new () => {
+        geocode: (
+          request: { location: { lat: number; lng: number } },
+          callback: (results: Array<{ formatted_address?: string }>, status: string) => void,
+        ) => void;
+      };
     };
   };
 };
@@ -58,6 +74,79 @@ type TourCard = {
   category: string;
   summary: string;
 };
+
+type FeatureKey = "food" | "ride" | "send" | "motorbike" | "booking" | "promotion";
+
+function getFeatureContent(feature: FeatureKey, language: "es" | "en") {
+  const spanish = language === "es";
+  const content = {
+    food: {
+      title: spanish ? "Alimentos" : "Food",
+      eyebrow: spanish ? "Servicio local" : "Local service",
+      description: spanish
+        ? "Coordina un traslado para recoger alimentos en La Fortuna. Indica el punto de recogida y el destino para solicitar disponibilidad."
+        : "Arrange a ride to pick up food in La Fortuna. Add the pickup point and destination to request availability.",
+      action: spanish ? "Configurar traslado" : "Set up a ride",
+    },
+    ride: {
+      title: spanish ? "Viajes" : "Rides",
+      eyebrow: spanish ? "Movilidad local" : "Local mobility",
+      description: spanish
+        ? "Calcula tu ruta, revisa la distancia y solicita un traslado privado o compartido."
+        : "Calculate your route, review the distance, and request a private or shared ride.",
+      action: spanish ? "Abrir formulario de viaje" : "Open ride form",
+    },
+    send: {
+      title: spanish ? "Enviar artículos" : "Send items",
+      eyebrow: spanish ? "Traslado de artículos" : "Item transport",
+      description: spanish
+        ? "Solicita ayuda para trasladar artículos entre dos puntos de La Fortuna. La disponibilidad se coordina con el operador."
+        : "Request help transporting items between two points in La Fortuna. Availability is coordinated with the operator.",
+      action: spanish ? "Solicitar traslado" : "Request transport",
+    },
+    motorbike: {
+      title: spanish ? "Moto" : "Motorbike",
+      eyebrow: spanish ? "Movilidad ágil" : "Agile mobility",
+      description: spanish
+        ? "Consulta disponibilidad para una opción de movilidad en moto y coordina los detalles de tu viaje."
+        : "Check motorbike mobility availability and coordinate the details of your ride.",
+      action: spanish ? "Consultar disponibilidad" : "Check availability",
+    },
+    booking: {
+      title: spanish ? "Reservas" : "Bookings",
+      eyebrow: spanish ? "Planifica tu viaje" : "Plan your trip",
+      description: spanish
+        ? "Elige origen, destino, horario, pasajeros y forma de pago para preparar tu solicitud."
+        : "Choose pickup, destination, timing, passengers, and payment method to prepare your request.",
+      action: spanish ? "Abrir formulario de reserva" : "Open booking form",
+    },
+    promotion: {
+      title: "Pizza La Fortuna",
+      eyebrow: spanish ? "Promoción local" : "Local promotion",
+      description: spanish
+        ? "Consulta disponibilidad de la promoción 2x1 y coordina la entrega o recogida directamente con el contacto local."
+        : "Ask about the 2-for-1 promotion and coordinate delivery or pickup directly with the local contact.",
+      action: spanish ? "Consultar por WhatsApp" : "Ask on WhatsApp",
+    },
+  } as const;
+  return content[feature];
+}
+
+function getFeatureIcon(feature: FeatureKey) {
+  if (feature === "food") return Utensils;
+  if (feature === "ride") return Plane;
+  if (feature === "send") return Package;
+  if (feature === "motorbike") return Bike;
+  if (feature === "booking") return CalendarDays;
+  return Star;
+}
+
+function featureFromHash(hash: string): FeatureKey | null {
+  const value = hash.replace(/^#feature\//, "");
+  return ["food", "ride", "send", "motorbike", "booking", "promotion"].includes(value)
+    ? (value as FeatureKey)
+    : null;
+}
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -252,6 +341,10 @@ function Index() {
   const [badRoad, setBadRoad] = useState(false);
   const [origin, setOrigin] = useState("Centro de La Fortuna");
   const [destination, setDestination] = useState("Parque Nacional Volcán Arenal");
+  const [currentLocation, setCurrentLocation] = useState<string | null>(null);
+  const [locationStatus, setLocationStatus] = useState<"idle" | "locating" | "ready" | "denied">(
+    "idle",
+  );
   const [passengerOrigins, setPassengerOrigins] = useState([
     "Centro de La Fortuna",
     "Centro de La Fortuna",
@@ -278,6 +371,18 @@ function Index() {
   const [mapsStatus, setMapsStatus] = useState<"loading" | "ready" | "fallback">("loading");
   const [routeStatus, setRouteStatus] = useState<"idle" | "updating" | "updated">("idle");
   const [selectedTour, setSelectedTour] = useState<TourCard | null>(null);
+  const [selectedFeature, setSelectedFeature] = useState<FeatureKey | null>(() =>
+    typeof window === "undefined" ? null : featureFromHash(window.location.hash),
+  );
+  const [featureTransition, setFeatureTransition] = useState<"enter" | "exit">("enter");
+  const [paymentOpen, setPaymentOpen] = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
+  const [user, setUser] = useState<User | null>(null);
+  const [authMode, setAuthMode] = useState<"login" | "register">("login");
+  const [authEmail, setAuthEmail] = useState("");
+  const [authPassword, setAuthPassword] = useState("");
+  const [authError, setAuthError] = useState("");
+  const [authSubmitting, setAuthSubmitting] = useState(false);
   const dynamicMultiplier = 2.8;
   const returnMultiplier = returnEmpty ? 2 : 1;
   const roadMultiplier = badRoad ? 1.2 : 1.5;
@@ -288,13 +393,54 @@ function Index() {
   const t = copy[language];
 
   useEffect(() => {
+    const unsubscribe = subscribeToUser(setUser);
+    return () => unsubscribe?.();
+  }, []);
+
+  useEffect(() => {
     if (!selectedTour) return;
     const closeOnEscape = (event: KeyboardEvent) => {
-      if (event.key === "Escape") setSelectedTour(null);
+      if (event.key === "Escape") closeTourDetail();
     };
     window.addEventListener("keydown", closeOnEscape);
     return () => window.removeEventListener("keydown", closeOnEscape);
   }, [selectedTour]);
+
+  useEffect(() => {
+    const handleBack = () => setSelectedTour(null);
+    window.addEventListener("popstate", handleBack);
+    return () => window.removeEventListener("popstate", handleBack);
+  }, []);
+
+  useEffect(() => {
+    const handleFeatureBack = () => {
+      if (featureFromHash(window.location.hash)) {
+        setSelectedFeature(featureFromHash(window.location.hash));
+        setFeatureTransition("enter");
+        return;
+      }
+      if (!selectedFeature) return;
+      setFeatureTransition("exit");
+      window.setTimeout(() => setSelectedFeature(null), 260);
+    };
+    window.addEventListener("popstate", handleFeatureBack);
+    return () => window.removeEventListener("popstate", handleFeatureBack);
+  }, [selectedFeature]);
+
+  useEffect(() => {
+    if (!selectedFeature) return;
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key !== "Escape") return;
+      setFeatureTransition("exit");
+      if (window.location.hash.startsWith("#feature/")) {
+        window.setTimeout(() => window.history.back(), 260);
+      } else {
+        window.setTimeout(() => setSelectedFeature(null), 260);
+      }
+    };
+    window.addEventListener("keydown", closeOnEscape);
+    return () => window.removeEventListener("keydown", closeOnEscape);
+  }, [selectedFeature]);
 
   useEffect(() => {
     const key = import.meta.env["VITE_GOOGLE_MAPS_API_KEY"];
@@ -318,6 +464,46 @@ function Index() {
     script.onerror = () => setMapsStatus("fallback");
     document.head.appendChild(script);
   }, []);
+
+  useEffect(() => {
+    if (!navigator.geolocation) {
+      setLocationStatus("denied");
+      return;
+    }
+
+    setLocationStatus("locating");
+    const watchId = navigator.geolocation.watchPosition(
+      (position) => {
+        const { latitude, longitude } = position.coords;
+        const maps = (window as MapsWindow).google?.maps;
+        if (!maps?.Geocoder) {
+          setCurrentLocation(null);
+          setLocationStatus("ready");
+          return;
+        }
+
+        setCurrentLocation(null);
+        setLocationStatus("locating");
+        const geocoder = new maps.Geocoder();
+        geocoder.geocode({ location: { lat: latitude, lng: longitude } }, (results, status) => {
+          if (status === "OK" && results[0]?.formatted_address) {
+            setCurrentLocation(results[0].formatted_address);
+            setLocationStatus("ready");
+            return;
+          }
+          setCurrentLocation(null);
+          setLocationStatus("ready");
+        });
+      },
+      () => {
+        setLocationStatus("denied");
+        setCurrentLocation(null);
+      },
+      { enableHighAccuracy: true, maximumAge: 15_000, timeout: 12_000 },
+    );
+
+    return () => navigator.geolocation.clearWatch(watchId);
+  }, [language, mapsStatus]);
 
   useEffect(() => {
     if (mapsStatus !== "ready" || !origin.trim() || !destination.trim()) return;
@@ -574,6 +760,25 @@ function Index() {
     );
   };
 
+  const submitAuth = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setAuthSubmitting(true);
+    setAuthError("");
+    try {
+      if (authMode === "login") await signInUser(authEmail, authPassword);
+      else await registerUser(authEmail, authPassword);
+      setAuthPassword("");
+    } catch (error) {
+      setAuthError(
+        error instanceof Error
+          ? "No se pudo completar la solicitud. Revisa tus datos e inténtalo de nuevo."
+          : "Error de autenticación.",
+      );
+    } finally {
+      setAuthSubmitting(false);
+    }
+  };
+
   const scheduleTrip = () => {
     const label = `${scheduleDate} · ${scheduleTime} · ${origin} → ${destination}`;
     setScheduledTrips((current) => (current.includes(label) ? current : [...current, label]));
@@ -606,6 +811,19 @@ function Index() {
 
   const confirmTransferBooking = async () => {
     if (confirmed || bookingStatus === "saving") return;
+    if (paymentMethod === "card" && !user) {
+      setProfileOpen(true);
+      setAuthError(
+        language === "es"
+          ? "Para pagar con tarjeta debes iniciar sesión o crear una cuenta."
+          : "You must sign in or create an account to pay by card.",
+      );
+      return;
+    }
+    if (paymentMethod === "card") {
+      setPaymentOpen(true);
+      return;
+    }
     setBookingStatus("saving");
     try {
       const result = await saveBooking({
@@ -623,6 +841,7 @@ function Index() {
         distanceKm,
         durationMinutes,
         language,
+        ...(user?.uid ? { userId: user.uid } : {}),
       });
       if (!result.ok) {
         setBookingStatus("error");
@@ -637,12 +856,22 @@ function Index() {
 
   const confirmTourBooking = async (tour: TourCard) => {
     if (bookingStatus === "saving") return;
+    if (isFirebaseAuthConfigured() && !user) {
+      setProfileOpen(true);
+      setAuthError(
+        language === "es"
+          ? "Inicia sesión para confirmar y guardar tu reserva."
+          : "Sign in to confirm and save your booking.",
+      );
+      return;
+    }
     setBookingStatus("saving");
     try {
       const result = await saveBooking({
         serviceType: "tour",
         tourName: tour.title,
         language,
+        userId: user?.uid,
       });
       if (!result.ok) {
         setBookingStatus("error");
@@ -657,6 +886,54 @@ function Index() {
     }
   };
 
+  const openTourDetail = (tour: TourCard) => {
+    window.history.pushState({ tour: tour.title }, "", `#tour/${encodeURIComponent(tour.title)}`);
+    setSelectedTour(tour);
+  };
+
+  const closeTourDetail = () => {
+    if (window.location.hash.startsWith("#tour/")) window.history.back();
+    else setSelectedTour(null);
+  };
+
+  const openFeatureDetail = (feature: FeatureKey) => {
+    window.history.pushState({ feature }, "", `#feature/${feature}`);
+    setFeatureTransition("enter");
+    setSelectedFeature(feature);
+  };
+
+  const closeFeatureDetail = useCallback(() => {
+    if (!selectedFeature) return;
+    setFeatureTransition("exit");
+    if (window.location.hash.startsWith("#feature/")) {
+      window.setTimeout(() => window.history.back(), 260);
+    } else {
+      window.setTimeout(() => setSelectedFeature(null), 260);
+    }
+  }, [selectedFeature]);
+
+  const continueFromFeature = (feature: FeatureKey) => {
+    if (feature === "promotion") {
+      openWhatsApp();
+      return;
+    }
+    closeFeatureDetail();
+    window.setTimeout(() => scrollToSection("route-preview"), 0);
+  };
+
+  const featureContent = selectedFeature ? getFeatureContent(selectedFeature, language) : null;
+  const FeatureIcon = selectedFeature ? getFeatureIcon(selectedFeature) : Star;
+  const locationLabel = (
+    currentLocation ??
+    (locationStatus === "locating"
+      ? language === "es"
+        ? "BUSCANDO UBICACIÓN..."
+        : "SEARCHING FOR LOCATION..."
+      : language === "es"
+        ? "UBICACIÓN ACTUAL"
+        : "CURRENT LOCATION")
+  ).toLocaleUpperCase(language === "es" ? "es-CR" : "en-US");
+
   return (
     <main
       className="app-shell min-h-screen text-foreground selection:bg-accent selection:text-accent-foreground"
@@ -668,17 +945,42 @@ function Index() {
     >
       <div className="pointer-events-none fixed inset-0 bg-[radial-gradient(circle_at_0%_0%,color-mix(in_oklab,var(--leaf)_10%,transparent)_0%,transparent_48%)]" />
       <div className="relative mx-auto min-h-screen w-full max-w-[430px] px-6 pb-32 pt-6 lg:max-w-6xl lg:px-10">
-        <header className="rise flex items-center justify-between">
+        <header className="top-header rise flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="flex items-center gap-2 rounded-full bg-jungle px-3 py-2 text-primary-foreground shadow-[0_4px_0_rgba(9,35,26,0.45),0_8px_16px_rgba(9,35,26,0.2)] ring-1 ring-white/25">
+            <div className="flex min-w-[10.5rem] items-center gap-2 rounded-full bg-jungle px-3 py-2 text-primary-foreground shadow-[0_4px_0_rgba(9,35,26,0.45),0_8px_16px_rgba(9,35,26,0.2)] ring-1 ring-white/25">
               <span className="grid size-7 place-items-center rounded-full bg-leaf/30 font-display text-sm ring-1 ring-white/20">
                 V
               </span>
-              <span className="font-display text-base">Vía</span>
+              <span
+                className="flex h-7 flex-col justify-center leading-none"
+                aria-label="Via La Fortuna · Tours y Viajes"
+              >
+                <span className="font-display text-base">Via La Fortuna</span>
+                <span className="mt-0.5 text-[7px] font-bold uppercase tracking-[0.12em] text-white/75">
+                  TOURS Y VIAJES
+                </span>
+              </span>
             </div>
-            <div className="leading-tight">
-              <p className="text-[9px] font-semibold uppercase tracking-[0.25em] text-foreground/70">
-                {t.place}
+            <div
+              className="flex h-7 w-[8rem] max-w-[8rem] min-w-0 shrink-0 items-center gap-1.5 overflow-hidden leading-tight"
+              aria-live="polite"
+            >
+              <span
+                className="relative grid size-4 shrink-0 place-items-center text-leaf-ink"
+                aria-label={
+                  locationStatus === "locating"
+                    ? language === "es"
+                      ? "Actualizando ubicación en tiempo real"
+                      : "Updating location in real time"
+                    : language === "es"
+                      ? "Ubicación actualizada"
+                      : "Location updated"
+                }
+              >
+                <MapPin className="size-3.5" aria-hidden="true" />
+              </span>
+              <p className="min-w-0 flex-1 truncate text-[9px] font-semibold tracking-[0.03em] text-foreground/70">
+                {locationLabel}
               </p>
             </div>
           </div>
@@ -709,28 +1011,42 @@ function Index() {
             </div>
             <div className="reference-shortcut-row">
               {[
-                { label: language === "es" ? "Alimentos" : "Food", icon: Utensils, tone: "orange" },
-                { label: language === "es" ? "Viaje" : "Ride", icon: Plane, tone: "blue" },
                 {
+                  key: "food" as const,
+                  label: language === "es" ? "Alimentos" : "Food",
+                  icon: Utensils,
+                  tone: "orange",
+                },
+                {
+                  key: "ride" as const,
+                  label: language === "es" ? "Viaje" : "Ride",
+                  icon: Plane,
+                  tone: "blue",
+                },
+                {
+                  key: "send" as const,
                   label: language === "es" ? "Enviar artículos" : "Send items",
                   icon: Package,
                   tone: "green",
                 },
                 {
+                  key: "motorbike" as const,
+                  label: language === "es" ? "Moto" : "Motorbike",
+                  icon: Bike,
+                  tone: "amber",
+                },
+                {
+                  key: "booking" as const,
                   label: language === "es" ? "Reserva" : "Booking",
                   icon: CalendarDays,
                   tone: "purple",
                 },
-              ].map(({ label, icon: Icon, tone }) => (
+              ].map(({ key, label, icon: Icon, tone }) => (
                 <button
                   key={label}
                   type="button"
                   className={`reference-shortcut reference-shortcut-${tone}`}
-                  onClick={() =>
-                    label === (language === "es" ? "Reserva" : "Booking")
-                      ? scrollToSection("route-preview")
-                      : undefined
-                  }
+                  onClick={() => openFeatureDetail(key)}
                 >
                   <span className="reference-shortcut-icon">
                     <Icon className="size-6" />
@@ -765,7 +1081,7 @@ function Index() {
         >
           <div>
             {mode === "transfers" && (
-              <section className="experience-panel rise mt-3 overflow-hidden rounded-[28px] p-4 ring-1 ring-border [animation-delay:140ms]">
+              <section className="fare-card experience-panel rise mt-3 overflow-hidden rounded-[28px] p-4 ring-1 ring-border [animation-delay:140ms]">
                 <div className="flex items-center justify-between">
                   <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-panel-muted-foreground">
                     {t.estimate}
@@ -788,44 +1104,6 @@ function Index() {
                     ? `${t.exchangeSource}: ₡${exchangeRate.toLocaleString("es-CR")} / USD`
                     : t.exchangeLoading}
                 </p>
-                <button
-                  onClick={() => void confirmTransferBooking()}
-                  className="mt-3 w-full rounded-2xl bg-leaf py-3.5 text-sm font-bold text-leaf-foreground transition-transform active:scale-[0.98]"
-                >
-                  {bookingStatus === "saving"
-                    ? language === "es"
-                      ? "Guardando reserva…"
-                      : "Saving booking…"
-                    : confirmed
-                      ? language === "es"
-                        ? "Solicitud confirmada"
-                        : "Request confirmed"
-                      : language === "es"
-                        ? "Confirmar reserva"
-                        : "Confirm booking"}
-                </button>
-                {bookingStatus === "saved" && (
-                  <p className="mt-2 text-center text-xs text-leaf">
-                    {language === "es"
-                      ? "Reserva guardada y enviada al panel administrativo."
-                      : "Booking saved and sent to the admin panel."}
-                  </p>
-                )}
-                {bookingStatus === "error" && (
-                  <div className="mt-2 space-y-2">
-                    <p className="text-center text-xs text-amber-200">
-                      {language === "es"
-                        ? "No se pudo guardar ahora. Puedes enviarla por WhatsApp como respaldo."
-                        : "It could not be saved now. You can send it by WhatsApp as a fallback."}
-                    </p>
-                    <button
-                      onClick={() => openWhatsApp()}
-                      className="w-full rounded-2xl border border-white/20 bg-white/10 py-2.5 text-xs font-bold text-white"
-                    >
-                      {language === "es" ? "Enviar por WhatsApp" : "Send by WhatsApp"}
-                    </button>
-                  </div>
-                )}
               </section>
             )}
 
@@ -834,7 +1112,13 @@ function Index() {
                 id="route-preview"
                 className="experience-panel mt-3 overflow-hidden rounded-[28px] p-4 ring-1 ring-border"
               >
-                <MiniRouteMap origin={origin} destination={destination} language={language} />
+                <MiniRouteMap
+                  origin={origin}
+                  destination={destination}
+                  language={language}
+                  distanceKm={distanceKm}
+                  durationMinutes={durationMinutes}
+                />
               </section>
             )}
 
@@ -842,6 +1126,15 @@ function Index() {
               <section
                 className="promo-banner rise mt-4"
                 aria-label={language === "es" ? "Promoción" : "Promotion"}
+                role="button"
+                tabIndex={0}
+                onClick={() => openFeatureDetail("promotion")}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter" || event.key === " ") {
+                    event.preventDefault();
+                    openFeatureDetail("promotion");
+                  }
+                }}
               >
                 <div>
                   <p className="text-[10px] font-bold uppercase tracking-[0.18em]">
@@ -1096,7 +1389,21 @@ function Index() {
                       <button
                         key={method}
                         disabled={confirmed}
-                        onClick={() => setPaymentMethod(method)}
+                        onClick={() => {
+                          setPaymentMethod(method);
+                          if (method === "card") {
+                            if (!user) {
+                              setProfileOpen(true);
+                              setAuthError(
+                                language === "es"
+                                  ? "Para pagar con tarjeta debes iniciar sesión o crear una cuenta."
+                                  : "You must sign in or create an account to pay by card.",
+                              );
+                            } else {
+                              setPaymentOpen(true);
+                            }
+                          }
+                        }}
                         className={`rounded-xl py-2.5 text-sm font-bold transition-colors ${paymentMethod === method ? "bg-leaf text-leaf-foreground" : "bg-leaf/15 text-leaf-ink"} ${confirmed ? "cursor-not-allowed opacity-60" : ""}`}
                       >
                         {method === "card" ? t.card : t.cash}
@@ -1119,6 +1426,44 @@ function Index() {
                       <p className="font-bold">{t.confirmedTitle}</p>
                       <p className="mt-0.5 text-muted-foreground">{t.confirmedBody}</p>
                     </div>
+                  </div>
+                )}
+                <button
+                  onClick={() => void confirmTransferBooking()}
+                  className="confirm-booking-button mt-4 w-full rounded-full bg-leaf py-3.5 text-sm font-bold text-leaf-foreground transition-transform active:scale-[0.98]"
+                >
+                  {bookingStatus === "saving"
+                    ? language === "es"
+                      ? "Guardando reserva…"
+                      : "Saving booking…"
+                    : confirmed
+                      ? language === "es"
+                        ? "Solicitud confirmada"
+                        : "Request confirmed"
+                      : language === "es"
+                        ? "Confirmar reserva"
+                        : "Confirm booking"}
+                </button>
+                {bookingStatus === "saved" && (
+                  <p className="mt-2 text-center text-xs text-leaf">
+                    {language === "es"
+                      ? "Reserva guardada y enviada al panel del conductor."
+                      : "Booking saved and sent to the driver panel."}
+                  </p>
+                )}
+                {bookingStatus === "error" && (
+                  <div className="mt-2 space-y-2">
+                    <p className="text-center text-xs text-amber-200">
+                      {language === "es"
+                        ? "No se pudo guardar ahora. Puedes enviarla por WhatsApp como respaldo."
+                        : "It could not be saved now. You can send it by WhatsApp as a fallback."}
+                    </p>
+                    <button
+                      onClick={() => openWhatsApp()}
+                      className="w-full rounded-2xl border border-white/20 bg-white/10 py-2.5 text-xs font-bold text-white"
+                    >
+                      {language === "es" ? "Enviar por WhatsApp" : "Send by WhatsApp"}
+                    </button>
                   </div>
                 )}
               </section>
@@ -1247,11 +1592,11 @@ function Index() {
                     key={tour.title}
                     role="button"
                     tabIndex={0}
-                    onClick={() => setSelectedTour(tour)}
+                    onClick={() => openTourDetail(tour)}
                     onKeyDown={(event) => {
                       if (event.key === "Enter" || event.key === " ") {
                         event.preventDefault();
-                        setSelectedTour(tour);
+                        openTourDetail(tour);
                       }
                     }}
                     className="experience-card flex h-[500px] w-full cursor-pointer flex-col rounded-[26px] bg-gradient-to-br from-surface via-surface to-leaf/10 p-3 text-foreground shadow-xl shadow-primary/10 ring-1 ring-border outline-none transition-transform hover:-translate-y-0.5 focus-visible:ring-2 focus-visible:ring-leaf lg:h-[510px]"
@@ -1365,19 +1710,20 @@ function Index() {
       </div>
 
       {selectedTour && (
-        <div
-          className="fixed inset-0 z-40 flex items-end justify-center bg-black/55 p-3 backdrop-blur-sm sm:items-center"
-          role="presentation"
-          onClick={() => setSelectedTour(null)}
-        >
+        <main className="fixed inset-0 z-40 overflow-y-auto bg-background px-4 pb-10 pt-4 sm:px-8 sm:pt-8">
           <section
-            className="max-h-[92vh] w-full max-w-lg overflow-y-auto rounded-[28px] bg-surface p-4 text-foreground shadow-2xl ring-1 ring-border sm:p-5"
-            role="dialog"
-            aria-modal="true"
+            className="mx-auto min-h-[calc(100vh-2rem)] w-full max-w-2xl rounded-[28px] bg-surface p-4 text-foreground shadow-xl ring-1 ring-border sm:min-h-[calc(100vh-4rem)] sm:p-7"
             aria-labelledby="tour-detail-title"
-            onClick={(event) => event.stopPropagation()}
           >
-            <div className="flex items-start justify-between gap-3">
+            <div className="flex items-center gap-3 border-b border-border pb-4">
+              <button
+                type="button"
+                aria-label={language === "es" ? "Volver a la lista" : "Back to list"}
+                onClick={closeTourDetail}
+                className="grid size-10 shrink-0 place-items-center rounded-full bg-background text-muted-foreground ring-1 ring-border transition-transform active:scale-95"
+              >
+                <ArrowLeft className="size-4" />
+              </button>
               <div>
                 <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-leaf-ink">
                   {language === "es" ? "Detalle de actividad" : "Activity details"}
@@ -1386,14 +1732,6 @@ function Index() {
                   {selectedTour.title}
                 </h2>
               </div>
-              <button
-                type="button"
-                aria-label={language === "es" ? "Cerrar detalles" : "Close details"}
-                onClick={() => setSelectedTour(null)}
-                className="grid size-9 shrink-0 place-items-center rounded-full bg-background text-muted-foreground ring-1 ring-border"
-              >
-                <X className="size-4" />
-              </button>
             </div>
             <img
               src={selectedTour.image}
@@ -1457,7 +1795,252 @@ function Index() {
                 : t.reserveTour}
             </button>
           </section>
+        </main>
+      )}
+
+      {paymentOpen && (
+        <div
+          className="fixed inset-0 z-50 flex items-end justify-center bg-black/55 p-3 backdrop-blur-sm sm:items-center"
+          role="presentation"
+          onClick={() => setPaymentOpen(false)}
+        >
+          <section
+            className="w-full max-w-md rounded-[28px] bg-surface p-5 text-foreground shadow-2xl ring-1 ring-border"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="card-payment-title"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-leaf-ink">
+                  {language === "es" ? "Pago protegido" : "Protected payment"}
+                </p>
+                <h2 id="card-payment-title" className="mt-1 font-display text-2xl">
+                  {language === "es" ? "Pagar con tarjeta" : "Pay by card"}
+                </h2>
+              </div>
+              <button
+                type="button"
+                aria-label={language === "es" ? "Cerrar pago" : "Close payment"}
+                onClick={() => setPaymentOpen(false)}
+                className="grid size-9 place-items-center rounded-full bg-background text-muted-foreground ring-1 ring-border"
+              >
+                <X className="size-4" />
+              </button>
+            </div>
+            <div className="mt-5 rounded-2xl bg-background p-4 text-sm leading-relaxed ring-1 ring-border">
+              {language === "es"
+                ? "Serás dirigido a Stripe Checkout o Payment Element para completar el pago. Via La Fortuna no almacena números de tarjeta ni códigos de seguridad."
+                : "You will continue to Stripe Checkout or Payment Element to complete payment. Via La Fortuna never stores card numbers or security codes."}
+            </div>
+            <div className="mt-4 flex items-center gap-2 text-xs font-semibold text-muted-foreground">
+              <ShieldCheck className="size-4 text-leaf" />
+              {language === "es" ? "Procesamiento seguro y cifrado" : "Secure encrypted processing"}
+            </div>
+            <button
+              type="button"
+              disabled
+              className="mt-5 w-full rounded-2xl bg-leaf py-3.5 text-sm font-bold text-leaf-foreground disabled:cursor-not-allowed disabled:opacity-55"
+            >
+              {language === "es"
+                ? "Configurar Stripe para continuar"
+                : "Configure Stripe to continue"}
+            </button>
+            <p className="mt-3 text-center text-[11px] text-muted-foreground">
+              {language === "es"
+                ? "El pago real se habilita al conectar Stripe Checkout en el backend."
+                : "Live payment is enabled after connecting Stripe Checkout in the backend."}
+            </p>
+          </section>
         </div>
+      )}
+
+      {profileOpen && (
+        <div
+          className="fixed inset-0 z-40 flex items-end justify-center bg-black/55 p-3 backdrop-blur-sm sm:items-center"
+          role="presentation"
+          onClick={() => setProfileOpen(false)}
+        >
+          <section
+            className="w-full max-w-md rounded-[28px] bg-surface p-5 text-foreground shadow-2xl ring-1 ring-border"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="profile-title"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-leaf-ink">
+                  {language === "es" ? "Cuenta segura" : "Secure account"}
+                </p>
+                <h2 id="profile-title" className="mt-1 font-display text-2xl">
+                  {language === "es" ? "Tu perfil" : "Your profile"}
+                </h2>
+              </div>
+              <button
+                type="button"
+                aria-label={language === "es" ? "Cerrar perfil" : "Close profile"}
+                onClick={() => setProfileOpen(false)}
+                className="grid size-9 place-items-center rounded-full bg-background text-muted-foreground ring-1 ring-border"
+              >
+                <X className="size-4" />
+              </button>
+            </div>
+            {!isFirebaseAuthConfigured() ? (
+              <p className="mt-5 rounded-2xl bg-amber-500/10 p-4 text-sm leading-relaxed text-amber-900 ring-1 ring-amber-500/20">
+                {language === "es"
+                  ? "La cuenta estará disponible cuando se configuren las variables VITE_FIREBASE_* del despliegue."
+                  : "Accounts become available after the deployment VITE_FIREBASE_* variables are configured."}
+              </p>
+            ) : user ? (
+              <div className="mt-5 space-y-4">
+                <div className="rounded-2xl bg-background p-4 ring-1 ring-border">
+                  <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-muted-foreground">
+                    {language === "es" ? "Sesión activa" : "Signed in"}
+                  </p>
+                  <p className="mt-1 font-semibold">{user.email}</p>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    {language === "es"
+                      ? "Cliente · tus reservas pueden asociarse a esta cuenta."
+                      : "Client · your bookings can be associated with this account."}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => void signOutUser()}
+                  className="w-full rounded-2xl bg-jungle py-3 font-bold text-white"
+                >
+                  {language === "es" ? "Cerrar sesión" : "Sign out"}
+                </button>
+              </div>
+            ) : (
+              <form className="mt-5 space-y-4" onSubmit={submitAuth}>
+                <p className="text-sm text-muted-foreground">
+                  {language === "es"
+                    ? "Crea una cuenta para identificar tus reservas. Los clientes no tienen acceso al panel del conductor."
+                    : "Create an account to identify your bookings. Clients cannot access the driver panel."}
+                </p>
+                <label className="block text-sm font-semibold">
+                  {language === "es" ? "Correo" : "Email"}
+                  <input
+                    required
+                    type="email"
+                    value={authEmail}
+                    onChange={(event) => setAuthEmail(event.target.value)}
+                    className="mt-1 w-full rounded-xl bg-background px-3 py-3 ring-1 ring-border outline-none focus:ring-2 focus:ring-leaf"
+                  />
+                </label>
+                <label className="block text-sm font-semibold">
+                  {language === "es" ? "Contraseña" : "Password"}
+                  <input
+                    required
+                    minLength={6}
+                    type="password"
+                    value={authPassword}
+                    onChange={(event) => setAuthPassword(event.target.value)}
+                    className="mt-1 w-full rounded-xl bg-background px-3 py-3 ring-1 ring-border outline-none focus:ring-2 focus:ring-leaf"
+                  />
+                </label>
+                {authError && (
+                  <p
+                    role="alert"
+                    className="rounded-xl bg-destructive/10 p-3 text-sm text-destructive"
+                  >
+                    {authError}
+                  </p>
+                )}
+                <button
+                  disabled={authSubmitting}
+                  className="w-full rounded-2xl bg-leaf py-3 font-bold text-leaf-foreground disabled:opacity-60"
+                >
+                  {authSubmitting
+                    ? language === "es"
+                      ? "Procesando…"
+                      : "Processing…"
+                    : authMode === "login"
+                      ? language === "es"
+                        ? "Iniciar sesión"
+                        : "Sign in"
+                      : language === "es"
+                        ? "Crear cuenta"
+                        : "Create account"}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setAuthMode(authMode === "login" ? "register" : "login");
+                    setAuthError("");
+                  }}
+                  className="w-full text-xs font-bold text-leaf-ink"
+                >
+                  {authMode === "login"
+                    ? language === "es"
+                      ? "¿No tienes cuenta? Regístrate"
+                      : "No account? Register"
+                    : language === "es"
+                      ? "Ya tengo cuenta · Iniciar sesión"
+                      : "I already have an account · Sign in"}
+                </button>
+              </form>
+            )}
+          </section>
+        </div>
+      )}
+
+      {selectedFeature && featureContent && (
+        <main
+          className={`push-screen fixed inset-0 z-[55] overflow-y-auto bg-background px-4 pb-10 pt-4 text-foreground sm:px-8 sm:pt-8 ${featureTransition === "exit" ? "is-exiting" : ""}`}
+        >
+          <section className="mx-auto min-h-[calc(100vh-2rem)] w-full max-w-2xl rounded-[30px] bg-surface p-5 shadow-xl ring-1 ring-border sm:min-h-[calc(100vh-4rem)] sm:p-8">
+            <header className="flex items-center gap-3 border-b border-border pb-5">
+              <button
+                type="button"
+                onClick={closeFeatureDetail}
+                aria-label={language === "es" ? "Volver" : "Go back"}
+                className="grid size-10 shrink-0 place-items-center rounded-full bg-background text-muted-foreground ring-1 ring-border transition-transform active:scale-95"
+              >
+                <ArrowLeft className="size-4" />
+              </button>
+              <div>
+                <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-leaf-ink">
+                  {featureContent.eyebrow}
+                </p>
+                <h1 className="font-display text-2xl font-bold">{featureContent.title}</h1>
+              </div>
+            </header>
+
+            <div className="mt-8 grid place-items-center rounded-[26px] bg-gradient-to-br from-leaf/20 via-background to-primary/10 py-12 ring-1 ring-border">
+              <span className="grid size-24 place-items-center rounded-full bg-leaf text-leaf-foreground shadow-[0_7px_0_color-mix(in_oklch,var(--color-jungle)_35%,transparent)]">
+                <FeatureIcon className="size-11" />
+              </span>
+            </div>
+
+            <p className="mt-7 text-base leading-relaxed text-muted-foreground">
+              {featureContent.description}
+            </p>
+
+            {selectedFeature === "promotion" && (
+              <div className="mt-6 rounded-2xl bg-[#ff9f1c] p-5 text-[#22170a] shadow-lg">
+                <p className="text-[10px] font-bold uppercase tracking-[0.18em]">
+                  {language === "es" ? "Promoción local" : "Local promotion"}
+                </p>
+                <p className="mt-1 font-display text-3xl font-bold">Pizza La Fortuna</p>
+                <p className="mt-2 font-bold">
+                  {language === "es" ? "2x1 · desde ₡9.990" : "2-for-1 · from ₡9,990"}
+                </p>
+              </div>
+            )}
+
+            <button
+              type="button"
+              onClick={() => continueFromFeature(selectedFeature)}
+              className="mt-8 w-full rounded-2xl bg-jungle py-4 text-sm font-bold text-primary-foreground shadow-[0_4px_0_color-mix(in_oklch,var(--color-jungle)_35%,transparent)] transition-transform active:scale-[0.98]"
+            >
+              {featureContent.action}
+            </button>
+          </section>
+        </main>
       )}
 
       <nav
@@ -1481,7 +2064,7 @@ function Index() {
               icon: RouteIcon,
               action: () => {
                 setActiveNav("routes");
-                scrollToSection("route-preview");
+                openFeatureDetail("ride");
               },
             },
             {
@@ -1499,7 +2082,7 @@ function Index() {
               icon: UserRound,
               action: () => {
                 setActiveNav("profile");
-                scrollToSection("tours");
+                setProfileOpen(true);
               },
             },
           ].map(({ id, label, icon: Icon, action }) => (

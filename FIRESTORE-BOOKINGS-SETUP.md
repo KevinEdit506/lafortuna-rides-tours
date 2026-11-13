@@ -1,6 +1,6 @@
 # Reservas compartidas con Firestore
 
-La app cliente guarda reservas en la colección `bookings` de Firebase Firestore. El panel administrativo del repositorio `lafortuna-rides-tours-admin` escucha esa misma colección en tiempo real.
+La app cliente guarda reservas en la colección `bookings` de Firebase Firestore. El panel del conductor del repositorio `lafortuna-rides-tours-admin` escucha esa misma colección en tiempo real.
 
 ## Variables de GitHub Actions
 
@@ -13,11 +13,11 @@ Configura estos secretos en **ambos repositorios**:
 - `VITE_FIREBASE_MESSAGING_SENDER_ID`
 - `VITE_FIREBASE_APP_ID`
 
-La app cliente usa esos valores durante el build. El panel administrativo usa los mismos valores para leer las reservas.
+La app cliente usa esos valores durante el build. El panel del conductor usa los mismos valores para leer las reservas.
 
 ## Reglas recomendadas
 
-No publiques Firestore con lectura y escritura abierta. Para producción, habilita Firebase Authentication para el panel administrativo y usa reglas que permitan crear reservas públicas con campos validados, pero restrinjan la lectura a usuarios administrativos autenticados.
+No publiques Firestore con lectura y escritura abierta. Para producción, habilita Firebase Authentication para el panel del conductor y usa reglas que permitan crear reservas públicas con campos validados, pero restrinjan la lectura a usuarios de conductores autenticados.
 
 Ejemplo conceptual:
 

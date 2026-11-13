@@ -17,6 +17,7 @@ export type BookingPayload = {
   distanceKm?: number;
   durationMinutes?: number;
   language: "es" | "en";
+  userId?: string | undefined;
 };
 
 const firebaseConfig = {
@@ -39,8 +40,10 @@ function firestore() {
 
 export async function saveBooking(payload: BookingPayload) {
   if (!configured()) return { ok: false as const, reason: "missing-config" as const };
+  const { userId, ...bookingData } = payload;
   const reference = await addDoc(collection(firestore(), "bookings"), {
-    ...payload,
+    ...bookingData,
+    ...(userId ? { userId } : {}),
     status: "pending",
     createdAt: serverTimestamp(),
   });

@@ -1,0 +1,21 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /users/{userId} {
+      allow read: if request.auth != null && request.auth.uid == userId;
+      allow create: if request.auth != null && request.auth.uid == userId && request.resource.data.role == "client";
+      allow update, delete: if false;
+    }
+    match /bookings/{bookingId} {
+      allow create: if (
+        request.resource.data.paymentMethod == "cash"
+        && !("userId" in request.resource.data)
+      ) || (
+        request.resource.data.paymentMethod == "card"
+        && request.auth != null
+        && request.resource.data.userId == request.auth.uid
+      );
+      allow read, update, delete: if request.auth != null && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == "driver";
+    }
+  }
+}

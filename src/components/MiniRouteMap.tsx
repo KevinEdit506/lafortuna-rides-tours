@@ -1,10 +1,12 @@
-import { LoaderCircle, RefreshCw } from "lucide-react";
+import { AlertTriangle, Clock3, LoaderCircle, RefreshCw, Route as RouteIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 
 type MiniRouteMapProps = {
   origin: string;
   destination: string;
   language: "es" | "en";
+  distanceKm?: number;
+  durationMinutes?: number;
 };
 
 function mapsAddress(address: string) {
@@ -18,7 +20,13 @@ function mapsAddress(address: string) {
   return `${trimmed}, Costa Rica`;
 }
 
-export function MiniRouteMap({ origin, destination, language }: MiniRouteMapProps) {
+export function MiniRouteMap({
+  origin,
+  destination,
+  language,
+  distanceKm = 8,
+  durationMinutes = 18,
+}: MiniRouteMapProps) {
   const [visibleRoute, setVisibleRoute] = useState({ origin, destination, language });
   const [loaded, setLoaded] = useState(false);
   const [loadError, setLoadError] = useState(false);
@@ -65,10 +73,11 @@ export function MiniRouteMap({ origin, destination, language }: MiniRouteMapProp
 
   return (
     <div className="mini-route-map">
-      <div className="mb-3">
+      <div className="route-card-heading mb-3">
         <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-panel-muted-foreground">
           {isSpanish ? "Ruta del viaje" : "Trip route"}
         </p>
+        <span>{isSpanish ? "Vista previa" : "Preview"}</span>
       </div>
       <div className="relative h-[300px] overflow-hidden rounded-[22px] bg-surface ring-1 ring-white/15 sm:h-[320px]">
         {complete ? (
@@ -127,6 +136,32 @@ export function MiniRouteMap({ origin, destination, language }: MiniRouteMapProp
             )}
           </div>
         )}
+        <div className="route-map-landmark" aria-hidden="true">
+          <AlertTriangle className="size-3.5" />
+          <span>Volcán Arenal</span>
+        </div>
+      </div>
+      <div
+        className="route-metrics"
+        aria-label={isSpanish ? "Resumen de la ruta" : "Route summary"}
+      >
+        <div>
+          <span className="route-metric-label">
+            {isSpanish ? "Tiempo estimado" : "Estimated time"}
+          </span>
+          <strong>
+            <Clock3 className="size-4" />
+            {durationMinutes} min
+          </strong>
+        </div>
+        <div className="text-right">
+          <span className="route-metric-label">
+            {isSpanish ? "Ruta sugerida" : "Suggested route"}
+          </span>
+          <strong>
+            {distanceKm.toFixed(1).replace(".", ",")} km <RouteIcon className="size-4" />
+          </strong>
+        </div>
       </div>
     </div>
   );
