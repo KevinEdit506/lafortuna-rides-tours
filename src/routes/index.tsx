@@ -1038,6 +1038,36 @@ function Index() {
             "Weather and road conditions can change quickly in Costa Rica. Leave room for rain, traffic, or gravel roads, and keep the operator's contact available so you can report any schedule change.",
           ],
         };
+  const tourismArticle: BlogArticle =
+    language === "es"
+      ? {
+          slug: "mejores-lugares-cerca-de-la-fortuna",
+          image: `${import.meta.env.BASE_URL}category-parques.jpg`,
+          category: "Guía de destinos · La Fortuna",
+          readTime: "6 min de lectura",
+          title: "Los mejores lugares turísticos cerca de La Fortuna",
+          excerpt:
+            "Una selección de volcanes, cataratas, puentes colgantes y aguas termales para planear tu próxima escapada.",
+          paragraphs: [
+            "El Volcán Arenal es el punto de partida ideal para conocer la zona. Sus miradores y senderos permiten apreciar el paisaje volcánico, el lago y la selva que rodea a La Fortuna; elige un recorrido acorde con el tiempo y el clima del día.",
+            "La Catarata Río Fortuna y los puentes colgantes de Mistico ofrecen dos formas distintas de disfrutar la naturaleza. La primera combina sendero y agua dulce, mientras que la segunda permite caminar entre el bosque y observar la vida silvestre desde las alturas.",
+            "Para terminar el día, las aguas termales son una opción relajante después de caminar. Si cuentas con más tiempo, puedes organizar una excursión de día completo hacia Río Celeste o los parques nacionales de la región, coordinando el traslado con anticipación.",
+          ],
+        }
+      : {
+          slug: "best-places-near-la-fortuna",
+          image: `${import.meta.env.BASE_URL}category-parques.jpg`,
+          category: "Destination guide · La Fortuna",
+          readTime: "6 min read",
+          title: "The best places to visit near La Fortuna",
+          excerpt:
+            "A selection of volcano views, waterfalls, hanging bridges, and hot springs for your next getaway.",
+          paragraphs: [
+            "Arenal Volcano is the ideal starting point for exploring the area. Its viewpoints and trails reveal volcanic scenery, the lake, and the rainforest around La Fortuna; choose a route that matches the day's time and weather.",
+            "La Fortuna Waterfall and Mistico Hanging Bridges offer two different ways to enjoy nature. The waterfall combines a forest trail with fresh water, while the bridges let you walk through the canopy and observe wildlife from above.",
+            "To finish the day, hot springs are a relaxing option after a hike. With more time, plan a full-day excursion to Río Celeste or one of the region's national parks, coordinating your transfer in advance.",
+          ],
+        };
   useEffect(() => {
     const syncArticleHash = () => {
       const hash = window.location.hash;
@@ -1048,6 +1078,11 @@ function Index() {
         hash === "#blog/safe-transfers-costa-rica"
       ) {
         setSelectedArticle(safetyArticle);
+      } else if (
+        hash === "#blog/mejores-lugares-cerca-de-la-fortuna" ||
+        hash === "#blog/best-places-near-la-fortuna"
+      ) {
+        setSelectedArticle(tourismArticle);
       }
     };
     syncArticleHash();
@@ -1847,7 +1882,7 @@ function Index() {
                 <Compass className="size-5 text-leaf" aria-hidden="true" />
               </div>
               <div className="mt-4 grid gap-4 lg:grid-cols-2">
-                {[blogArticle, safetyArticle].map((article) => (
+                {[blogArticle, safetyArticle, tourismArticle].map((article) => (
                   <article
                     key={article.slug}
                     className="overflow-hidden rounded-[24px] bg-white text-foreground shadow-xl ring-1 ring-white/20"
@@ -1934,9 +1969,14 @@ function Index() {
                     ? language === "es"
                       ? "¿Listo para viajar con tranquilidad?"
                       : "Ready to travel with peace of mind?"
-                    : language === "es"
-                      ? "¿Listo para conocer Arenal?"
-                      : "Ready to discover Arenal?"}
+                    : selectedArticle.slug === "mejores-lugares-cerca-de-la-fortuna" ||
+                        selectedArticle.slug === "best-places-near-la-fortuna"
+                      ? language === "es"
+                        ? "¿Listo para explorar La Fortuna?"
+                        : "Ready to explore La Fortuna?"
+                      : language === "es"
+                        ? "¿Listo para conocer Arenal?"
+                        : "Ready to discover Arenal?"}
                 </p>
                 <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
                   {language === "es"
