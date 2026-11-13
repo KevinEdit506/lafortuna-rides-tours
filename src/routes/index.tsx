@@ -1068,6 +1068,12 @@ function Index() {
                   icon: Bike,
                   tone: "amber",
                 },
+                {
+                  key: "booking" as const,
+                  label: language === "es" ? "Reserva" : "Booking",
+                  icon: CalendarDays,
+                  tone: "purple",
+                },
               ].map(({ key, label, icon: Icon, tone }) => (
                 <button
                   key={label}
