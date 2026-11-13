@@ -1009,10 +1009,15 @@ function Index() {
           ],
         };
   useEffect(() => {
-    const hash = window.location.hash;
-    if (hash === "#blog/primer-dia-en-arenal" || hash === "#blog/first-day-in-arenal") {
-      setSelectedArticle(blogArticle);
-    }
+    const syncArticleHash = () => {
+      const hash = window.location.hash;
+      if (hash === "#blog/primer-dia-en-arenal" || hash === "#blog/first-day-in-arenal") {
+        setSelectedArticle(blogArticle);
+      }
+    };
+    syncArticleHash();
+    window.addEventListener("hashchange", syncArticleHash);
+    return () => window.removeEventListener("hashchange", syncArticleHash);
     // The article is static content; this effect only restores a shared deep link.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [language]);
