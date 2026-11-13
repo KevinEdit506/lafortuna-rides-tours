@@ -1008,11 +1008,46 @@ function Index() {
             "To make the most of your time, coordinate your transfer in advance. That lets you focus on the experience, choose a private or shared ride, and return to La Fortuna without worrying about the route.",
           ],
         };
+  const safetyArticle: BlogArticle =
+    language === "es"
+      ? {
+          slug: "traslados-seguros-costa-rica",
+          image: `${import.meta.env.BASE_URL}category-rios.jpg`,
+          category: "Consejos de viaje · Costa Rica",
+          readTime: "4 min de lectura",
+          title: "Consejos para traslados seguros en Costa Rica",
+          excerpt:
+            "Qué revisar antes de salir, cómo coordinar tu recogida y cómo viajar con más tranquilidad entre destinos.",
+          paragraphs: [
+            "Antes de confirmar un traslado, verifica el punto exacto de recogida, el destino y el horario. Compartir referencias como el nombre del hotel, una entrada principal o un punto conocido ayuda a que el encuentro sea claro para ambas partes.",
+            "Viaja con tus pertenencias importantes contigo y confirma quién realizará el servicio. En trayectos largos, usa el cinturón de seguridad, informa si llevas equipaje especial y evita cambiar el destino durante el camino sin coordinarlo primero.",
+            "En Costa Rica el clima y las condiciones de algunas carreteras pueden cambiar rápido. Deja margen para lluvia, tráfico o caminos de lastre, y conserva a mano el contacto del operador para avisar cualquier cambio de horario.",
+          ],
+        }
+      : {
+          slug: "safe-transfers-costa-rica",
+          image: `${import.meta.env.BASE_URL}category-rios.jpg`,
+          category: "Travel tips · Costa Rica",
+          readTime: "4 min read",
+          title: "Tips for safer transfers in Costa Rica",
+          excerpt:
+            "What to check before departure, how to coordinate pickup, and how to travel between destinations with greater peace of mind.",
+          paragraphs: [
+            "Before confirming a transfer, verify the exact pickup point, destination, and time. Sharing details such as the hotel name, main entrance, or a recognizable landmark makes the meeting clear for everyone.",
+            "Keep important belongings with you and confirm who will operate the service. On longer trips, wear your seat belt, mention special luggage, and avoid changing the destination on the road without coordinating first.",
+            "Weather and road conditions can change quickly in Costa Rica. Leave room for rain, traffic, or gravel roads, and keep the operator's contact available so you can report any schedule change.",
+          ],
+        };
   useEffect(() => {
     const syncArticleHash = () => {
       const hash = window.location.hash;
       if (hash === "#blog/primer-dia-en-arenal" || hash === "#blog/first-day-in-arenal") {
         setSelectedArticle(blogArticle);
+      } else if (
+        hash === "#blog/traslados-seguros-costa-rica" ||
+        hash === "#blog/safe-transfers-costa-rica"
+      ) {
+        setSelectedArticle(safetyArticle);
       }
     };
     syncArticleHash();
@@ -1811,33 +1846,40 @@ function Index() {
                 </div>
                 <Compass className="size-5 text-leaf" aria-hidden="true" />
               </div>
-              <article className="mt-4 overflow-hidden rounded-[24px] bg-white text-foreground shadow-xl ring-1 ring-white/20">
-                <img
-                  src={blogArticle.image}
-                  alt={blogArticle.title}
-                  width={1024}
-                  height={768}
-                  loading="lazy"
-                  className="h-44 w-full object-cover"
-                />
-                <div className="p-4">
-                  <div className="flex items-center justify-between gap-3 text-[10px] font-bold uppercase tracking-[0.12em] text-leaf-ink">
-                    <span>{blogArticle.category}</span>
-                    <span>{blogArticle.readTime}</span>
-                  </div>
-                  <h3 className="mt-2 font-display text-xl leading-tight">{blogArticle.title}</h3>
-                  <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-                    {blogArticle.excerpt}
-                  </p>
-                  <button
-                    type="button"
-                    onClick={() => openArticleDetail(blogArticle)}
-                    className="mt-4 w-full rounded-2xl bg-leaf py-3 text-sm font-bold text-leaf-foreground shadow-[0_3px_0_color-mix(in_oklch,var(--color-jungle)_35%,transparent)] transition-transform active:scale-[0.98]"
+              <div className="mt-4 grid gap-4 lg:grid-cols-2">
+                {[blogArticle, safetyArticle].map((article) => (
+                  <article
+                    key={article.slug}
+                    className="overflow-hidden rounded-[24px] bg-white text-foreground shadow-xl ring-1 ring-white/20"
                   >
-                    {language === "es" ? "Leer artículo" : "Read article"}
-                  </button>
-                </div>
-              </article>
+                    <img
+                      src={article.image}
+                      alt={article.title}
+                      width={1024}
+                      height={768}
+                      loading="lazy"
+                      className="h-44 w-full object-cover"
+                    />
+                    <div className="p-4">
+                      <div className="flex items-center justify-between gap-3 text-[10px] font-bold uppercase tracking-[0.12em] text-leaf-ink">
+                        <span>{article.category}</span>
+                        <span>{article.readTime}</span>
+                      </div>
+                      <h3 className="mt-2 font-display text-xl leading-tight">{article.title}</h3>
+                      <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                        {article.excerpt}
+                      </p>
+                      <button
+                        type="button"
+                        onClick={() => openArticleDetail(article)}
+                        className="mt-4 w-full rounded-2xl bg-leaf py-3 text-sm font-bold text-leaf-foreground shadow-[0_3px_0_color-mix(in_oklch,var(--color-jungle)_35%,transparent)] transition-transform active:scale-[0.98]"
+                      >
+                        {language === "es" ? "Leer artículo" : "Read article"}
+                      </button>
+                    </div>
+                  </article>
+                ))}
+              </div>
             </section>
           </div>
         </div>
@@ -1887,7 +1929,14 @@ function Index() {
               </div>
               <div className="mt-7 rounded-[22px] bg-background p-4 ring-1 ring-border">
                 <p className="text-sm font-bold">
-                  {language === "es" ? "¿Listo para conocer Arenal?" : "Ready to discover Arenal?"}
+                  {selectedArticle.slug === "traslados-seguros-costa-rica" ||
+                  selectedArticle.slug === "safe-transfers-costa-rica"
+                    ? language === "es"
+                      ? "¿Listo para viajar con tranquilidad?"
+                      : "Ready to travel with peace of mind?"
+                    : language === "es"
+                      ? "¿Listo para conocer Arenal?"
+                      : "Ready to discover Arenal?"}
                 </p>
                 <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
                   {language === "es"
