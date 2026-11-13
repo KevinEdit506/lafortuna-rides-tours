@@ -350,10 +350,6 @@ function Index() {
     "Centro de La Fortuna",
     "Centro de La Fortuna",
   ]);
-  const [passengerDestinations, setPassengerDestinations] = useState([
-    "Parque Nacional Volcán Arenal",
-    "Parque Nacional Volcán Arenal",
-  ]);
   const [paymentMethod, setPaymentMethod] = useState<"card" | "cash">("cash");
   const [exchangeRate, setExchangeRate] = useState<number | null>(null);
   const [confirmed, setConfirmed] = useState(false);
@@ -561,7 +557,7 @@ function Index() {
     setPassengerDistances((current) =>
       Array.from({ length: passengers }, (_, index) => {
         const passengerOrigin = passengerOrigins[index] ?? origin;
-        const passengerDestination = passengerDestinations[index] ?? destination;
+        const passengerDestination = destination;
         return Math.max(
           1,
           4 + ((passengerOrigin.length * 7 + passengerDestination.length * 11) % 120) / 10,
@@ -571,7 +567,7 @@ function Index() {
     setPassengerDurations(() =>
       Array.from({ length: passengers }, (_, index) => {
         const passengerOrigin = passengerOrigins[index] ?? origin;
-        const passengerDestination = passengerDestinations[index] ?? destination;
+        const passengerDestination = destination;
         const fallbackDistance = Math.max(
           1,
           4 + ((passengerOrigin.length * 7 + passengerDestination.length * 11) % 120) / 10,
@@ -579,16 +575,7 @@ function Index() {
         return Math.max(3, Math.round(fallbackDistance * 2.2));
       }),
     );
-  }, [
-    destination,
-    durationMinutes,
-    mapsStatus,
-    origin,
-    passengerDestinations,
-    passengerOrigins,
-    passengers,
-    rideType,
-  ]);
+  }, [destination, durationMinutes, mapsStatus, origin, passengerOrigins, passengers, rideType]);
 
   useEffect(() => {
     if (rideType !== "shared" || mapsStatus !== "ready") return;
@@ -596,7 +583,7 @@ function Index() {
     if (!maps) return;
     const service = new maps.DirectionsService();
     passengerOrigins.slice(0, passengers).forEach((passengerOrigin, index) => {
-      const passengerDestination = passengerDestinations[index] ?? destination;
+      const passengerDestination = destination;
       service.route(
         {
           origin: passengerOrigin,
@@ -626,7 +613,7 @@ function Index() {
         },
       );
     });
-  }, [destination, mapsStatus, passengerDestinations, passengerOrigins, passengers, rideType]);
+  }, [destination, mapsStatus, passengerOrigins, passengers, rideType]);
 
   useEffect(() => {
     if (mapsStatus !== "ready") return;
@@ -701,19 +688,17 @@ function Index() {
         }>,
       };
     }
-    const perPassenger = passengerDestinations
-      .slice(0, passengers)
-      .map((passengerDestination, index) => {
-        const passengerDistance = passengerDistances[index] ?? distanceKm;
-        const totalCrc = calculateCrc(passengerDistance);
-        const total = Math.round((crcToUsd(totalCrc) + tollsAndFees) * 100) / 100;
-        return {
-          destination: passengerDestination,
-          distance: passengerDistance,
-          duration: passengerDurations[index] ?? durationMinutes,
-          total,
-        };
-      });
+    const perPassenger = passengerOrigins.slice(0, passengers).map((_passengerOrigin, index) => {
+      const passengerDistance = passengerDistances[index] ?? distanceKm;
+      const totalCrc = calculateCrc(passengerDistance);
+      const total = Math.round((crcToUsd(totalCrc) + tollsAndFees) * 100) / 100;
+      return {
+        destination,
+        distance: passengerDistance,
+        duration: passengerDurations[index] ?? durationMinutes,
+        total,
+      };
+    });
     const total = perPassenger.reduce((sum, item) => sum + item.total, 0);
     return {
       base: 0,
@@ -731,12 +716,13 @@ function Index() {
       perPassenger,
     };
   }, [
+    destination,
     distanceKm,
     durationMinutes,
     exchangeRate,
-    passengerDestinations,
     passengerDistances,
     passengerDurations,
+    passengerOrigins,
     passengers,
     rideType,
     dynamicMultiplier,
@@ -761,9 +747,6 @@ function Index() {
     setPassengers(nextPassengers);
     setPassengerOrigins((current) =>
       Array.from({ length: nextPassengers }, (_, index) => current[index] ?? origin),
-    );
-    setPassengerDestinations((current) =>
-      Array.from({ length: nextPassengers }, (_, index) => current[index] ?? destination),
     );
     setPassengerDistances((current) =>
       Array.from({ length: nextPassengers }, (_, index) => current[index] ?? distanceKm),
@@ -809,8 +792,22 @@ function Index() {
         ? `Hola Via La Fortuna, me gustaría reservar el tour ${tourName}. ¿Podrían ayudarme con disponibilidad y próximos pasos?`
         : `Hello Via La Fortuna, I would like to book the ${tourName} tour. Could you help me with availability and next steps?`
       : isSpanish
-        ? `Hola Via La Fortuna, me gustaría reservar un traslado.\n\nOrigen: ${origin}\nDestino: ${destination}\n${rideType === "shared" ? `Rutas por pasajero:\n${passengerDestinations.map((item, index) => `Pasajero ${index + 1}: ${passengerOrigins[index]} → ${item}`).join("\n")}` : ""}\nTipo: ${rideType === "private" ? "Privado" : "Compartido"}\nHorario: ${timing === "now" ? "Ahora" : `${scheduleDate} · ${scheduleTime}`}\nPasajeros: ${passengers}\nPago: ${paymentMethod === "card" ? "Tarjeta" : "Efectivo"}\nTarifa estimada: ${formatFareForMessage(fare.total)}`
-        : `Hello Via La Fortuna, I would like to book a transfer.\n\nPickup: ${origin}\nDestination: ${destination}\n${rideType === "shared" ? `Passenger routes:\n${passengerDestinations.map((item, index) => `Passenger ${index + 1}: ${passengerOrigins[index]} → ${item}`).join("\n")}` : ""}\nType: ${rideType === "private" ? "Private" : "Shared"}\nTiming: ${timing === "now" ? "Now" : `${scheduleDate} · ${scheduleTime}`}\nPassengers: ${passengers}\nPayment: ${paymentMethod === "card" ? "Card" : "Cash"}\nEstimated fare: ${formatFareForMessage(fare.total)}`;
+        ? `Hola Via La Fortuna, me gustaría reservar un traslado.\n\nOrigen: ${origin}\nDestino: ${destination}\n${
+            rideType === "shared"
+              ? `Orígenes por pasajero hacia ${destination}:\n${passengerOrigins
+                  .slice(0, passengers)
+                  .map((item, index) => `Pasajero ${index + 1}: ${item} → ${destination}`)
+                  .join("\n")}`
+              : ""
+          }\nTipo: ${rideType === "private" ? "Privado" : "Compartido"}\nHorario: ${timing === "now" ? "Ahora" : `${scheduleDate} · ${scheduleTime}`}\nPasajeros: ${passengers}\nPago: ${paymentMethod === "card" ? "Tarjeta" : "Efectivo"}\nTarifa estimada: ${formatFareForMessage(fare.total)}`
+        : `Hello Via La Fortuna, I would like to book a transfer.\n\nPickup: ${origin}\nDestination: ${destination}\n${
+            rideType === "shared"
+              ? `Passenger pickups to ${destination}:\n${passengerOrigins
+                  .slice(0, passengers)
+                  .map((item, index) => `Passenger ${index + 1}: ${item} → ${destination}`)
+                  .join("\n")}`
+              : ""
+          }\nType: ${rideType === "private" ? "Private" : "Shared"}\nTiming: ${timing === "now" ? "Now" : `${scheduleDate} · ${scheduleTime}`}\nPassengers: ${passengers}\nPayment: ${paymentMethod === "card" ? "Card" : "Cash"}\nEstimated fare: ${formatFareForMessage(fare.total)}`;
 
     window.open(
       `https://wa.me/50663135655?text=${encodeURIComponent(message)}`,
@@ -938,7 +935,6 @@ function Index() {
 
   const selectDestination = (place: string) => {
     setDestination(place);
-    setPassengerDestinations((items) => items.map(() => place));
     closeDestinationSearch();
   };
 
@@ -1365,7 +1361,7 @@ function Index() {
                   <div className="mt-3 rounded-2xl bg-background p-3 ring-1 ring-border">
                     <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">
                       <MapPin className="size-3.5 text-leaf" />
-                      {t.sharedDestinations}
+                      {language === "es" ? "Orígenes de pasajeros" : "Passenger pickups"}
                     </div>
                     <div className="mt-2 space-y-2">
                       {Array.from({ length: passengers }, (_, index) => (
@@ -1384,23 +1380,6 @@ function Index() {
                                 )
                               }
                               placeholder={origin}
-                              className="mt-0.5 w-full rounded-full bg-surface px-3 py-2 text-sm font-semibold outline-none ring-1 ring-border"
-                            />
-                          </label>
-                          <label className="block">
-                            <span className="text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
-                              {t.passengerDestination} {index + 1}
-                            </span>
-                            <input
-                              value={passengerDestinations[index] ?? ""}
-                              onChange={(event) =>
-                                setPassengerDestinations((current) =>
-                                  current.map((item, itemIndex) =>
-                                    itemIndex === index ? event.target.value : item,
-                                  ),
-                                )
-                              }
-                              placeholder={destination}
                               className="mt-0.5 w-full rounded-full bg-surface px-3 py-2 text-sm font-semibold outline-none ring-1 ring-border"
                             />
                           </label>
