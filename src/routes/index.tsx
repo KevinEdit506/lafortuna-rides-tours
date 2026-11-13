@@ -371,9 +371,7 @@ function Index() {
   const [selectedFeature, setSelectedFeature] = useState<FeatureKey | null>(() =>
     typeof window === "undefined" ? null : featureFromHash(window.location.hash),
   );
-  const [destinationSearchOpen, setDestinationSearchOpen] = useState(() =>
-    typeof window === "undefined" ? false : window.location.hash === "#destination-search",
-  );
+  const [destinationSearchOpen, setDestinationSearchOpen] = useState(false);
   const [destinationQuery, setDestinationQuery] = useState("");
   const [featureTransition, setFeatureTransition] = useState<"enter" | "exit">("enter");
   const [paymentOpen, setPaymentOpen] = useState(false);
@@ -408,17 +406,18 @@ function Index() {
   }, [selectedTour]);
 
   useEffect(() => {
+    if (!destinationSearchOpen) return;
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setDestinationSearchOpen(false);
+    };
+    window.addEventListener("keydown", closeOnEscape);
+    return () => window.removeEventListener("keydown", closeOnEscape);
+  }, [destinationSearchOpen]);
+
+  useEffect(() => {
     const handleBack = () => setSelectedTour(null);
     window.addEventListener("popstate", handleBack);
     return () => window.removeEventListener("popstate", handleBack);
-  }, []);
-
-  useEffect(() => {
-    const handleDestinationSearchBack = () => {
-      setDestinationSearchOpen(window.location.hash === "#destination-search");
-    };
-    window.addEventListener("popstate", handleDestinationSearchBack);
-    return () => window.removeEventListener("popstate", handleDestinationSearchBack);
   }, []);
 
   useEffect(() => {
@@ -924,14 +923,10 @@ function Index() {
 
   const openDestinationSearch = () => {
     setDestinationQuery("");
-    window.history.pushState({ destinationSearch: true }, "", "#destination-search");
     setDestinationSearchOpen(true);
   };
 
-  const closeDestinationSearch = () => {
-    if (window.location.hash === "#destination-search") window.history.back();
-    else setDestinationSearchOpen(false);
-  };
+  const closeDestinationSearch = () => setDestinationSearchOpen(false);
 
   const selectDestination = (place: string) => {
     setDestination(place);
@@ -2054,25 +2049,35 @@ function Index() {
       )}
 
       {destinationSearchOpen && (
-        <main className="push-screen fixed inset-0 z-[60] overflow-y-auto bg-background px-4 pb-10 pt-4 text-foreground sm:px-8 sm:pt-8">
-          <section className="mx-auto min-h-[calc(100vh-2rem)] w-full max-w-2xl rounded-[30px] bg-surface p-5 shadow-xl ring-1 ring-border sm:min-h-[calc(100vh-4rem)] sm:p-8">
-            <header className="flex items-center gap-3 border-b border-border pb-5">
-              <button
-                type="button"
-                onClick={closeDestinationSearch}
-                aria-label={language === "es" ? "Volver" : "Go back"}
-                className="grid size-10 shrink-0 place-items-center rounded-full bg-background text-muted-foreground ring-1 ring-border transition-transform active:scale-95"
-              >
-                <ArrowLeft className="size-4" />
-              </button>
+        <div
+          className="fixed inset-0 z-[60] flex items-end justify-center bg-black/55 p-3 backdrop-blur-sm sm:items-center sm:p-6"
+          role="presentation"
+          onClick={closeDestinationSearch}
+        >
+          <section
+            className="w-full max-w-2xl rounded-[30px] bg-surface p-5 text-foreground shadow-2xl ring-1 ring-border sm:max-h-[min(720px,calc(100vh-3rem))] sm:p-8"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="destination-search-title"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <header className="flex items-start justify-between gap-3 border-b border-border pb-5">
               <div>
                 <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-leaf-ink">
                   {language === "es" ? "Destino" : "Destination"}
                 </p>
-                <h1 className="font-display text-2xl font-bold">
+                <h1 id="destination-search-title" className="mt-1 font-display text-2xl font-bold">
                   {language === "es" ? "¿A dónde vas?" : "Where are you going?"}
                 </h1>
               </div>
+              <button
+                type="button"
+                onClick={() => setDestinationSearchOpen(false)}
+                aria-label={language === "es" ? "Cerrar búsqueda" : "Close search"}
+                className="grid size-10 shrink-0 place-items-center rounded-full bg-background text-muted-foreground ring-1 ring-border transition-transform active:scale-95"
+              >
+                <X className="size-4" />
+              </button>
             </header>
 
             <div className="mt-7 flex items-center gap-3 rounded-2xl bg-background px-4 py-3 ring-1 ring-border focus-within:ring-2 focus-within:ring-primary">
@@ -2117,7 +2122,7 @@ function Index() {
               )}
             </div>
           </section>
-        </main>
+        </div>
       )}
 
       <nav
