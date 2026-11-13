@@ -1181,11 +1181,11 @@ function Index() {
             )}
 
             {mode === "transfers" ? (
-              <section className="control-relief rise mt-4 rounded-[30px] bg-surface p-4 [animation-delay:200ms]">
-                <h2 className="mb-3 rounded-full bg-jungle px-5 py-3 text-center font-display text-xl text-primary-foreground shadow-[0_4px_0_color-mix(in_oklch,var(--color-jungle)_35%,transparent)]">
+              <section className="booking-reference-panel control-relief rise mt-4 rounded-[30px] bg-surface p-4 [animation-delay:200ms]">
+                <h2 className="mx-auto mb-3 max-w-[13rem] rounded-full bg-jungle px-5 py-2.5 text-center font-display text-lg text-primary-foreground shadow-[0_4px_0_color-mix(in_oklch,var(--color-jungle)_35%,transparent)]">
                   {language === "es" ? "Reservar Tours" : "Book Tours"}
                 </h2>
-                <div className="address-fields rounded-[24px] bg-background p-3.5 text-foreground ring-1 ring-border">
+                <div className="address-fields rounded-[24px] bg-[#edf5f8] p-3.5 text-foreground ring-1 ring-[#d9e5ea]">
                   <div className="flex items-center gap-3">
                     <span
                       className="grid size-8 shrink-0 place-items-center rounded-full bg-white/10 ring-1 ring-white/10"
@@ -1206,7 +1206,7 @@ function Index() {
                           setRouteStatus("updating");
                         }}
                         list="place-suggestions"
-                        className="address-input mt-1.5 min-h-12 w-full min-w-0 rounded-full bg-surface px-4 py-2.5 text-base font-semibold text-foreground outline-none"
+                        className="address-input mt-1.5 min-h-12 w-full min-w-0 rounded-full bg-[#f8fbfc] px-4 py-2.5 text-sm font-semibold text-foreground outline-none"
                       />
                     </label>
                   </div>
@@ -1231,7 +1231,7 @@ function Index() {
                           setRouteStatus("updating");
                         }}
                         list="place-suggestions"
-                        className="address-input mt-1.5 min-h-12 w-full min-w-0 rounded-full bg-surface px-4 py-2.5 text-base font-semibold text-foreground outline-none"
+                        className="address-input mt-1.5 min-h-12 w-full min-w-0 rounded-full bg-[#f8fbfc] px-4 py-2.5 text-sm font-semibold text-foreground outline-none"
                       />
                     </label>
                   </div>
@@ -1247,14 +1247,14 @@ function Index() {
                     <button
                       key={value}
                       onClick={() => setRideType(value)}
-                      className={`rounded-full py-2.5 text-[13px] font-bold ${rideType === value ? "bg-leaf text-leaf-foreground shadow-sm" : "bg-leaf/15 text-leaf-ink"}`}
+                      className={`rounded-full py-2.5 text-[13px] font-bold ${rideType === value ? "bg-[#169bc5] text-white shadow-sm" : "bg-[#eef1f5] text-[#697180]"}`}
                     >
                       {t[value]}
                     </button>
                   ))}
                 </div>
                 <div className="mt-3 grid grid-cols-2 gap-3">
-                  <div className="rounded-2xl bg-background px-3 py-2.5 ring-1 ring-border">
+                  <div className="rounded-2xl bg-[#f8fbfc] px-3 py-2.5 ring-1 ring-[#d9e5ea]">
                     <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">
                       <Clock3 className="size-3.5" />
                       {timing === "now" ? t.now : t.schedule}
@@ -1267,7 +1267,7 @@ function Index() {
                       <CalendarDays className="size-4 text-leaf" />
                     </button>
                   </div>
-                  <div className="rounded-2xl bg-background px-3 py-2.5 ring-1 ring-border">
+                  <div className="rounded-2xl bg-[#f8fbfc] px-3 py-2.5 ring-1 ring-[#d9e5ea]">
                     <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">
                       <UsersRound className="size-3.5" />
                       {t.passengers}
@@ -1289,6 +1289,11 @@ function Index() {
                     </div>
                   </div>
                 </div>
+                <p className="mt-2 px-1 text-[10px] leading-relaxed text-muted-foreground">
+                  {language === "es"
+                    ? "La fecha y hora quedan solicitadas hasta coordinar con el operador."
+                    : "The date and time remain requested until coordinated with the operator."}
+                </p>
                 {timing === "schedule" && (
                   <div className="mt-3 rounded-[24px] bg-background p-3 ring-1 ring-border">
                     <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">
@@ -1385,7 +1390,7 @@ function Index() {
                     </div>
                   </div>
                 )}
-                <div className="mt-3 rounded-2xl bg-background p-1 ring-1 ring-border">
+                <div className="mt-3 rounded-2xl bg-[#f8fbfc] p-1 ring-1 ring-[#d9e5ea]">
                   <p className="px-3 pt-2 text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">
                     {t.payment}
                   </p>
@@ -1409,7 +1414,7 @@ function Index() {
                             }
                           }
                         }}
-                        className={`rounded-xl py-2.5 text-sm font-bold transition-colors ${paymentMethod === method ? "bg-leaf text-leaf-foreground" : "bg-leaf/15 text-leaf-ink"} ${confirmed ? "cursor-not-allowed opacity-60" : ""}`}
+                        className={`rounded-xl py-2.5 text-sm font-bold transition-colors ${paymentMethod === method ? "bg-[#169bc5] text-white" : "bg-[#eef1f5] text-[#697180]"} ${confirmed ? "cursor-not-allowed opacity-60" : ""}`}
                       >
                         {method === "card" ? t.card : t.cash}
                       </button>
@@ -1423,7 +1428,7 @@ function Index() {
                 </div>
                 {confirmed && (
                   <div
-                    className="mt-3 flex items-start gap-2 rounded-2xl bg-leaf/15 p-3 text-xs text-primary ring-1 ring-leaf/25"
+                    className="mt-3 flex items-start gap-2 rounded-2xl bg-[#e8f4f8] p-3 text-xs text-primary ring-1 ring-[#b9d9e4]"
                     role="status"
                   >
                     <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-leaf" />
@@ -1435,7 +1440,7 @@ function Index() {
                 )}
                 <button
                   onClick={() => void confirmTransferBooking()}
-                  className="confirm-booking-button mt-4 w-full rounded-full bg-leaf py-3.5 text-sm font-bold text-leaf-foreground transition-transform active:scale-[0.98]"
+                  className="confirm-booking-button mt-4 w-full rounded-full bg-[#169bc5] py-3.5 text-sm font-bold text-white transition-transform active:scale-[0.98]"
                 >
                   {bookingStatus === "saving"
                     ? language === "es"

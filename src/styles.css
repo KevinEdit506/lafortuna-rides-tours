@@ -1085,3 +1085,17 @@ input::placeholder {
     background: oklch(0.75 0.18 150 / 16%);
   }
 }
+
+/* Booking card visual treatment from the supplied mobile reference. */
+.booking-reference-panel {
+  background: #ffffff !important;
+  color: #26323a;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.9) inset,
+    0 5px 0 rgba(31, 55, 66, 0.12),
+    0 14px 28px rgba(31, 55, 66, 0.14);
+}
+
+.booking-reference-panel .text-muted-foreground {
+  color: #69747d;
+}
