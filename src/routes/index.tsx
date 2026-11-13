@@ -152,13 +152,13 @@ function featureFromHash(hash: string): FeatureKey | null {
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Via La Fortuna | Transfers & Tours in Arenal" },
+      { title: "Via Fortuna | Transfers & Tours in Arenal" },
       {
         name: "description",
         content:
           "Reserve traslados privados y tours bilingües en La Fortuna, Costa Rica. Tarifas claras, atención local y experiencias memorables cerca del Arenal.",
       },
-      { property: "og:title", content: "Via La Fortuna | Transfers & Tours in Arenal" },
+      { property: "og:title", content: "Via Fortuna | Transfers & Tours in Arenal" },
       {
         property: "og:description",
         content:
@@ -166,7 +166,7 @@ export const Route = createFileRoute("/")({
       },
       { property: "og:type", content: "website" },
       { property: "og:url", content: "https://kevinedit506.github.io/lafortuna-rides-tours/" },
-      { property: "og:site_name", content: "Via La Fortuna" },
+      { property: "og:site_name", content: "Via Fortuna" },
       { property: "og:locale", content: "es_CR" },
       {
         property: "og:image",
@@ -176,7 +176,7 @@ export const Route = createFileRoute("/")({
       { property: "og:image:width", content: "2560" },
       { property: "og:image:height", content: "1440" },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:title", content: "Via La Fortuna | Transfers & Tours in Arenal" },
+      { name: "twitter:title", content: "Via Fortuna | Transfers & Tours in Arenal" },
       {
         name: "twitter:description",
         content:
@@ -789,10 +789,10 @@ function Index() {
     const isSpanish = language === "es";
     const message = tourName
       ? isSpanish
-        ? `Hola Via La Fortuna, me gustaría reservar el tour ${tourName}. ¿Podrían ayudarme con disponibilidad y próximos pasos?`
-        : `Hello Via La Fortuna, I would like to book the ${tourName} tour. Could you help me with availability and next steps?`
+        ? `Hola Via Fortuna, me gustaría reservar el tour ${tourName}. ¿Podrían ayudarme con disponibilidad y próximos pasos?`
+        : `Hello Via Fortuna, I would like to book the ${tourName} tour. Could you help me with availability and next steps?`
       : isSpanish
-        ? `Hola Via La Fortuna, me gustaría reservar un traslado.\n\nOrigen: ${origin}\nDestino: ${destination}\n${
+        ? `Hola Via Fortuna, me gustaría reservar un traslado.\n\nOrigen: ${origin}\nDestino: ${destination}\n${
             rideType === "shared"
               ? `Orígenes por pasajero hacia ${destination}:\n${passengerOrigins
                   .slice(0, passengers)
@@ -800,7 +800,7 @@ function Index() {
                   .join("\n")}`
               : ""
           }\nTipo: ${rideType === "private" ? "Privado" : "Compartido"}\nHorario: ${timing === "now" ? "Ahora" : `${scheduleDate} · ${scheduleTime}`}\nPasajeros: ${passengers}\nPago: ${paymentMethod === "card" ? "Tarjeta" : "Efectivo"}\nTarifa estimada: ${formatFareForMessage(fare.total)}`
-        : `Hello Via La Fortuna, I would like to book a transfer.\n\nPickup: ${origin}\nDestination: ${destination}\n${
+        : `Hello Via Fortuna, I would like to book a transfer.\n\nPickup: ${origin}\nDestination: ${destination}\n${
             rideType === "shared"
               ? `Passenger pickups to ${destination}:\n${passengerOrigins
                   .slice(0, passengers)
@@ -982,10 +982,10 @@ function Index() {
               </span>
               <span
                 className="flex min-w-0 h-7 flex-col justify-center leading-none"
-                aria-label="Via La Fortuna · Tours y Viajes"
+                aria-label="Via Fortuna · Tours y Viajes"
               >
                 <span className="whitespace-nowrap font-display text-[clamp(0.72rem,3.2vw,1rem)] font-extrabold leading-none tracking-[-0.025em]">
-                  Via La Fortuna
+                  Via Fortuna
                 </span>
                 <span className="mt-0.5 text-[7px] font-bold uppercase tracking-[0.12em] text-white/75">
                   TOURS Y VIAJES
@@ -1841,8 +1841,8 @@ function Index() {
             </div>
             <div className="mt-5 rounded-2xl bg-background p-4 text-sm leading-relaxed ring-1 ring-border">
               {language === "es"
-                ? "Serás dirigido a Stripe Checkout o Payment Element para completar el pago. Via La Fortuna no almacena números de tarjeta ni códigos de seguridad."
-                : "You will continue to Stripe Checkout or Payment Element to complete payment. Via La Fortuna never stores card numbers or security codes."}
+                ? "Serás dirigido a Stripe Checkout o Payment Element para completar el pago. Via Fortuna no almacena números de tarjeta ni códigos de seguridad."
+                : "You will continue to Stripe Checkout or Payment Element to complete payment. Via Fortuna never stores card numbers or security codes."}
             </div>
             <div className="mt-4 flex items-center gap-2 text-xs font-semibold text-muted-foreground">
               <ShieldCheck className="size-4 text-leaf" />

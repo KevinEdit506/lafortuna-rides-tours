@@ -78,14 +78,14 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Via La Fortuna | Transfers & Tours in Arenal" },
+      { title: "Via Fortuna | Transfers & Tours in Arenal" },
       {
         name: "description",
         content:
           "Reserve traslados privados y tours bilingües en La Fortuna, Costa Rica. Tarifas claras, atención local y experiencias memorables cerca del Arenal.",
       },
-      { name: "author", content: "Via La Fortuna" },
-      { property: "og:title", content: "Via La Fortuna | Transfers & Tours in Arenal" },
+      { name: "author", content: "Via Fortuna" },
+      { property: "og:title", content: "Via Fortuna | Transfers & Tours in Arenal" },
       {
         property: "og:description",
         content:
@@ -93,7 +93,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       },
       { property: "og:type", content: "website" },
       { property: "og:url", content: "https://kevinedit506.github.io/lafortuna-rides-tours/" },
-      { property: "og:site_name", content: "Via La Fortuna" },
+      { property: "og:site_name", content: "Via Fortuna" },
       { property: "og:locale", content: "es_CR" },
       {
         property: "og:image",
@@ -103,7 +103,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { property: "og:image:width", content: "2560" },
       { property: "og:image:height", content: "1440" },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:title", content: "Via La Fortuna | Transfers & Tours in Arenal" },
+      { name: "twitter:title", content: "Via Fortuna | Transfers & Tours in Arenal" },
       {
         name: "twitter:description",
         content:

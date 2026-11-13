@@ -1,6 +1,6 @@
-# Via La Fortuna
+# Via Fortuna
 
-Via La Fortuna is a bilingual rides and tours experience for travelers visiting La Fortuna and the Arenal region of Costa Rica. The app combines clear transfer estimates, scheduled private or shared rides, and curated local experiences in a calm, trustworthy interface.
+Via Fortuna is a bilingual rides and tours experience for travelers visiting La Fortuna and the Arenal region of Costa Rica. The app combines clear transfer estimates, scheduled private or shared rides, and curated local experiences in a calm, trustworthy interface.
 
 ## Live site
 
@@ -62,4 +62,4 @@ Changes pushed to `main` are validated and deployed through [GitHub Actions](.gi
 
 ## Brand assets
 
-The public metadata uses a branded Via La Fortuna favicon and a scenic Arenal-region social preview image. The image was selected to communicate the product promise at a glance: reliable local mobility surrounded by the landscape travelers come to experience.
+The public metadata uses a branded Via Fortuna favicon and a scenic Arenal-region social preview image. The image was selected to communicate the product promise at a glance: reliable local mobility surrounded by the landscape travelers come to experience.
