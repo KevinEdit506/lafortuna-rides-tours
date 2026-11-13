@@ -74,6 +74,7 @@ type TourCard = {
   rating: string;
   category: string;
   summary: string;
+  price: string;
 };
 
 type BlogArticle = {
@@ -1654,7 +1655,9 @@ function Index() {
                     <span className="size-1.5 rounded-full bg-leaf" />
                     <p className="text-[11px] font-bold uppercase tracking-[0.2em]">{t.curation}</p>
                   </div>
-                  <h2 className="mt-1 font-display text-[22px] text-white">{t.escapes}</h2>
+                  <h2 className="mt-1 font-display text-[22px] text-white">
+                    {language === "es" ? "Experiencias Locales" : "Local Experiences"}
+                  </h2>
                 </div>
               </div>
               <p className="mb-3 text-sm leading-relaxed text-white/80">
@@ -1662,87 +1665,60 @@ function Index() {
                   ? "Descubre experiencias locales y escapadas por Costa Rica: playas, parques nacionales, ríos y bosque tropical."
                   : "Discover local experiences and Costa Rica escapes: beaches, national parks, rivers, and tropical forest."}
               </p>
-              <div className="flex flex-col gap-4 pb-6">
+              <div className="mt-4 grid gap-4 sm:grid-cols-2">
                 {[
                   {
                     image: `${import.meta.env.BASE_URL}category-arenal.jpg`,
                     title:
-                      language === "es"
-                        ? "Volcán Arenal y aguas termales"
-                        : "Arenal Volcano & hot springs",
+                      language === "es" ? "Actividades en La Fortuna" : "Activities in La Fortuna",
                     meta: `5 ${t.hours}`,
                     rating: "4.9",
-                    category: language === "es" ? "Arenal · Naturaleza" : "Arenal · Nature",
+                    category:
+                      language === "es" ? "Naturaleza · Experiencias" : "Nature · Experiences",
                     summary:
                       language === "es"
-                        ? "Paisajes volcánicos, senderos y una pausa relajante en aguas termales de la zona."
-                        : "Volcanic views, rainforest trails, and a relaxing pause in the area's hot springs.",
+                        ? "Volcán Arenal, aguas termales y experiencias locales para descubrir la zona con calma."
+                        : "Arenal Volcano, hot springs, and local experiences to discover the area at an easy pace.",
+                    price: language === "es" ? "Desde ₡35.000" : "From $70",
+                  },
+                  {
+                    image: `${import.meta.env.BASE_URL}category-rios.jpg`,
+                    title: language === "es" ? "Ríos y Aventuras" : "Rivers and Adventures",
+                    meta: `6 ${t.hours}`,
+                    rating: "4.8",
+                    category: language === "es" ? "Ríos · Aire libre" : "Rivers · Outdoors",
+                    summary:
+                      language === "es"
+                        ? "Río Peñas Blancas, agua dulce y aventura tropical con acompañamiento local."
+                        : "Peñas Blancas River, fresh water, and tropical adventure with local assistance.",
+                    price: language === "es" ? "Desde ₡28.000" : "From $56",
                   },
                   {
                     image: misticoImage,
                     title:
-                      language === "es" ? "Puentes Colgantes Místico" : "Mystic Hanging Bridges",
-                    meta: `3.5 ${t.hours}`,
+                      language === "es"
+                        ? "Parques y Puentes Colgantes"
+                        : "Parks and Hanging Bridges",
+                    meta: `4 ${t.hours}`,
                     rating: "4.9",
-                    category: language === "es" ? "Arenal · Naturaleza" : "Arenal · Nature",
+                    category: language === "es" ? "Bosque · Aventura" : "Forest · Adventure",
                     summary:
                       language === "es"
-                        ? "Senderos y puentes suspendidos entre bosque nuboso, con vistas del paisaje volcánico."
-                        : "Trails and suspended bridges through cloud forest, with views of the volcanic landscape.",
+                        ? "Senderos protegidos y puentes suspendidos para observar el bosque y su biodiversidad."
+                        : "Protected trails and suspended bridges to experience the forest and its biodiversity.",
+                    price: language === "es" ? "Desde ₡32.000" : "From $64",
                   },
                   {
                     image: `${import.meta.env.BASE_URL}category-playas.jpg`,
-                    title:
-                      language === "es"
-                        ? "Escapada a playas del Pacífico"
-                        : "Pacific coast beach escape",
+                    title: language === "es" ? "Playas" : "Beaches",
                     meta: `10 ${t.hours}`,
                     rating: "4.8",
-                    category: language === "es" ? "Playas · Día completo" : "Beaches · Full day",
+                    category: language === "es" ? "Costa · Día completo" : "Coast · Full day",
                     summary:
                       language === "es"
-                        ? "Un día de costa, arena y mar con traslado cómodo desde La Fortuna."
-                        : "A full day of coast, sand, and sea with a comfortable transfer from La Fortuna.",
-                  },
-                  {
-                    image: `${import.meta.env.BASE_URL}category-parques.jpg`,
-                    title:
-                      language === "es"
-                        ? "Parques nacionales de Costa Rica"
-                        : "Costa Rica national parks",
-                    meta: `8 ${t.hours}`,
-                    rating: "4.9",
-                    category: language === "es" ? "Parques · Aventura" : "Parks · Adventure",
-                    summary:
-                      language === "es"
-                        ? "Explora senderos protegidos, miradores y biodiversidad con acompañamiento local."
-                        : "Explore protected trails, viewpoints, and biodiversity with local assistance.",
-                  },
-                  {
-                    image: riverImage,
-                    title:
-                      language === "es" ? "Safari Río Peñas Blancas" : "Peñas Blancas River Safari",
-                    meta: `4 ${t.hours}`,
-                    rating: "4.8",
-                    category: language === "es" ? "La Fortuna · Río" : "La Fortuna · River",
-                    summary:
-                      language === "es"
-                        ? "Recorrido tranquilo por el río para observar aves y vida silvestre con guía local."
-                        : "A peaceful river ride to observe birds and wildlife with a local guide.",
-                  },
-                  {
-                    image: `${import.meta.env.BASE_URL}category-rios.jpg`,
-                    title:
-                      language === "es"
-                        ? "Ríos y aventura tropical"
-                        : "Rivers & tropical adventure",
-                    meta: `6 ${t.hours}`,
-                    rating: "4.7",
-                    category: language === "es" ? "Ríos · Aire libre" : "Rivers · Outdoors",
-                    summary:
-                      language === "es"
-                        ? "Naturaleza, agua dulce y actividades al aire libre para descubrir la región."
-                        : "Fresh water, nature, and outdoor activities to discover the region.",
+                        ? "Una escapada a la costa del Pacífico con traslado cómodo desde La Fortuna."
+                        : "A Pacific coast escape with a comfortable transfer from La Fortuna.",
+                    price: language === "es" ? "Desde ₡45.000" : "From $90",
                   },
                 ].map((tour) => (
                   <article
@@ -1756,7 +1732,7 @@ function Index() {
                         openTourDetail(tour);
                       }
                     }}
-                    className="experience-card flex h-[500px] w-full cursor-pointer flex-col rounded-[26px] bg-gradient-to-br from-surface via-surface to-leaf/10 p-3 text-foreground shadow-xl shadow-primary/10 ring-1 ring-border outline-none transition-transform hover:-translate-y-0.5 focus-visible:ring-2 focus-visible:ring-leaf lg:h-[510px]"
+                    className="experience-card flex min-h-[390px] w-full cursor-pointer flex-col overflow-hidden rounded-[24px] bg-white text-foreground shadow-xl ring-1 ring-white/20 outline-none transition-transform hover:-translate-y-0.5 focus-visible:ring-2 focus-visible:ring-leaf"
                   >
                     <img
                       src={tour.image}
@@ -1764,21 +1740,20 @@ function Index() {
                       width={1024}
                       height={768}
                       loading="lazy"
-                      className="h-44 w-full rounded-[19px] object-cover"
+                      className="h-44 w-full object-cover"
                     />
-                    <div className="flex min-h-0 flex-1 flex-col px-2 pb-2 pt-4">
-                      <h3 className="font-display text-[17px] leading-snug text-foreground">
-                        {tour.title}
-                      </h3>
-                      <p className="mt-1 text-[10px] font-bold uppercase tracking-[0.12em] text-leaf-ink">
-                        {tour.category}
-                      </p>
-                      <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
+                    <div className="flex min-h-0 flex-1 flex-col p-4">
+                      <div className="flex items-center justify-between gap-3 text-[10px] font-bold uppercase tracking-[0.12em] text-leaf-ink">
+                        <span>{tour.category}</span>
+                        <span>{tour.meta}</span>
+                      </div>
+                      <h3 className="mt-2 font-display text-xl leading-tight">{tour.title}</h3>
+                      <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
                         {tour.summary}
                       </p>
-                      <div className="mt-2 flex items-center justify-between text-xs text-muted-foreground">
-                        <span>{tour.meta}</span>
-                        <span className="flex items-center gap-1 rounded-md bg-surface px-1.5 py-0.5 font-bold text-foreground">
+                      <div className="mt-3 flex items-center justify-between text-sm">
+                        <span className="font-bold text-leaf-ink">{tour.price}</span>
+                        <span className="flex items-center gap-1 rounded-md bg-background px-2 py-1 font-bold text-foreground">
                           <Star className="size-3 fill-current" />
                           {tour.rating}
                         </span>
@@ -1786,11 +1761,11 @@ function Index() {
                       <button
                         onClick={(event) => {
                           event.stopPropagation();
-                          setSelectedTour(tour);
+                          openTourDetail(tour);
                         }}
-                        className="mt-auto w-full rounded-xl bg-leaf py-2.5 text-xs font-bold text-leaf-foreground shadow-[0_3px_0_color-mix(in_oklch,var(--color-jungle)_35%,transparent)]"
+                        className="mt-auto w-full rounded-2xl bg-leaf py-3 text-sm font-bold text-leaf-foreground shadow-[0_3px_0_color-mix(in_oklch,var(--color-jungle)_35%,transparent)]"
                       >
-                        {language === "es" ? "Ver tours disponibles" : "View available tours"}
+                        {language === "es" ? "Seleccionar Tour" : "Select Tour"}
                       </button>
                     </div>
                   </article>
@@ -2036,6 +2011,7 @@ function Index() {
                 {selectedTour.meta} · ★ {selectedTour.rating}
               </span>
             </div>
+            <p className="mt-3 text-lg font-bold text-leaf-ink">{selectedTour.price}</p>
             <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
               {selectedTour.summary}
             </p>
