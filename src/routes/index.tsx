@@ -362,6 +362,7 @@ function Index() {
     "Centro de La Fortuna",
   ]);
   const [paymentMethod, setPaymentMethod] = useState<"card" | "cash">("cash");
+  const [tourPaymentMethod, setTourPaymentMethod] = useState<"cash" | "card" | "whatsapp">("cash");
   const [exchangeRate, setExchangeRate] = useState<number | null>(null);
   const [confirmed, setConfirmed] = useState(false);
   const [bookingStatus, setBookingStatus] = useState<"idle" | "saving" | "saved" | "error">("idle");
@@ -890,7 +891,7 @@ function Index() {
 
   const confirmTourBooking = async (tour: TourCard) => {
     if (bookingStatus === "saving") return;
-    if (isFirebaseAuthConfigured() && !user) {
+    if (tourPaymentMethod === "card" && isFirebaseAuthConfigured() && !user) {
       setProfileOpen(true);
       setAuthError(
         language === "es"
@@ -899,21 +900,31 @@ function Index() {
       );
       return;
     }
+    if (tourPaymentMethod === "card") {
+      setPaymentOpen(true);
+      return;
+    }
     setBookingStatus("saving");
     try {
       const result = await saveBooking({
         serviceType: "tour",
         tourName: tour.title,
         language,
-        userId: user?.uid,
+        paymentMethod: "cash",
+        confirmationMethod: tourPaymentMethod,
+        ...(user?.uid ? { userId: user.uid } : {}),
       });
-      if (!result.ok) {
+      if (!result.ok && tourPaymentMethod !== "whatsapp") {
         setBookingStatus("error");
         openWhatsApp(tour.title);
         return;
       }
       setBookingStatus("saved");
-      setSelectedTour(null);
+      if (tourPaymentMethod === "whatsapp") {
+        openWhatsApp(tour.title);
+      } else {
+        setSelectedTour(null);
+      }
     } catch {
       setBookingStatus("error");
       openWhatsApp(tour.title);
@@ -2015,6 +2026,51 @@ function Index() {
             <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
               {selectedTour.summary}
             </p>
+            <div className="mt-5 rounded-[22px] bg-background p-3 ring-1 ring-border">
+              <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-muted-foreground">
+                {language === "es" ? "Método de confirmación" : "Confirmation method"}
+              </p>
+              <div className="mt-2 grid grid-cols-3 gap-1.5">
+                {(["cash", "card", "whatsapp"] as const).map((method) => (
+                  <button
+                    key={method}
+                    type="button"
+                    onClick={() => setTourPaymentMethod(method)}
+                    className={`rounded-xl px-2 py-2.5 text-[11px] font-bold transition-colors ${tourPaymentMethod === method ? "bg-[#169bc5] text-white" : "bg-[#eef1f5] text-[#697180]"}`}
+                  >
+                    {method === "cash"
+                      ? language === "es"
+                        ? "Efectivo"
+                        : "Cash"
+                      : method === "card"
+                        ? language === "es"
+                          ? "Tarjeta"
+                          : "Card"
+                        : "WhatsApp"}
+                  </button>
+                ))}
+              </div>
+              <div className="mt-3 flex items-start gap-2 text-xs leading-relaxed text-muted-foreground">
+                {tourPaymentMethod === "whatsapp" ? (
+                  <MessageCircle className="mt-0.5 size-4 shrink-0 text-leaf" />
+                ) : (
+                  <ShieldCheck className="mt-0.5 size-4 shrink-0 text-leaf" />
+                )}
+                <span>
+                  {tourPaymentMethod === "cash"
+                    ? language === "es"
+                      ? "Solicita el tour y coordina el pago en efectivo con el operador."
+                      : "Request the tour and coordinate cash payment with the operator."
+                    : tourPaymentMethod === "card"
+                      ? language === "es"
+                        ? "El pago se completa mediante un checkout seguro. Nunca ingreses los datos de tu tarjeta aquí."
+                        : "Payment is completed through secure checkout. Never enter card details here."
+                      : language === "es"
+                        ? "Abriremos WhatsApp con los datos del tour listos para confirmar disponibilidad."
+                        : "We will open WhatsApp with the tour details ready to confirm availability."}
+                </span>
+              </div>
+            </div>
 
             <div className="mt-5 rounded-[22px] bg-background p-3 ring-1 ring-border">
               <h3 className="text-sm font-bold">
@@ -2060,6 +2116,13 @@ function Index() {
                   : "Saving…"
                 : t.reserveTour}
             </button>
+            {bookingStatus === "saved" && (
+              <p className="mt-2 text-center text-xs font-semibold text-leaf-ink">
+                {language === "es"
+                  ? "Solicitud de tour confirmada correctamente."
+                  : "Tour request confirmed successfully."}
+              </p>
+            )}
           </section>
         </main>
       )}

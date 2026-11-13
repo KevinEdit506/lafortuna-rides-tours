@@ -9,6 +9,7 @@ export type BookingPayload = {
   rideType?: "private" | "shared";
   passengers?: number;
   paymentMethod?: "card" | "cash";
+  confirmationMethod?: "cash" | "card" | "whatsapp";
   timing?: "now" | "schedule";
   scheduleDate?: string;
   scheduleTime?: string;
