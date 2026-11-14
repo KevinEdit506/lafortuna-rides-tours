@@ -1734,7 +1734,7 @@ function Index() {
                         openTourDetail(tour);
                       }
                     }}
-                    className="experience-card flex min-h-[390px] w-full cursor-pointer flex-col overflow-hidden rounded-[24px] bg-white text-foreground shadow-xl ring-1 ring-white/20 outline-none transition-transform hover:-translate-y-0.5 focus-visible:ring-2 focus-visible:ring-leaf"
+                    className="experience-card unified-card-surface flex min-h-[390px] w-full cursor-pointer flex-col overflow-hidden rounded-[24px] bg-white text-foreground shadow-xl ring-1 ring-white/20 outline-none transition-transform hover:-translate-y-0.5 focus-visible:ring-2 focus-visible:ring-leaf"
                   >
                     <img
                       src={tour.image}
@@ -1765,7 +1765,7 @@ function Index() {
                           event.stopPropagation();
                           openTourDetail(tour);
                         }}
-                        className="mt-auto w-full rounded-2xl bg-leaf py-3 text-sm font-bold text-leaf-foreground shadow-[0_3px_0_color-mix(in_oklch,var(--color-jungle)_35%,transparent)]"
+                        className="card-cta mt-auto w-full rounded-2xl bg-leaf py-3 text-sm font-bold text-leaf-foreground shadow-[0_3px_0_color-mix(in_oklch,var(--color-jungle)_35%,transparent)]"
                       >
                         {language === "es" ? "Seleccionar Tour" : "Select Tour"}
                       </button>
@@ -1822,7 +1822,7 @@ function Index() {
                 ].map((review) => (
                   <article
                     key={review.name}
-                    className="flex min-h-[190px] flex-col rounded-[22px] bg-black/25 p-4 ring-1 ring-white/10"
+                    className="review-card unified-card-surface flex min-h-[190px] flex-col rounded-[22px] bg-black/25 p-4 ring-1 ring-white/10"
                   >
                     <div className="flex items-center gap-1 text-leaf" aria-label="5 estrellas">
                       {Array.from({ length: 5 }).map((_, index) => (
@@ -1862,7 +1862,7 @@ function Index() {
                 {[blogArticle, safetyArticle, tourismArticle].map((article) => (
                   <article
                     key={article.slug}
-                    className="overflow-hidden rounded-[24px] bg-white text-foreground shadow-xl ring-1 ring-white/20"
+                    className="blog-card unified-card-surface overflow-hidden rounded-[24px] bg-white text-foreground shadow-xl ring-1 ring-white/20"
                   >
                     <img
                       src={article.image}
@@ -1884,7 +1884,7 @@ function Index() {
                       <button
                         type="button"
                         onClick={() => openArticleDetail(article)}
-                        className="mt-4 w-full rounded-2xl bg-leaf py-3 text-sm font-bold text-leaf-foreground shadow-[0_3px_0_color-mix(in_oklch,var(--color-jungle)_35%,transparent)] transition-transform active:scale-[0.98]"
+                        className="card-cta mt-4 w-full rounded-2xl bg-leaf py-3 text-sm font-bold text-leaf-foreground shadow-[0_3px_0_color-mix(in_oklch,var(--color-jungle)_35%,transparent)] transition-transform active:scale-[0.98]"
                       >
                         {language === "es" ? "Leer artículo" : "Read article"}
                       </button>

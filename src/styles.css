@@ -1099,3 +1099,49 @@ input::placeholder {
 .booking-reference-panel .text-muted-foreground {
   color: #69747d;
 }
+
+/* Unified fixed card treatment: soft raised surface, fine outline and gentle side shadow. */
+.experience-panel,
+.fare-card,
+.promo-banner,
+.booking-reference-panel,
+.unified-card-surface {
+  border: 1px solid color-mix(in oklch, var(--foreground) 12%, transparent);
+  box-shadow:
+    inset 0 1px 0 oklch(1 0 0 / 72%),
+    0 3px 0 color-mix(in oklch, var(--foreground) 10%, transparent),
+    0 12px 24px color-mix(in oklch, var(--foreground) 11%, transparent);
+}
+
+.experience-card,
+.unified-card-surface {
+  isolation: isolate;
+}
+
+.experience-card > img,
+.blog-card > img,
+.unified-card-surface > img {
+  border-radius: 20px 20px 0 0;
+}
+
+.card-cta,
+.unified-card-surface button.bg-leaf {
+  box-shadow:
+    inset 0 1px 0 oklch(1 0 0 / 28%),
+    0 3px 0 color-mix(in oklch, var(--color-jungle) 35%, transparent),
+    0 6px 12px color-mix(in oklch, var(--color-jungle) 14%, transparent);
+}
+
+.card-cta:active,
+.unified-card-surface button.bg-leaf:active {
+  box-shadow:
+    inset 0 2px 3px color-mix(in oklch, var(--color-jungle) 18%, transparent),
+    0 1px 0 color-mix(in oklch, var(--color-jungle) 28%, transparent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card-cta,
+  .unified-card-surface button.bg-leaf {
+    transition: none;
+  }
+}
