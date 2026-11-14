@@ -141,6 +141,23 @@ async function lookupFirebaseUser(env: ServerEnv, idToken: string) {
   return { uid: user.localId, email: user.email };
 }
 
+async function getBookingFields(env: ServerEnv, bookingId: string) {
+  const projectId =
+    envValue(env, "VITE_FIREBASE_PROJECT_ID") ?? envValue(env, "FIREBASE_PROJECT_ID");
+  if (!projectId) throw new Error("FIREBASE_PROJECT_ID is not configured on the server");
+  const accessToken = await getFirestoreAccessToken(env, projectId);
+  const document = await fetch(
+    `https://firestore.googleapis.com/v1/projects/${encodeURIComponent(projectId)}/databases/(default)/documents/bookings/${encodeURIComponent(bookingId)}`,
+    { headers: { authorization: `Bearer ${accessToken}` } },
+  );
+  if (document.status === 404) return null;
+  if (!document.ok) throw new Error(`Firestore booking lookup failed (${document.status})`);
+  const payload = (await document.json()) as {
+    fields?: Record<string, { stringValue?: string }>;
+  };
+  return payload.fields ?? {};
+}
+
 async function stripeFetch(env: ServerEnv, path: string, init: RequestInit = {}) {
   const secret = envValue(env, "STRIPE_SECRET_KEY");
   if (!secret || (!secret.startsWith("sk_test_") && !secret.startsWith("sk_live_"))) {
@@ -180,10 +197,31 @@ async function createCheckoutSession(request: Request, env: ServerEnv) {
   if (!body.successUrl || !body.cancelUrl)
     return response({ error: "successUrl and cancelUrl are required" }, 400);
 
+  const booking = await getBookingFields(env, bookingId);
+  if (!booking || booking["userId"]?.stringValue !== user.uid) {
+    return response({ error: "Booking was not found for this user" }, 404);
+  }
+  if (booking["paymentMethod"]?.stringValue !== "card") {
+    return response({ error: "Only card bookings can start Checkout" }, 400);
+  }
+
+  const requestOrigin = new URL(request.url).origin;
+  let successUrl: URL;
+  let cancelUrl: URL;
+  try {
+    successUrl = new URL(body.successUrl);
+    cancelUrl = new URL(body.cancelUrl);
+  } catch {
+    return response({ error: "Invalid successUrl or cancelUrl" }, 400);
+  }
+  if (successUrl.origin !== requestOrigin || cancelUrl.origin !== requestOrigin) {
+    return response({ error: "Checkout return URLs must use this application origin" }, 400);
+  }
+
   const form = new URLSearchParams();
   form.set("mode", "payment");
-  form.set("success_url", body.successUrl);
-  form.set("cancel_url", body.cancelUrl);
+  form.set("success_url", successUrl.toString());
+  form.set("cancel_url", cancelUrl.toString());
   form.set("client_reference_id", bookingId);
   form.set("customer_email", user.email ?? "");
   form.set("line_items[0][price_data][currency]", currency);
