@@ -2100,6 +2100,51 @@ function Index() {
                 ))}
               </div>
             </div>
+            <div className="mt-5 rounded-[22px] bg-[#eef8fb] p-4 ring-1 ring-[#b8dce6]">
+              <div className="flex items-center justify-between gap-3">
+                <h3 className="text-sm font-bold text-[#15566a]">
+                  {language === "es" ? "Resumen del pedido" : "Order summary"}
+                </h3>
+                <CheckCircle2 className="size-4 text-[#169bc5]" />
+              </div>
+              <div className="mt-3 space-y-2 text-xs">
+                <div className="flex items-start justify-between gap-4">
+                  <span className="text-muted-foreground">
+                    {language === "es" ? "Tour seleccionado" : "Selected tour"}
+                  </span>
+                  <span className="max-w-[58%] text-right font-semibold">{selectedTour.title}</span>
+                </div>
+                <div className="flex items-center justify-between gap-4">
+                  <span className="text-muted-foreground">
+                    {language === "es" ? "Duración" : "Duration"}
+                  </span>
+                  <span className="font-semibold">{selectedTour.meta}</span>
+                </div>
+                <div className="flex items-center justify-between gap-4">
+                  <span className="text-muted-foreground">
+                    {language === "es" ? "Precio del tour" : "Tour price"}
+                  </span>
+                  <span className="font-semibold">{selectedTour.price}</span>
+                </div>
+                <div className="flex items-center justify-between gap-4">
+                  <span className="text-muted-foreground">
+                    {language === "es" ? "Cantidad" : "Quantity"}
+                  </span>
+                  <span className="font-semibold">1</span>
+                </div>
+                <div className="border-t border-[#b8dce6] pt-2">
+                  <div className="flex items-center justify-between gap-4 text-sm font-bold text-[#15566a]">
+                    <span>{language === "es" ? "Total estimado" : "Estimated total"}</span>
+                    <span>{selectedTour.price}</span>
+                  </div>
+                </div>
+                <p className="pt-1 text-[11px] leading-relaxed text-muted-foreground">
+                  {language === "es"
+                    ? `Pago: ${tourPaymentMethod === "card" ? "Tarjeta" : "Efectivo"} · Envío: WhatsApp`
+                    : `Payment: ${tourPaymentMethod === "card" ? "Card" : "Cash"} · Send via: WhatsApp`}
+                </p>
+              </div>
+            </div>
             <button
               type="button"
               onClick={() => void confirmTourBooking(selectedTour)}
