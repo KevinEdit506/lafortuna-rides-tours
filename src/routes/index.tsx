@@ -363,7 +363,7 @@ function Index() {
   ]);
   const [paymentMethod, setPaymentMethod] = useState<"card" | "cash">("cash");
   const [tourPaymentMethod, setTourPaymentMethod] = useState<"cash" | "card">("cash");
-  const [tourWhatsAppSelected, setTourWhatsAppSelected] = useState(false);
+  const [tourWhatsAppSelected, setTourWhatsAppSelected] = useState(true);
   const [exchangeRate, setExchangeRate] = useState<number | null>(null);
   const [confirmed, setConfirmed] = useState(false);
   const [bookingStatus, setBookingStatus] = useState<"idle" | "saving" | "saved" | "error">("idle");
@@ -923,7 +923,7 @@ function Index() {
 
   const openTourDetail = (tour: TourCard) => {
     window.history.pushState({ tour: tour.title }, "", `#tour/${encodeURIComponent(tour.title)}`);
-    setTourWhatsAppSelected(false);
+    setTourWhatsAppSelected(true);
     setSelectedTour(tour);
   };
 
