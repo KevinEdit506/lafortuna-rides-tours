@@ -75,6 +75,8 @@ type TourCard = {
   category: string;
   summary: string;
   price: string;
+  priceCrc: number;
+  priceUsd: number;
 };
 
 type BlogArticle = {
@@ -892,13 +894,13 @@ function Index() {
 
   const confirmTourBooking = async (tour: TourCard) => {
     if (bookingStatus === "saving") return;
-    if (!tourWhatsAppSelected) return;
-    if (tourPaymentMethod === "card" && isFirebaseAuthConfigured() && !user) {
+    if (tourPaymentMethod === "cash" && !tourWhatsAppSelected) return;
+    if (tourPaymentMethod === "card" && (!isFirebaseAuthConfigured() || !user)) {
       setProfileOpen(true);
       setAuthError(
         language === "es"
-          ? "Inicia sesión para confirmar y guardar tu reserva."
-          : "Sign in to confirm and save your booking.",
+          ? "Inicia sesión para pagar con tarjeta y continuar a Stripe Checkout."
+          : "Sign in to pay by card and continue to Stripe Checkout.",
       );
       return;
     }
@@ -909,15 +911,53 @@ function Index() {
         tourName: tour.title,
         language,
         paymentMethod: tourPaymentMethod,
-        confirmationMethod: "whatsapp",
+        confirmationMethod: tourPaymentMethod === "card" ? "card" : "whatsapp",
         ...(user?.uid ? { userId: user.uid } : {}),
       });
+      if (!result.ok) {
+        setBookingStatus("error");
+        return;
+      }
+      if (tourPaymentMethod === "card" && user) {
+        const idToken = await user.getIdToken();
+        const checkoutResponse = await fetch("/api/stripe/create-checkout-session", {
+          method: "POST",
+          headers: {
+            "content-type": "application/json",
+            authorization: `Bearer ${idToken}`,
+          },
+          body: JSON.stringify({
+            bookingId: result.id,
+            tourName: tour.title,
+            amountCents: Math.round((language === "es" ? tour.priceCrc : tour.priceUsd) * 100),
+            currency: language === "es" ? "crc" : "usd",
+            successUrl: `${window.location.origin}/?stripe=success#tour/${encodeURIComponent(tour.title)}`,
+            cancelUrl: `${window.location.origin}/?stripe=cancel#tour/${encodeURIComponent(tour.title)}`,
+          }),
+        });
+        const checkout = (await checkoutResponse.json()) as {
+          checkoutUrl?: string;
+          error?: string;
+        };
+        if (!checkoutResponse.ok || !checkout.checkoutUrl) {
+          setBookingStatus("error");
+          setAuthError(
+            checkout.error ??
+              (language === "es"
+                ? "No se pudo iniciar el pago seguro. Intenta nuevamente."
+                : "Secure payment could not be started. Please try again."),
+          );
+          return;
+        }
+        window.location.assign(checkout.checkoutUrl);
+        return;
+      }
       openWhatsApp(tour.title, tourPaymentMethod);
-      setBookingStatus(result.ok ? "saved" : "error");
+      setBookingStatus("saved");
       setSelectedTour(null);
     } catch {
       setBookingStatus("error");
-      openWhatsApp(tour.title, tourPaymentMethod);
+      if (tourPaymentMethod === "cash") openWhatsApp(tour.title, tourPaymentMethod);
     }
   };
 
@@ -1682,6 +1722,8 @@ function Index() {
                         ? "Volcán Arenal, aguas termales y experiencias locales para descubrir la zona con calma."
                         : "Arenal Volcano, hot springs, and local experiences to discover the area at an easy pace.",
                     price: language === "es" ? "Desde ₡35.000" : "From $70",
+                    priceCrc: 35000,
+                    priceUsd: 70,
                   },
                   {
                     image: `${import.meta.env.BASE_URL}category-rios.jpg`,
@@ -1694,6 +1736,8 @@ function Index() {
                         ? "Río Peñas Blancas, agua dulce y aventura tropical con acompañamiento local."
                         : "Peñas Blancas River, fresh water, and tropical adventure with local assistance.",
                     price: language === "es" ? "Desde ₡28.000" : "From $56",
+                    priceCrc: 28000,
+                    priceUsd: 56,
                   },
                   {
                     image: misticoImage,
@@ -1709,6 +1753,8 @@ function Index() {
                         ? "Senderos protegidos y puentes suspendidos para observar el bosque y su biodiversidad."
                         : "Protected trails and suspended bridges to experience the forest and its biodiversity.",
                     price: language === "es" ? "Desde ₡32.000" : "From $64",
+                    priceCrc: 32000,
+                    priceUsd: 64,
                   },
                   {
                     image: `${import.meta.env.BASE_URL}category-playas.jpg`,
@@ -1721,6 +1767,8 @@ function Index() {
                         ? "Una escapada a la costa del Pacífico con traslado cómodo desde La Fortuna."
                         : "A Pacific coast escape with a comfortable transfer from La Fortuna.",
                     price: language === "es" ? "Desde ₡45.000" : "From $90",
+                    priceCrc: 45000,
+                    priceUsd: 90,
                   },
                 ].map((tour) => (
                   <article
@@ -2047,24 +2095,26 @@ function Index() {
                       ? "Solicita el tour y coordina el pago en efectivo con el operador."
                       : "Request the tour and coordinate cash payment with the operator."
                     : language === "es"
-                      ? "Solicita el pago con tarjeta. El operador te enviará un enlace seguro; nunca ingreses los datos aquí."
-                      : "Request card payment. The operator will send a secure link; never enter card details here."}
+                      ? "Continúa a Stripe Checkout para pagar de forma segura; nunca ingreses los datos aquí."
+                      : "Continue to Stripe Checkout for secure payment; never enter card details here."}
                 </span>
               </div>
-              <button
-                type="button"
-                onClick={() => setTourWhatsAppSelected((selected) => !selected)}
-                className={`mt-3 flex w-full items-center justify-center gap-2 rounded-xl py-2.5 text-xs font-bold transition-colors ${tourWhatsAppSelected ? "bg-[#25D366] text-white" : "bg-[#eef1f5] text-[#697180]"}`}
-              >
-                <MessageCircle className="size-4" />
-                {tourWhatsAppSelected
-                  ? language === "es"
-                    ? "WhatsApp seleccionado"
-                    : "WhatsApp selected"
-                  : language === "es"
-                    ? "Seleccionar WhatsApp para enviar la reserva"
-                    : "Select WhatsApp to send the booking"}
-              </button>
+              {tourPaymentMethod === "cash" && (
+                <button
+                  type="button"
+                  onClick={() => setTourWhatsAppSelected((selected) => !selected)}
+                  className={`mt-3 flex w-full items-center justify-center gap-2 rounded-xl py-2.5 text-xs font-bold transition-colors ${tourWhatsAppSelected ? "bg-[#25D366] text-white" : "bg-[#eef1f5] text-[#697180]"}`}
+                >
+                  <MessageCircle className="size-4" />
+                  {tourWhatsAppSelected
+                    ? language === "es"
+                      ? "WhatsApp seleccionado"
+                      : "WhatsApp selected"
+                    : language === "es"
+                      ? "Seleccionar WhatsApp para enviar la reserva"
+                      : "Select WhatsApp to send the booking"}
+                </button>
+              )}
             </div>
 
             <div className="mt-5 rounded-[22px] bg-background p-3 ring-1 ring-border">
@@ -2140,15 +2190,22 @@ function Index() {
                 </div>
                 <p className="pt-1 text-[11px] leading-relaxed text-muted-foreground">
                   {language === "es"
-                    ? `Pago: ${tourPaymentMethod === "card" ? "Tarjeta" : "Efectivo"} · Envío: WhatsApp`
-                    : `Payment: ${tourPaymentMethod === "card" ? "Card" : "Cash"} · Send via: WhatsApp`}
+                    ? tourPaymentMethod === "card"
+                      ? "Pago: Tarjeta · Checkout seguro de Stripe"
+                      : "Pago: Efectivo · Envío: WhatsApp"
+                    : tourPaymentMethod === "card"
+                      ? "Payment: Card · Secure Stripe Checkout"
+                      : "Payment: Cash · Send via: WhatsApp"}
                 </p>
               </div>
             </div>
             <button
               type="button"
               onClick={() => void confirmTourBooking(selectedTour)}
-              disabled={!tourWhatsAppSelected || bookingStatus === "saving"}
+              disabled={
+                (tourPaymentMethod === "cash" && !tourWhatsAppSelected) ||
+                bookingStatus === "saving"
+              }
               className="mt-4 w-full rounded-2xl bg-leaf py-3.5 text-sm font-bold text-leaf-foreground shadow-[0_3px_0_color-mix(in_oklch,var(--color-jungle)_35%,transparent)] disabled:cursor-not-allowed disabled:opacity-50"
             >
               {bookingStatus === "saving"
@@ -2156,8 +2213,12 @@ function Index() {
                   ? "Guardando…"
                   : "Saving…"
                 : language === "es"
-                  ? "Enviar reserva por WhatsApp"
-                  : "Send booking by WhatsApp"}
+                  ? tourPaymentMethod === "card"
+                    ? "Pagar con Stripe Checkout"
+                    : "Enviar reserva por WhatsApp"
+                  : tourPaymentMethod === "card"
+                    ? "Pay with Stripe Checkout"
+                    : "Send booking by WhatsApp"}
             </button>
             {bookingStatus === "saved" && (
               <p className="mt-2 text-center text-xs font-semibold text-leaf-ink">
