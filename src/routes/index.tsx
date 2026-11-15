@@ -1829,30 +1829,7 @@ function Index() {
                     )}
                   </section>
                 </div>
-              ) : (
-                <button
-                  type="button"
-                  onClick={openBookingPage}
-                  className="booking-entry-banner control-relief rise mt-4 flex w-full items-center justify-between gap-4 rounded-[30px] bg-surface p-5 text-left ring-1 ring-border transition-transform hover:-translate-y-0.5 active:scale-[0.99]"
-                >
-                  <span>
-                    <span className="block text-[10px] font-bold uppercase tracking-[0.18em] text-leaf-ink">
-                      {language === "es" ? "Reserva" : "Booking"}
-                    </span>
-                    <span className="mt-1 block font-display text-2xl font-bold">
-                      {language === "es" ? "Reservar Tours" : "Book Tours"}
-                    </span>
-                    <span className="mt-1 block text-sm text-muted-foreground">
-                      {language === "es"
-                        ? "Abre el panel completo de reservas."
-                        : "Open the full booking panel."}
-                    </span>
-                  </span>
-                  <span className="grid size-12 shrink-0 place-items-center rounded-full bg-jungle text-primary-foreground shadow-[0_4px_0_color-mix(in_oklch,var(--color-jungle)_35%,transparent)]">
-                    <CalendarDays className="size-5" />
-                  </span>
-                </button>
-              )
+              ) : null
             ) : (
               <section className="rise mt-4 rounded-[30px] bg-surface p-5 shadow-xl shadow-primary/10 ring-1 ring-border">
                 <Compass className="size-7 text-leaf" />
