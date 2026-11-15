@@ -440,6 +440,15 @@ function Index() {
   }, [destinationSearchOpen]);
 
   useEffect(() => {
+    if (!tourPickerOpen) return;
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setTourPickerOpen(false);
+    };
+    window.addEventListener("keydown", closeOnEscape);
+    return () => window.removeEventListener("keydown", closeOnEscape);
+  }, [tourPickerOpen]);
+
+  useEffect(() => {
     const handleBack = () => {
       const hash = window.location.hash;
       if (!hash.startsWith("#tour/")) setSelectedTour(null);
