@@ -126,7 +126,7 @@ function getFeatureContent(feature: FeatureKey, language: "es" | "en") {
       action: spanish ? "Solicitar traslado" : "Request transport",
     },
     motorbike: {
-      title: spanish ? "Moto" : "Motorbike",
+      title: "Express",
       eyebrow: spanish ? "Movilidad ágil" : "Agile mobility",
       description: spanish
         ? "Consulta disponibilidad para una opción de movilidad en moto y coordina los detalles de tu viaje."
@@ -1350,7 +1350,7 @@ function Index() {
                 },
                 {
                   key: "motorbike" as const,
-                  label: language === "es" ? "Moto" : "Motorbike",
+                  label: "Express",
                   icon: Bike,
                   tone: "amber",
                 },
