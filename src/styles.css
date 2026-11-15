@@ -1145,3 +1145,16 @@ input::placeholder {
     transition: none;
   }
 }
+
+/* Página dedicada de reservas: el inicio conserva solo el acceso al banner. */
+.booking-page-open .reference-shortcuts,
+.booking-page-open .fare-card,
+.booking-page-open #route-preview,
+.booking-page-open .promo-banner,
+.booking-page-open .experience-panel {
+  display: none;
+}
+
+.booking-page-open .booking-page-shell {
+  margin-top: 1.25rem;
+}

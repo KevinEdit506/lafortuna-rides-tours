@@ -355,6 +355,9 @@ function Index() {
   const [language, setLanguage] = useState<"es" | "en">("es");
   const [mode, setMode] = useState<"transfers" | "tours">("transfers");
   const [activeNav, setActiveNav] = useState<"home" | "routes" | "chat" | "profile">("home");
+  const [bookingPageOpen, setBookingPageOpen] = useState(
+    () => typeof window !== "undefined" && window.location.hash === "#booking",
+  );
   const [timing, setTiming] = useState<"now" | "schedule">("now");
   const [rideType, setRideType] = useState<"private" | "shared">("private");
   const [passengers, setPassengers] = useState(2);
@@ -1090,6 +1093,18 @@ function Index() {
     else setSelectedArticle(null);
   };
 
+  const openBookingPage = () => {
+    window.history.pushState({ booking: true }, "", "#booking");
+    setBookingPageOpen(true);
+    setSelectedFeature(null);
+    setTourPickerOpen(false);
+  };
+
+  const closeBookingPage = () => {
+    if (window.location.hash === "#booking") window.history.back();
+    else setBookingPageOpen(false);
+  };
+
   const openFeatureDetail = (feature: FeatureKey) => {
     window.history.pushState({ feature }, "", `#feature/${feature}`);
     setFeatureTransition("enter");
@@ -1260,6 +1275,16 @@ function Index() {
         : "CURRENT LOCATION")
   ).toLocaleUpperCase(language === "es" ? "es-CR" : "en-US");
 
+  useEffect(() => {
+    const syncBookingHash = () => setBookingPageOpen(window.location.hash === "#booking");
+    window.addEventListener("hashchange", syncBookingHash);
+    window.addEventListener("popstate", syncBookingHash);
+    return () => {
+      window.removeEventListener("hashchange", syncBookingHash);
+      window.removeEventListener("popstate", syncBookingHash);
+    };
+  }, []);
+
   return (
     <main
       className="app-shell min-h-screen text-foreground selection:bg-accent selection:text-accent-foreground"
@@ -1270,7 +1295,9 @@ function Index() {
       }
     >
       <div className="pointer-events-none fixed inset-0 bg-[radial-gradient(circle_at_0%_0%,color-mix(in_oklab,var(--leaf)_10%,transparent)_0%,transparent_48%)]" />
-      <div className="relative mx-auto min-h-screen w-full max-w-[430px] px-6 pb-32 pt-6 lg:max-w-6xl lg:px-10">
+      <div
+        className={`relative mx-auto min-h-screen w-full max-w-[430px] px-6 pb-32 pt-6 lg:max-w-6xl lg:px-10 ${bookingPageOpen ? "booking-page-open" : ""}`}
+      >
         <header className="top-header rise flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="flex min-w-[10.5rem] items-center gap-2 rounded-full bg-jungle px-3 py-2 text-primary-foreground shadow-[0_4px_0_rgba(9,35,26,0.45),0_8px_16px_rgba(9,35,26,0.2)] ring-1 ring-white/25">
@@ -1374,7 +1401,7 @@ function Index() {
                   key={label}
                   type="button"
                   className={`reference-shortcut reference-shortcut-${tone}`}
-                  onClick={() => openFeatureDetail(key)}
+                  onClick={() => (key === "booking" ? openBookingPage() : openFeatureDetail(key))}
                 >
                   <span className="reference-shortcut-icon">
                     <Icon className="size-6" />
@@ -1483,302 +1510,349 @@ function Index() {
             )}
 
             {mode === "transfers" ? (
-              <section className="booking-reference-panel control-relief rise mt-4 rounded-[30px] bg-surface p-4 [animation-delay:200ms]">
-                <h2 className="mx-auto mb-3 max-w-[13rem] rounded-full bg-jungle px-5 py-2.5 text-center font-display text-lg text-primary-foreground shadow-[0_4px_0_color-mix(in_oklch,var(--color-jungle)_35%,transparent)]">
-                  {language === "es" ? "Reservar Tours" : "Book Tours"}
-                </h2>
-                <div className="address-fields rounded-[24px] bg-[#edf5f8] p-3.5 text-foreground ring-1 ring-[#d9e5ea]">
-                  <div className="flex items-center gap-3">
-                    <span
-                      className="grid size-8 shrink-0 place-items-center rounded-full bg-white/10 ring-1 ring-white/10"
-                      aria-hidden="true"
-                    >
-                      <Circle className="size-3.5 text-muted-foreground" />
-                    </span>
-                    <label className="min-w-0 flex-1">
-                      <span className="block text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
-                        {t.origin}
-                      </span>
-                      <input
-                        ref={originInputRef}
-                        aria-label={t.origin}
-                        value={origin}
-                        onChange={(event) => {
-                          setOrigin(event.target.value);
-                          setRouteStatus("updating");
-                        }}
-                        list="place-suggestions"
-                        className="address-input mt-1.5 min-h-12 w-full min-w-0 rounded-full bg-[#f8fbfc] px-4 py-2.5 text-sm font-semibold text-foreground outline-none"
-                      />
-                    </label>
-                  </div>
-                  <div className="my-3.5 border-t border-border" aria-hidden="true" />
-                  <div className="flex items-center gap-3">
-                    <span
-                      className="grid size-8 shrink-0 place-items-center rounded-full bg-white/10 ring-1 ring-white/10"
-                      aria-hidden="true"
-                    >
-                      <MapPin className="size-4 text-muted-foreground" />
-                    </span>
-                    <label className="min-w-0 flex-1">
-                      <span className="block text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
-                        {t.destination}
-                      </span>
-                      <input
-                        ref={destinationInputRef}
-                        aria-label={t.destination}
-                        value={destination}
-                        onChange={(event) => {
-                          setDestination(event.target.value);
-                          setRouteStatus("updating");
-                        }}
-                        list="place-suggestions"
-                        className="address-input mt-1.5 min-h-12 w-full min-w-0 rounded-full bg-[#f8fbfc] px-4 py-2.5 text-sm font-semibold text-foreground outline-none"
-                      />
-                    </label>
-                  </div>
-                </div>
-                <datalist id="place-suggestions">
-                  {localPlaceSuggestions.map((place) => (
-                    <option key={place} value={place} />
-                  ))}
-                </datalist>
-
-                <div className="mt-4 grid grid-cols-2 gap-2 rounded-full bg-background p-1 ring-1 ring-border">
-                  {(["private", "shared"] as const).map((value) => (
-                    <button
-                      key={value}
-                      onClick={() => setRideType(value)}
-                      className={`rounded-full py-2.5 text-[13px] font-bold ${rideType === value ? "bg-[#169bc5] text-white shadow-sm" : "bg-[#eef1f5] text-[#697180]"}`}
-                    >
-                      {t[value]}
-                    </button>
-                  ))}
-                </div>
-                <div className="mt-3 grid grid-cols-2 gap-3">
-                  <div className="rounded-2xl bg-[#f8fbfc] px-3 py-2.5 ring-1 ring-[#d9e5ea]">
-                    <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">
-                      <Clock3 className="size-3.5" />
-                      {timing === "now" ? t.now : t.schedule}
-                    </div>
-                    <button
-                      onClick={() => setTiming(timing === "now" ? "schedule" : "now")}
-                      className="mt-1 flex w-full items-center justify-between text-sm font-semibold"
-                    >
-                      {timing === "now" ? t.now : `${scheduleDate} · ${scheduleTime}`}
-                      <CalendarDays className="size-4 text-leaf" />
-                    </button>
-                  </div>
-                  <div className="rounded-2xl bg-[#f8fbfc] px-3 py-2.5 ring-1 ring-[#d9e5ea]">
-                    <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">
-                      <UsersRound className="size-3.5" />
-                      {t.passengers}
-                    </div>
-                    <div className="mt-1 flex items-center justify-between">
-                      <button
-                        aria-label="Restar pasajero"
-                        onClick={() => updatePassengers(Math.max(1, passengers - 1))}
-                      >
-                        <Minus className="size-4" />
-                      </button>
-                      <span className="text-sm font-bold">{passengers}</span>
-                      <button
-                        aria-label="Agregar pasajero"
-                        onClick={() => updatePassengers(Math.min(8, passengers + 1))}
-                      >
-                        <Plus className="size-4 text-leaf" />
-                      </button>
-                    </div>
-                  </div>
-                </div>
-                <p className="mt-2 px-1 text-[10px] leading-relaxed text-muted-foreground">
-                  {language === "es"
-                    ? "La fecha y hora quedan solicitadas hasta coordinar con el operador."
-                    : "The date and time remain requested until coordinated with the operator."}
-                </p>
-                {timing === "schedule" && (
-                  <div className="mt-3 rounded-[24px] bg-background p-3 ring-1 ring-border">
-                    <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">
-                      <CalendarDays className="size-3.5 text-leaf" />
-                      {t.scheduledTrip}
-                    </div>
-                    <div className="mt-2 grid grid-cols-2 gap-2">
-                      <input
-                        type="date"
-                        value={scheduleDate}
-                        min={scheduleDate}
-                        onChange={(event) => setScheduleDate(event.target.value)}
-                        className="rounded-full bg-surface px-3 py-2 text-sm font-semibold ring-1 ring-border outline-none"
-                      />
-                      <input
-                        type="time"
-                        value={scheduleTime}
-                        onChange={(event) => setScheduleTime(event.target.value)}
-                        className="rounded-full bg-surface px-3 py-2 text-sm font-semibold ring-1 ring-border outline-none"
-                      />
-                    </div>
-                    <button
-                      onClick={scheduleTrip}
-                      className="mt-2 w-full rounded-full bg-leaf py-2 text-xs font-bold text-leaf-foreground transition-transform active:scale-[0.98]"
-                    >
-                      {t.agenda}
-                    </button>
-                  </div>
-                )}
-                {scheduledTrips.length > 0 && (
-                  <div className="mt-3 rounded-[24px] bg-background p-3 ring-1 ring-border">
-                    <div className="flex items-center justify-between gap-3">
-                      <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">
-                        {t.agenda}
-                      </p>
-                      <span className="rounded-full bg-leaf/15 px-2 py-1 text-[10px] font-bold text-leaf">
-                        {scheduledTrips.length}
-                      </span>
-                    </div>
-                    <div className="mt-2 space-y-2">
-                      {scheduledTrips.map((trip, index) => (
-                        <div
-                          key={`${trip}-${index}`}
-                          className="flex items-center gap-2 rounded-2xl bg-surface px-3 py-2 text-xs font-semibold"
+              bookingPageOpen ? (
+                <div className="booking-page-shell rounded-[30px] bg-background p-2 sm:p-4">
+                  <section className="booking-reference-panel control-relief rise mt-4 rounded-[30px] bg-surface p-4 [animation-delay:200ms]">
+                    {bookingPageOpen && (
+                      <div className="mb-4 flex items-center gap-3 border-b border-border pb-4">
+                        <button
+                          type="button"
+                          onClick={closeBookingPage}
+                          aria-label={language === "es" ? "Volver al inicio" : "Back to home"}
+                          className="grid size-10 shrink-0 place-items-center rounded-full bg-background text-muted-foreground ring-1 ring-border transition-transform active:scale-95"
                         >
-                          <CalendarDays className="size-3.5 shrink-0 text-leaf" />
-                          <span className="min-w-0 flex-1 truncate">{trip}</span>
+                          <ArrowLeft className="size-4" />
+                        </button>
+                        <div>
+                          <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-leaf-ink">
+                            {language === "es" ? "Página de reservas" : "Booking page"}
+                          </p>
+                          <p className="mt-1 text-sm font-semibold text-muted-foreground">
+                            {language === "es" ? "Reserva tu traslado" : "Book your transfer"}
+                          </p>
+                        </div>
+                      </div>
+                    )}
+                    <h2 className="mx-auto mb-3 max-w-[13rem] rounded-full bg-jungle px-5 py-2.5 text-center font-display text-lg text-primary-foreground shadow-[0_4px_0_color-mix(in_oklch,var(--color-jungle)_35%,transparent)]">
+                      {language === "es" ? "Reservar Tours" : "Book Tours"}
+                    </h2>
+                    <div className="address-fields rounded-[24px] bg-[#edf5f8] p-3.5 text-foreground ring-1 ring-[#d9e5ea]">
+                      <div className="flex items-center gap-3">
+                        <span
+                          className="grid size-8 shrink-0 place-items-center rounded-full bg-white/10 ring-1 ring-white/10"
+                          aria-hidden="true"
+                        >
+                          <Circle className="size-3.5 text-muted-foreground" />
+                        </span>
+                        <label className="min-w-0 flex-1">
+                          <span className="block text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+                            {t.origin}
+                          </span>
+                          <input
+                            ref={originInputRef}
+                            aria-label={t.origin}
+                            value={origin}
+                            onChange={(event) => {
+                              setOrigin(event.target.value);
+                              setRouteStatus("updating");
+                            }}
+                            list="place-suggestions"
+                            className="address-input mt-1.5 min-h-12 w-full min-w-0 rounded-full bg-[#f8fbfc] px-4 py-2.5 text-sm font-semibold text-foreground outline-none"
+                          />
+                        </label>
+                      </div>
+                      <div className="my-3.5 border-t border-border" aria-hidden="true" />
+                      <div className="flex items-center gap-3">
+                        <span
+                          className="grid size-8 shrink-0 place-items-center rounded-full bg-white/10 ring-1 ring-white/10"
+                          aria-hidden="true"
+                        >
+                          <MapPin className="size-4 text-muted-foreground" />
+                        </span>
+                        <label className="min-w-0 flex-1">
+                          <span className="block text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+                            {t.destination}
+                          </span>
+                          <input
+                            ref={destinationInputRef}
+                            aria-label={t.destination}
+                            value={destination}
+                            onChange={(event) => {
+                              setDestination(event.target.value);
+                              setRouteStatus("updating");
+                            }}
+                            list="place-suggestions"
+                            className="address-input mt-1.5 min-h-12 w-full min-w-0 rounded-full bg-[#f8fbfc] px-4 py-2.5 text-sm font-semibold text-foreground outline-none"
+                          />
+                        </label>
+                      </div>
+                    </div>
+                    <datalist id="place-suggestions">
+                      {localPlaceSuggestions.map((place) => (
+                        <option key={place} value={place} />
+                      ))}
+                    </datalist>
+
+                    <div className="mt-4 grid grid-cols-2 gap-2 rounded-full bg-background p-1 ring-1 ring-border">
+                      {(["private", "shared"] as const).map((value) => (
+                        <button
+                          key={value}
+                          onClick={() => setRideType(value)}
+                          className={`rounded-full py-2.5 text-[13px] font-bold ${rideType === value ? "bg-[#169bc5] text-white shadow-sm" : "bg-[#eef1f5] text-[#697180]"}`}
+                        >
+                          {t[value]}
+                        </button>
+                      ))}
+                    </div>
+                    <div className="mt-3 grid grid-cols-2 gap-3">
+                      <div className="rounded-2xl bg-[#f8fbfc] px-3 py-2.5 ring-1 ring-[#d9e5ea]">
+                        <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">
+                          <Clock3 className="size-3.5" />
+                          {timing === "now" ? t.now : t.schedule}
+                        </div>
+                        <button
+                          onClick={() => setTiming(timing === "now" ? "schedule" : "now")}
+                          className="mt-1 flex w-full items-center justify-between text-sm font-semibold"
+                        >
+                          {timing === "now" ? t.now : `${scheduleDate} · ${scheduleTime}`}
+                          <CalendarDays className="size-4 text-leaf" />
+                        </button>
+                      </div>
+                      <div className="rounded-2xl bg-[#f8fbfc] px-3 py-2.5 ring-1 ring-[#d9e5ea]">
+                        <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">
+                          <UsersRound className="size-3.5" />
+                          {t.passengers}
+                        </div>
+                        <div className="mt-1 flex items-center justify-between">
                           <button
-                            type="button"
-                            aria-label={`${t.remove}: ${trip}`}
-                            title={t.remove}
-                            onClick={() =>
-                              setScheduledTrips((current) =>
-                                current.filter((_, itemIndex) => itemIndex !== index),
-                              )
-                            }
-                            className="grid size-6 shrink-0 place-items-center rounded-full text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
+                            aria-label="Restar pasajero"
+                            onClick={() => updatePassengers(Math.max(1, passengers - 1))}
                           >
-                            <X className="size-3.5" />
+                            <Minus className="size-4" />
+                          </button>
+                          <span className="text-sm font-bold">{passengers}</span>
+                          <button
+                            aria-label="Agregar pasajero"
+                            onClick={() => updatePassengers(Math.min(8, passengers + 1))}
+                          >
+                            <Plus className="size-4 text-leaf" />
                           </button>
                         </div>
-                      ))}
+                      </div>
                     </div>
-                  </div>
-                )}
-                {rideType === "shared" && (
-                  <div className="mt-3 rounded-2xl bg-background p-3 ring-1 ring-border">
-                    <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">
-                      <MapPin className="size-3.5 text-leaf" />
-                      {language === "es" ? "Orígenes de pasajeros" : "Passenger pickups"}
-                    </div>
-                    <div className="mt-2 space-y-2">
-                      {Array.from({ length: passengers }, (_, index) => (
-                        <div key={index} className="space-y-1">
-                          <label className="block">
-                            <span className="text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
-                              {t.pickupShort} {index + 1}
-                            </span>
-                            <input
-                              value={passengerOrigins[index] ?? ""}
-                              onChange={(event) =>
-                                setPassengerOrigins((current) =>
-                                  current.map((item, itemIndex) =>
-                                    itemIndex === index ? event.target.value : item,
-                                  ),
-                                )
-                              }
-                              placeholder={origin}
-                              className="mt-0.5 w-full rounded-full bg-surface px-3 py-2 text-sm font-semibold outline-none ring-1 ring-border"
-                            />
-                          </label>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-                <div className="mt-3 rounded-2xl bg-[#f8fbfc] p-1 ring-1 ring-[#d9e5ea]">
-                  <p className="px-3 pt-2 text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">
-                    {t.payment}
-                  </p>
-                  <div className="mt-1 grid grid-cols-2 gap-1">
-                    {(["cash", "card"] as const).map((method) => (
-                      <button
-                        key={method}
-                        disabled={confirmed}
-                        onClick={() => {
-                          setPaymentMethod(method);
-                          if (method === "card") {
-                            if (!user) {
-                              setProfileOpen(true);
-                              setAuthError(
-                                language === "es"
-                                  ? "Para pagar con tarjeta debes iniciar sesión o crear una cuenta."
-                                  : "You must sign in or create an account to pay by card.",
-                              );
-                            } else {
-                              setPaymentOpen(true);
-                            }
-                          }
-                        }}
-                        className={`rounded-xl py-2.5 text-sm font-bold transition-colors ${paymentMethod === method ? "bg-[#169bc5] text-white" : "bg-[#eef1f5] text-[#697180]"} ${confirmed ? "cursor-not-allowed opacity-60" : ""}`}
-                      >
-                        {method === "card" ? t.card : t.cash}
-                      </button>
-                    ))}
-                  </div>
-                  {confirmed && (
-                    <p className="px-3 pb-2 pt-1 text-[10px] font-semibold text-muted-foreground">
-                      {t.paymentLocked}
-                    </p>
-                  )}
-                </div>
-                {confirmed && (
-                  <div
-                    className="mt-3 flex items-start gap-2 rounded-2xl bg-[#e8f4f8] p-3 text-xs text-primary ring-1 ring-[#b9d9e4]"
-                    role="status"
-                  >
-                    <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-leaf" />
-                    <div>
-                      <p className="font-bold">{t.confirmedTitle}</p>
-                      <p className="mt-0.5 text-muted-foreground">{t.confirmedBody}</p>
-                    </div>
-                  </div>
-                )}
-                <button
-                  onClick={() => void confirmTransferBooking()}
-                  className="confirm-booking-button mt-4 w-full rounded-full bg-[#169bc5] py-3.5 text-sm font-bold text-white transition-transform active:scale-[0.98]"
-                >
-                  {bookingStatus === "saving"
-                    ? language === "es"
-                      ? "Guardando reserva…"
-                      : "Saving booking…"
-                    : confirmed
-                      ? language === "es"
-                        ? "Solicitud confirmada"
-                        : "Request confirmed"
-                      : language === "es"
-                        ? "Confirmar reserva"
-                        : "Confirm booking"}
-                </button>
-                {bookingStatus === "saved" && (
-                  <p className="mt-2 text-center text-xs text-leaf">
-                    {language === "es"
-                      ? "Reserva guardada y enviada al panel del conductor."
-                      : "Booking saved and sent to the driver panel."}
-                  </p>
-                )}
-                {bookingStatus === "error" && (
-                  <div className="mt-2 space-y-2">
-                    <p className="text-center text-xs text-amber-200">
+                    <p className="mt-2 px-1 text-[10px] leading-relaxed text-muted-foreground">
                       {language === "es"
-                        ? "No se pudo guardar ahora. Puedes enviarla por WhatsApp como respaldo."
-                        : "It could not be saved now. You can send it by WhatsApp as a fallback."}
+                        ? "La fecha y hora quedan solicitadas hasta coordinar con el operador."
+                        : "The date and time remain requested until coordinated with the operator."}
                     </p>
+                    {timing === "schedule" && (
+                      <div className="mt-3 rounded-[24px] bg-background p-3 ring-1 ring-border">
+                        <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">
+                          <CalendarDays className="size-3.5 text-leaf" />
+                          {t.scheduledTrip}
+                        </div>
+                        <div className="mt-2 grid grid-cols-2 gap-2">
+                          <input
+                            type="date"
+                            value={scheduleDate}
+                            min={scheduleDate}
+                            onChange={(event) => setScheduleDate(event.target.value)}
+                            className="rounded-full bg-surface px-3 py-2 text-sm font-semibold ring-1 ring-border outline-none"
+                          />
+                          <input
+                            type="time"
+                            value={scheduleTime}
+                            onChange={(event) => setScheduleTime(event.target.value)}
+                            className="rounded-full bg-surface px-3 py-2 text-sm font-semibold ring-1 ring-border outline-none"
+                          />
+                        </div>
+                        <button
+                          onClick={scheduleTrip}
+                          className="mt-2 w-full rounded-full bg-leaf py-2 text-xs font-bold text-leaf-foreground transition-transform active:scale-[0.98]"
+                        >
+                          {t.agenda}
+                        </button>
+                      </div>
+                    )}
+                    {scheduledTrips.length > 0 && (
+                      <div className="mt-3 rounded-[24px] bg-background p-3 ring-1 ring-border">
+                        <div className="flex items-center justify-between gap-3">
+                          <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">
+                            {t.agenda}
+                          </p>
+                          <span className="rounded-full bg-leaf/15 px-2 py-1 text-[10px] font-bold text-leaf">
+                            {scheduledTrips.length}
+                          </span>
+                        </div>
+                        <div className="mt-2 space-y-2">
+                          {scheduledTrips.map((trip, index) => (
+                            <div
+                              key={`${trip}-${index}`}
+                              className="flex items-center gap-2 rounded-2xl bg-surface px-3 py-2 text-xs font-semibold"
+                            >
+                              <CalendarDays className="size-3.5 shrink-0 text-leaf" />
+                              <span className="min-w-0 flex-1 truncate">{trip}</span>
+                              <button
+                                type="button"
+                                aria-label={`${t.remove}: ${trip}`}
+                                title={t.remove}
+                                onClick={() =>
+                                  setScheduledTrips((current) =>
+                                    current.filter((_, itemIndex) => itemIndex !== index),
+                                  )
+                                }
+                                className="grid size-6 shrink-0 place-items-center rounded-full text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
+                              >
+                                <X className="size-3.5" />
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    {rideType === "shared" && (
+                      <div className="mt-3 rounded-2xl bg-background p-3 ring-1 ring-border">
+                        <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">
+                          <MapPin className="size-3.5 text-leaf" />
+                          {language === "es" ? "Orígenes de pasajeros" : "Passenger pickups"}
+                        </div>
+                        <div className="mt-2 space-y-2">
+                          {Array.from({ length: passengers }, (_, index) => (
+                            <div key={index} className="space-y-1">
+                              <label className="block">
+                                <span className="text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
+                                  {t.pickupShort} {index + 1}
+                                </span>
+                                <input
+                                  value={passengerOrigins[index] ?? ""}
+                                  onChange={(event) =>
+                                    setPassengerOrigins((current) =>
+                                      current.map((item, itemIndex) =>
+                                        itemIndex === index ? event.target.value : item,
+                                      ),
+                                    )
+                                  }
+                                  placeholder={origin}
+                                  className="mt-0.5 w-full rounded-full bg-surface px-3 py-2 text-sm font-semibold outline-none ring-1 ring-border"
+                                />
+                              </label>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    <div className="mt-3 rounded-2xl bg-[#f8fbfc] p-1 ring-1 ring-[#d9e5ea]">
+                      <p className="px-3 pt-2 text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">
+                        {t.payment}
+                      </p>
+                      <div className="mt-1 grid grid-cols-2 gap-1">
+                        {(["cash", "card"] as const).map((method) => (
+                          <button
+                            key={method}
+                            disabled={confirmed}
+                            onClick={() => {
+                              setPaymentMethod(method);
+                              if (method === "card") {
+                                if (!user) {
+                                  setProfileOpen(true);
+                                  setAuthError(
+                                    language === "es"
+                                      ? "Para pagar con tarjeta debes iniciar sesión o crear una cuenta."
+                                      : "You must sign in or create an account to pay by card.",
+                                  );
+                                } else {
+                                  setPaymentOpen(true);
+                                }
+                              }
+                            }}
+                            className={`rounded-xl py-2.5 text-sm font-bold transition-colors ${paymentMethod === method ? "bg-[#169bc5] text-white" : "bg-[#eef1f5] text-[#697180]"} ${confirmed ? "cursor-not-allowed opacity-60" : ""}`}
+                          >
+                            {method === "card" ? t.card : t.cash}
+                          </button>
+                        ))}
+                      </div>
+                      {confirmed && (
+                        <p className="px-3 pb-2 pt-1 text-[10px] font-semibold text-muted-foreground">
+                          {t.paymentLocked}
+                        </p>
+                      )}
+                    </div>
+                    {confirmed && (
+                      <div
+                        className="mt-3 flex items-start gap-2 rounded-2xl bg-[#e8f4f8] p-3 text-xs text-primary ring-1 ring-[#b9d9e4]"
+                        role="status"
+                      >
+                        <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-leaf" />
+                        <div>
+                          <p className="font-bold">{t.confirmedTitle}</p>
+                          <p className="mt-0.5 text-muted-foreground">{t.confirmedBody}</p>
+                        </div>
+                      </div>
+                    )}
                     <button
-                      onClick={() => openWhatsApp()}
-                      className="w-full rounded-2xl border border-white/20 bg-white/10 py-2.5 text-xs font-bold text-white"
+                      onClick={() => void confirmTransferBooking()}
+                      className="confirm-booking-button mt-4 w-full rounded-full bg-[#169bc5] py-3.5 text-sm font-bold text-white transition-transform active:scale-[0.98]"
                     >
-                      {language === "es" ? "Enviar por WhatsApp" : "Send by WhatsApp"}
+                      {bookingStatus === "saving"
+                        ? language === "es"
+                          ? "Guardando reserva…"
+                          : "Saving booking…"
+                        : confirmed
+                          ? language === "es"
+                            ? "Solicitud confirmada"
+                            : "Request confirmed"
+                          : language === "es"
+                            ? "Confirmar reserva"
+                            : "Confirm booking"}
                     </button>
-                  </div>
-                )}
-              </section>
+                    {bookingStatus === "saved" && (
+                      <p className="mt-2 text-center text-xs text-leaf">
+                        {language === "es"
+                          ? "Reserva guardada y enviada al panel del conductor."
+                          : "Booking saved and sent to the driver panel."}
+                      </p>
+                    )}
+                    {bookingStatus === "error" && (
+                      <div className="mt-2 space-y-2">
+                        <p className="text-center text-xs text-amber-200">
+                          {language === "es"
+                            ? "No se pudo guardar ahora. Puedes enviarla por WhatsApp como respaldo."
+                            : "It could not be saved now. You can send it by WhatsApp as a fallback."}
+                        </p>
+                        <button
+                          onClick={() => openWhatsApp()}
+                          className="w-full rounded-2xl border border-white/20 bg-white/10 py-2.5 text-xs font-bold text-white"
+                        >
+                          {language === "es" ? "Enviar por WhatsApp" : "Send by WhatsApp"}
+                        </button>
+                      </div>
+                    )}
+                  </section>
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  onClick={openBookingPage}
+                  className="booking-entry-banner control-relief rise mt-4 flex w-full items-center justify-between gap-4 rounded-[30px] bg-surface p-5 text-left ring-1 ring-border transition-transform hover:-translate-y-0.5 active:scale-[0.99]"
+                >
+                  <span>
+                    <span className="block text-[10px] font-bold uppercase tracking-[0.18em] text-leaf-ink">
+                      {language === "es" ? "Reserva" : "Booking"}
+                    </span>
+                    <span className="mt-1 block font-display text-2xl font-bold">
+                      {language === "es" ? "Reservar Tours" : "Book Tours"}
+                    </span>
+                    <span className="mt-1 block text-sm text-muted-foreground">
+                      {language === "es"
+                        ? "Abre el panel completo de reservas."
+                        : "Open the full booking panel."}
+                    </span>
+                  </span>
+                  <span className="grid size-12 shrink-0 place-items-center rounded-full bg-jungle text-primary-foreground shadow-[0_4px_0_color-mix(in_oklch,var(--color-jungle)_35%,transparent)]">
+                    <CalendarDays className="size-5" />
+                  </span>
+                </button>
+              )
             ) : (
               <section className="rise mt-4 rounded-[30px] bg-surface p-5 shadow-xl shadow-primary/10 ring-1 ring-border">
                 <Compass className="size-7 text-leaf" />
@@ -1789,7 +1863,7 @@ function Index() {
                     : "Choose an experience with transport and bilingual assistance included."}
                 </p>
                 <button
-                  onClick={() => scrollToSection("tours")}
+                  onClick={openBookingPage}
                   className="mt-5 w-full rounded-2xl bg-jungle py-4 text-sm font-bold text-primary-foreground transition-transform active:scale-[0.98]"
                 >
                   {t.explore}
