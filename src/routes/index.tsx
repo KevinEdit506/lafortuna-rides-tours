@@ -79,6 +79,13 @@ type TourCard = {
   priceUsd: number;
 };
 
+type ReservationSummary = {
+  id: string;
+  title: string;
+  details: string;
+  status: "requested" | "scheduled";
+};
+
 type BlogArticle = {
   slug: string;
   image: string;
@@ -127,12 +134,12 @@ function getFeatureContent(feature: FeatureKey, language: "es" | "en") {
       action: spanish ? "Consultar disponibilidad" : "Check availability",
     },
     booking: {
-      title: spanish ? "Reservas" : "Bookings",
+      title: spanish ? "Reservas actuales" : "Current bookings",
       eyebrow: spanish ? "Planifica tu viaje" : "Plan your trip",
       description: spanish
-        ? "Elige origen, destino, horario, pasajeros y forma de pago para preparar tu solicitud."
-        : "Choose pickup, destination, timing, passengers, and payment method to prepare your request.",
-      action: spanish ? "Abrir formulario de reserva" : "Open booking form",
+        ? "Revisa tus solicitudes de esta sesión y agenda un tour escogiendo primero el tipo de actividad."
+        : "Review this session's requests and schedule a tour by choosing an activity type first.",
+      action: spanish ? "Agendar un tour" : "Schedule a tour",
     },
     promotion: {
       title: "Pizza La Fortuna",
@@ -369,6 +376,7 @@ function Index() {
   const [exchangeRate, setExchangeRate] = useState<number | null>(null);
   const [confirmed, setConfirmed] = useState(false);
   const [bookingStatus, setBookingStatus] = useState<"idle" | "saving" | "saved" | "error">("idle");
+  const [currentReservations, setCurrentReservations] = useState<ReservationSummary[]>([]);
   const [scheduledTrips, setScheduledTrips] = useState<string[]>([]);
   const [scheduleDate, setScheduleDate] = useState(() => {
     const today = new Date();
@@ -389,6 +397,7 @@ function Index() {
   );
   const [destinationSearchOpen, setDestinationSearchOpen] = useState(false);
   const [destinationQuery, setDestinationQuery] = useState("");
+  const [tourPickerOpen, setTourPickerOpen] = useState(false);
   const [featureTransition, setFeatureTransition] = useState<"enter" | "exit">("enter");
   const [paymentOpen, setPaymentOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
@@ -885,6 +894,15 @@ function Index() {
         setBookingStatus("error");
         return;
       }
+      setCurrentReservations((items) => [
+        {
+          id: result.id,
+          title: language === "es" ? "Traslado solicitado" : "Transfer requested",
+          details: `${origin} → ${destination}`,
+          status: timing === "schedule" ? "scheduled" : "requested",
+        },
+        ...items,
+      ]);
       setConfirmed(true);
       setBookingStatus("saved");
     } catch {
@@ -918,6 +936,22 @@ function Index() {
         setBookingStatus("error");
         return;
       }
+      setCurrentReservations((items) => [
+        {
+          id: result.id,
+          title: tour.title,
+          details:
+            tourPaymentMethod === "card"
+              ? language === "es"
+                ? "Pago pendiente en Stripe Checkout"
+                : "Payment pending in Stripe Checkout"
+              : language === "es"
+                ? "Solicitud enviada por WhatsApp"
+                : "Request sent through WhatsApp",
+          status: "requested",
+        },
+        ...items,
+      ]);
       if (tourPaymentMethod === "card" && user) {
         const idToken = await user.getIdToken();
         const checkoutResponse = await fetch("/api/stripe/create-checkout-session", {
@@ -966,6 +1000,71 @@ function Index() {
     setTourWhatsAppSelected(true);
     setSelectedTour(tour);
   };
+  const openTourCategory = (category: "activities" | "rivers" | "parks" | "beaches") => {
+    const tours: Record<typeof category, TourCard> = {
+      activities: {
+        image: `${import.meta.env.BASE_URL}category-arenal.jpg`,
+        title: language === "es" ? "Actividades en La Fortuna" : "Activities in La Fortuna",
+        meta: `5 ${t.hours}`,
+        rating: "4.9",
+        category: language === "es" ? "Naturaleza · Experiencias" : "Nature · Experiences",
+        summary:
+          language === "es"
+            ? "Volcán Arenal, aguas termales y experiencias locales para descubrir la zona con calma."
+            : "Arenal Volcano, hot springs, and local experiences to discover the area at an easy pace.",
+        price: language === "es" ? "Desde ₡35.000" : "From $70",
+        priceCrc: 35000,
+        priceUsd: 70,
+      },
+      rivers: {
+        image: riverImage,
+        title: language === "es" ? "Ríos y Aventuras" : "Rivers and Adventures",
+        meta: `6 ${t.hours}`,
+        rating: "4.8",
+        category: language === "es" ? "Ríos · Aire libre" : "Rivers · Outdoors",
+        summary:
+          language === "es"
+            ? "Río Peñas Blancas, agua dulce y aventura tropical con acompañamiento local."
+            : "Peñas Blancas River, freshwater, and tropical adventure with local guidance.",
+        price: language === "es" ? "Desde ₡28.000" : "From $56",
+        priceCrc: 28000,
+        priceUsd: 56,
+      },
+      parks: {
+        image: misticoImage,
+        title: language === "es" ? "Parques y Puentes Colgantes" : "Parks and Hanging Bridges",
+        meta: `4 ${t.hours}`,
+        rating: "4.9",
+        category: language === "es" ? "Bosque · Aventura" : "Forest · Adventure",
+        summary:
+          language === "es"
+            ? "Senderos protegidos y puentes suspendidos para observar el bosque y su biodiversidad."
+            : "Protected trails and suspended bridges to experience the forest and its biodiversity.",
+        price: language === "es" ? "Desde ₡32.000" : "From $64",
+        priceCrc: 32000,
+        priceUsd: 64,
+      },
+      beaches: {
+        image: `${import.meta.env.BASE_URL}category-playas.jpg`,
+        title: language === "es" ? "Playas" : "Beaches",
+        meta: `10 ${t.hours}`,
+        rating: "4.8",
+        category: language === "es" ? "Costa · Día completo" : "Coast · Full day",
+        summary:
+          language === "es"
+            ? "Una escapada a la costa del Pacífico con traslado cómodo desde La Fortuna."
+            : "A Pacific coast escape with a comfortable transfer from La Fortuna.",
+        price: language === "es" ? "Desde ₡45.000" : "From $90",
+        priceCrc: 45000,
+        priceUsd: 90,
+      },
+    };
+    setTourPickerOpen(false);
+    setFeatureTransition("exit");
+    window.history.replaceState({}, "", window.location.pathname + window.location.search);
+    setSelectedFeature(null);
+    window.setTimeout(() => openTourDetail(tours[category]), 180);
+  };
 
   const closeTourDetail = () => {
     if (window.location.hash.startsWith("#tour/")) window.history.back();
@@ -1011,6 +1110,10 @@ function Index() {
   };
 
   const continueFromFeature = (feature: FeatureKey) => {
+    if (feature === "booking") {
+      setTourPickerOpen(true);
+      return;
+    }
     if (feature === "promotion") {
       openWhatsApp();
       return;
@@ -2453,6 +2556,63 @@ function Index() {
               {featureContent.description}
             </p>
 
+            {selectedFeature === "booking" && (
+              <section className="mt-6 rounded-[24px] bg-background p-4 ring-1 ring-border">
+                <div className="flex items-center justify-between gap-3">
+                  <div>
+                    <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-leaf-ink">
+                      {language === "es" ? "Tus solicitudes" : "Your requests"}
+                    </p>
+                    <h2 className="mt-1 font-display text-xl font-bold">
+                      {language === "es" ? "Reservaciones actuales" : "Current reservations"}
+                    </h2>
+                  </div>
+                  <CalendarDays className="size-5 text-leaf" aria-hidden="true" />
+                </div>
+                {currentReservations.length > 0 ? (
+                  <div className="mt-4 space-y-2">
+                    {currentReservations.map((reservation) => (
+                      <article
+                        key={reservation.id}
+                        className="rounded-2xl bg-white p-3 text-sm ring-1 ring-border"
+                      >
+                        <div className="flex items-start justify-between gap-3">
+                          <p className="font-bold">{reservation.title}</p>
+                          <span className="rounded-full bg-leaf/15 px-2 py-1 text-[10px] font-bold text-leaf-ink">
+                            {reservation.status === "scheduled"
+                              ? language === "es"
+                                ? "Programada"
+                                : "Scheduled"
+                              : language === "es"
+                                ? "Solicitada"
+                                : "Requested"}
+                          </span>
+                        </div>
+                        <p className="mt-1 text-xs text-muted-foreground">{reservation.details}</p>
+                        <p className="mt-2 text-[10px] text-muted-foreground">
+                          ID: {reservation.id}
+                        </p>
+                      </article>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="mt-4 rounded-2xl border border-dashed border-border px-4 py-5 text-sm leading-relaxed text-muted-foreground">
+                    {language === "es"
+                      ? "Todavía no tienes reservaciones en esta sesión. Puedes agendar un tour al final."
+                      : "You do not have reservations in this session yet. You can schedule a tour below."}
+                  </p>
+                )}
+                <button
+                  type="button"
+                  onClick={() => setTourPickerOpen(true)}
+                  className="mt-4 flex w-full items-center justify-center gap-2 rounded-2xl bg-jungle py-3.5 text-sm font-bold text-primary-foreground shadow-[0_4px_0_color-mix(in_oklch,var(--color-jungle)_35%,transparent)] transition-transform active:scale-[0.98]"
+                >
+                  <CalendarDays className="size-4" />
+                  {language === "es" ? "Agendar un tour" : "Schedule a tour"}
+                </button>
+              </section>
+            )}
+
             {selectedFeature === "promotion" && (
               <div className="mt-6 rounded-2xl bg-[#ff9f1c] p-5 text-[#22170a] shadow-lg">
                 <p className="text-[10px] font-bold uppercase tracking-[0.18em]">
@@ -2465,15 +2625,102 @@ function Index() {
               </div>
             )}
 
-            <button
-              type="button"
-              onClick={() => continueFromFeature(selectedFeature)}
-              className="mt-8 w-full rounded-2xl bg-jungle py-4 text-sm font-bold text-primary-foreground shadow-[0_4px_0_color-mix(in_oklch,var(--color-jungle)_35%,transparent)] transition-transform active:scale-[0.98]"
-            >
-              {featureContent.action}
-            </button>
+            {selectedFeature !== "booking" && (
+              <button
+                type="button"
+                onClick={() => continueFromFeature(selectedFeature)}
+                className="mt-8 w-full rounded-2xl bg-jungle py-4 text-sm font-bold text-primary-foreground shadow-[0_4px_0_color-mix(in_oklch,var(--color-jungle)_35%,transparent)] transition-transform active:scale-[0.98]"
+              >
+                {featureContent.action}
+              </button>
+            )}
           </section>
         </main>
+      )}
+
+      {tourPickerOpen && (
+        <div
+          className="fixed inset-0 z-[70] flex items-end justify-center bg-black/55 p-3 backdrop-blur-sm sm:items-center sm:p-6"
+          role="presentation"
+          onClick={() => setTourPickerOpen(false)}
+        >
+          <section
+            className="w-full max-w-2xl rounded-[30px] bg-surface p-5 text-foreground shadow-2xl ring-1 ring-border sm:p-8"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="tour-picker-title"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <header className="flex items-start justify-between gap-3 border-b border-border pb-5">
+              <div>
+                <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-leaf-ink">
+                  {language === "es" ? "Tipo de actividad" : "Activity type"}
+                </p>
+                <h2 id="tour-picker-title" className="mt-1 font-display text-2xl font-bold">
+                  {language === "es"
+                    ? "¿Qué tour quieres agendar?"
+                    : "Which tour would you like to schedule?"}
+                </h2>
+                <p className="mt-2 text-sm text-muted-foreground">
+                  {language === "es"
+                    ? "Selecciona una categoría para abrir sus detalles y reservar."
+                    : "Select a category to open its details and book."}
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setTourPickerOpen(false)}
+                aria-label={language === "es" ? "Cerrar selector de tour" : "Close tour selector"}
+                className="grid size-10 shrink-0 place-items-center rounded-full bg-background text-muted-foreground ring-1 ring-border transition-transform active:scale-95"
+              >
+                <X className="size-4" />
+              </button>
+            </header>
+            <div className="mt-5 grid gap-3 sm:grid-cols-2">
+              {(
+                [
+                  [
+                    "activities",
+                    language === "es" ? "Actividades en La Fortuna" : "Activities in La Fortuna",
+                    "category-arenal.jpg",
+                  ],
+                  [
+                    "rivers",
+                    language === "es" ? "Ríos y Aventuras" : "Rivers and Adventures",
+                    riverImage,
+                  ],
+                  [
+                    "parks",
+                    language === "es" ? "Parques y Puentes Colgantes" : "Parks and Hanging Bridges",
+                    misticoImage,
+                  ],
+                  ["beaches", language === "es" ? "Playas" : "Beaches", "category-playas.jpg"],
+                ] as const
+              ).map(([category, title, image]) => (
+                <button
+                  key={category}
+                  type="button"
+                  onClick={() => openTourCategory(category)}
+                  className="overflow-hidden rounded-[22px] bg-white text-left shadow-lg ring-1 ring-border transition-transform hover:-translate-y-0.5 active:scale-[0.98]"
+                >
+                  <img
+                    src={
+                      image.startsWith("/") || image.includes("/")
+                        ? image
+                        : `${import.meta.env.BASE_URL}${image}`
+                    }
+                    alt={title}
+                    className="h-28 w-full object-cover"
+                  />
+                  <span className="flex items-center justify-between gap-2 p-3 text-sm font-bold">
+                    {title}
+                    <ArrowRight className="size-4 shrink-0 text-leaf-ink" />
+                  </span>
+                </button>
+              ))}
+            </div>
+          </section>
+        </div>
       )}
 
       {destinationSearchOpen && (
