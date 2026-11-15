@@ -868,6 +868,19 @@ function Index() {
     }
   };
 
+  const openHelpWhatsApp = () => {
+    const message =
+      language === "es"
+        ? "Hola Via Fortuna, necesito ayuda. ¿Podrían atenderme, por favor?"
+        : "Hello Via Fortuna, I need help. Could someone assist me, please?";
+
+    window.open(
+      `https://wa.me/50663135655?text=${encodeURIComponent(message)}`,
+      "_blank",
+      "noopener,noreferrer",
+    );
+  };
+
   const confirmTransferBooking = async () => {
     if (confirmed || bookingStatus === "saving") return;
     if (paymentMethod === "card" && !user) {
@@ -2890,7 +2903,7 @@ function Index() {
               icon: MessageCircle,
               action: () => {
                 setActiveNav("chat");
-                openWhatsApp();
+                openHelpWhatsApp();
               },
             },
             {
