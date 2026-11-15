@@ -1158,3 +1158,91 @@ input::placeholder {
 .booking-page-open .booking-page-shell {
   margin-top: 1.25rem;
 }
+
+/* Ajustes finos para teléfonos: más espacio útil y controles táctiles sin desbordes. */
+@media (max-width: 899px) {
+  .booking-page-open .app-shell > .relative {
+    padding-right: 0.75rem;
+    padding-left: 0.75rem;
+    padding-bottom: 6.5rem;
+  }
+
+  .booking-page-open .booking-page-shell {
+    margin-top: 0.55rem;
+    padding: 0;
+    background: transparent;
+  }
+
+  .booking-page-open .booking-reference-panel {
+    margin-top: 0;
+    padding: 0.9rem;
+    border-radius: 1.5rem;
+  }
+
+  .booking-page-open .booking-reference-panel > .mb-4 {
+    margin-bottom: 0.8rem;
+    padding-bottom: 0.7rem;
+  }
+
+  .booking-page-open .booking-reference-panel > .mb-4 button {
+    min-width: 2.75rem;
+    min-height: 2.75rem;
+  }
+
+  .booking-page-open .booking-reference-panel h2 {
+    max-width: 100%;
+    min-width: 0;
+    width: fit-content;
+    padding-inline: 1.2rem;
+    font-size: 1rem;
+  }
+
+  .booking-page-open .address-fields > div {
+    min-width: 0;
+  }
+
+  .booking-page-open .address-fields .address-input {
+    min-width: 0;
+    font-size: clamp(0.76rem, 3.5vw, 0.88rem);
+    text-overflow: ellipsis;
+  }
+
+  .booking-page-open .booking-reference-panel button {
+    min-height: 2.75rem;
+  }
+
+  .booking-page-open .booking-reference-panel .confirm-booking-button {
+    min-height: 3.35rem;
+    margin-top: 0.85rem;
+    font-size: 0.95rem;
+  }
+
+  .booking-page-open .booking-reference-panel input[type="date"],
+  .booking-page-open .booking-reference-panel input[type="time"] {
+    min-width: 0;
+    width: 100%;
+    font-size: 0.78rem;
+  }
+}
+
+@media (max-width: 370px) {
+  .booking-page-open .booking-reference-panel {
+    padding: 0.72rem;
+  }
+
+  .booking-page-open .control-relief > .mt-3.grid {
+    grid-template-columns: 1fr;
+  }
+
+  .booking-page-open .booking-reference-panel .mt-2.grid {
+    grid-template-columns: 1fr;
+  }
+
+  .booking-page-open .address-fields > div {
+    padding-inline: 0.55rem;
+  }
+
+  .booking-page-open .booking-reference-panel label > span {
+    font-size: 0.63rem;
+  }
+}
