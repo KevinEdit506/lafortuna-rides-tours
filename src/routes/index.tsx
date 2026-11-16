@@ -3,6 +3,13 @@ import {
   ArrowLeft,
   ArrowRight,
   CalendarDays,
+  ChevronLeft,
+  ChevronRight,
+  CreditCard,
+  Instagram,
+  Facebook,
+  Radio,
+  Smartphone,
   Bike,
   CarFront,
   CheckCircle2,
@@ -172,13 +179,13 @@ function featureFromHash(hash: string): FeatureKey | null {
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Via Fortuna | Transfers & Tours in Arenal" },
+      { title: "TuraVía | Transfers & Tours in Arenal" },
       {
         name: "description",
         content:
           "Reserve traslados privados y tours bilingües en La Fortuna, Costa Rica. Tarifas claras, atención local y experiencias memorables cerca del Arenal.",
       },
-      { property: "og:title", content: "Via Fortuna | Transfers & Tours in Arenal" },
+      { property: "og:title", content: "TuraVía | Transfers & Tours in Arenal" },
       {
         property: "og:description",
         content:
@@ -186,7 +193,7 @@ export const Route = createFileRoute("/")({
       },
       { property: "og:type", content: "website" },
       { property: "og:url", content: "https://kevinedit506.github.io/lafortuna-rides-tours/" },
-      { property: "og:site_name", content: "Via Fortuna" },
+      { property: "og:site_name", content: "TuraVía" },
       { property: "og:locale", content: "es_CR" },
       {
         property: "og:image",
@@ -196,7 +203,7 @@ export const Route = createFileRoute("/")({
       { property: "og:image:width", content: "2560" },
       { property: "og:image:height", content: "1440" },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:title", content: "Via Fortuna | Transfers & Tours in Arenal" },
+      { name: "twitter:title", content: "TuraVía | Transfers & Tours in Arenal" },
       {
         name: "twitter:description",
         content:
@@ -410,6 +417,9 @@ function Index() {
   const [authPassword, setAuthPassword] = useState("");
   const [authError, setAuthError] = useState("");
   const [authSubmitting, setAuthSubmitting] = useState(false);
+  const [activeExperienceFilter, setActiveExperienceFilter] = useState<
+    "all" | "activities" | "rivers" | "parks" | "beaches" | "promotion" | "blog"
+  >("all");
   const dynamicMultiplier = 2.8;
   const returnMultiplier = returnEmpty ? 2 : 1;
   const roadMultiplier = badRoad ? 1.2 : 1.5;
@@ -838,10 +848,10 @@ function Index() {
     const isSpanish = language === "es";
     const message = tourName
       ? isSpanish
-        ? `Hola Via Fortuna, me gustaría reservar el tour ${tourName}.\n\nMétodo de pago: ${tourPayment === "card" ? "Tarjeta" : "Efectivo"}\n\n¿Podrían ayudarme con disponibilidad y próximos pasos?`
-        : `Hello Via Fortuna, I would like to book the ${tourName} tour.\n\nPayment method: ${tourPayment === "card" ? "Card" : "Cash"}\n\nCould you help me with availability and next steps?`
+        ? `Hola TuraVía, me gustaría reservar el tour ${tourName}.\n\nMétodo de pago: ${tourPayment === "card" ? "Tarjeta" : "Efectivo"}\n\n¿Podrían ayudarme con disponibilidad y próximos pasos?`
+        : `Hello TuraVía, I would like to book the ${tourName} tour.\n\nPayment method: ${tourPayment === "card" ? "Card" : "Cash"}\n\nCould you help me with availability and next steps?`
       : isSpanish
-        ? `Hola Via Fortuna, me gustaría reservar un traslado.\n\nOrigen: ${origin}\nDestino: ${destination}\n${
+        ? `Hola TuraVía, me gustaría reservar un traslado.\n\nOrigen: ${origin}\nDestino: ${destination}\n${
             rideType === "shared"
               ? `Orígenes por pasajero hacia ${destination}:\n${passengerOrigins
                   .slice(0, passengers)
@@ -849,7 +859,7 @@ function Index() {
                   .join("\n")}`
               : ""
           }\nTipo: ${rideType === "private" ? "Privado" : "Compartido"}\nHorario: ${timing === "now" ? "Ahora" : `${scheduleDate} · ${scheduleTime}`}\nPasajeros: ${passengers}\nPago: ${paymentMethod === "card" ? "Tarjeta" : "Efectivo"}\nTarifa estimada: ${formatFareForMessage(fare.total)}`
-        : `Hello Via Fortuna, I would like to book a transfer.\n\nPickup: ${origin}\nDestination: ${destination}\n${
+        : `Hello TuraVía, I would like to book a transfer.\n\nPickup: ${origin}\nDestination: ${destination}\n${
             rideType === "shared"
               ? `Passenger pickups to ${destination}:\n${passengerOrigins
                   .slice(0, passengers)
@@ -871,8 +881,8 @@ function Index() {
   const openHelpWhatsApp = () => {
     const message =
       language === "es"
-        ? "Hola Via Fortuna, necesito ayuda. ¿Podrían atenderme, por favor?"
-        : "Hello Via Fortuna, I need help. Could someone assist me, please?";
+        ? "Hola TuraVía, necesito ayuda. ¿Podrían atenderme, por favor?"
+        : "Hello TuraVía, I need help. Could someone assist me, please?";
 
     window.open(
       `https://wa.me/50663135655?text=${encodeURIComponent(message)}`,
@@ -935,10 +945,10 @@ function Index() {
     }
   };
 
-  const confirmTourBooking = async (tour: TourCard) => {
+  const confirmTourBooking = async (tour: TourCard, requestedPaymentMethod = tourPaymentMethod) => {
     if (bookingStatus === "saving") return;
-    if (tourPaymentMethod === "cash" && !tourWhatsAppSelected) return;
-    if (tourPaymentMethod === "card" && (!isFirebaseAuthConfigured() || !user)) {
+    if (requestedPaymentMethod === "cash" && !tourWhatsAppSelected) return;
+    if (requestedPaymentMethod === "card" && (!isFirebaseAuthConfigured() || !user)) {
       setProfileOpen(true);
       setAuthError(
         language === "es"
@@ -953,8 +963,8 @@ function Index() {
         serviceType: "tour",
         tourName: tour.title,
         language,
-        paymentMethod: tourPaymentMethod,
-        confirmationMethod: tourPaymentMethod === "card" ? "card" : "whatsapp",
+        paymentMethod: requestedPaymentMethod,
+        confirmationMethod: requestedPaymentMethod === "card" ? "card" : "whatsapp",
         ...(user?.uid ? { userId: user.uid } : {}),
       });
       if (!result.ok) {
@@ -966,7 +976,7 @@ function Index() {
           id: result.id,
           title: tour.title,
           details:
-            tourPaymentMethod === "card"
+            requestedPaymentMethod === "card"
               ? language === "es"
                 ? "Pago pendiente en Stripe Checkout"
                 : "Payment pending in Stripe Checkout"
@@ -977,7 +987,7 @@ function Index() {
         },
         ...items,
       ]);
-      if (tourPaymentMethod === "card" && user) {
+      if (requestedPaymentMethod === "card" && user) {
         const idToken = await user.getIdToken();
         const checkoutResponse = await fetch("/api/stripe/create-checkout-session", {
           method: "POST",
@@ -1011,12 +1021,12 @@ function Index() {
         window.location.assign(checkout.checkoutUrl);
         return;
       }
-      openWhatsApp(tour.title, tourPaymentMethod);
+      openWhatsApp(tour.title, requestedPaymentMethod);
       setBookingStatus("saved");
       setSelectedTour(null);
     } catch {
       setBookingStatus("error");
-      if (tourPaymentMethod === "cash") openWhatsApp(tour.title, tourPaymentMethod);
+      if (requestedPaymentMethod === "cash") openWhatsApp(tour.title, requestedPaymentMethod);
     }
   };
 
@@ -1319,10 +1329,10 @@ function Index() {
               </span>
               <span
                 className="flex min-w-0 h-7 flex-col justify-center leading-none"
-                aria-label="Via Fortuna · Tours y Viajes"
+                aria-label="TuraVía · Tours y Viajes"
               >
                 <span className="whitespace-nowrap font-display text-[clamp(0.72rem,3.2vw,1rem)] font-extrabold leading-none tracking-[-0.025em]">
-                  Via Fortuna
+                  TuraVía
                 </span>
                 <span className="mt-0.5 text-[7px] font-bold uppercase tracking-[0.12em] text-white/75">
                   TOURS Y VIAJES
@@ -1352,19 +1362,39 @@ function Index() {
               </p>
             </div>
           </div>
-          <div
-            className="flex rounded-full bg-jungle/85 p-1 ring-1 ring-white/20"
-            aria-label="Language"
-          >
-            {(["es", "en"] as const).map((lang) => (
-              <button
-                key={lang}
-                onClick={() => setLanguage(lang)}
-                className={`rounded-full px-3 py-1 text-[11px] font-bold uppercase transition-colors ${language === lang ? "bg-leaf text-leaf-foreground" : "text-white/75"}`}
-              >
-                {lang}
-              </button>
-            ))}
+          <div className="flex items-center gap-1.5">
+            <a
+              href="https://www.facebook.com/"
+              target="_blank"
+              rel="noreferrer"
+              aria-label="Facebook TuraVía"
+              className="grid size-8 place-items-center rounded-full bg-jungle/85 text-white ring-1 ring-white/20 transition-transform active:scale-95"
+            >
+              <Facebook className="size-4" />
+            </a>
+            <a
+              href="https://www.instagram.com/"
+              target="_blank"
+              rel="noreferrer"
+              aria-label="Instagram TuraVía"
+              className="grid size-8 place-items-center rounded-full bg-jungle/85 text-white ring-1 ring-white/20 transition-transform active:scale-95"
+            >
+              <Instagram className="size-4" />
+            </a>
+            <div
+              className="flex rounded-full bg-jungle/85 p-1 ring-1 ring-white/20"
+              aria-label={language === "es" ? "Idioma" : "Language"}
+            >
+              {(["es", "en"] as const).map((lang) => (
+                <button
+                  key={lang}
+                  onClick={() => setLanguage(lang)}
+                  className={`rounded-full px-3 py-1 text-[11px] font-bold uppercase transition-colors ${language === lang ? "bg-leaf text-leaf-foreground" : "text-white/75"}`}
+                >
+                  {lang}
+                </button>
+              ))}
+            </div>
           </div>
         </header>
 
@@ -1483,6 +1513,100 @@ function Index() {
                   distanceKm={distanceKm}
                   durationMinutes={durationMinutes}
                 />
+              </section>
+            )}
+
+            {mode === "transfers" && (
+              <section
+                id="experience-carousel"
+                className="experience-carousel-panel rise mt-4 rounded-[28px] p-3 ring-1 ring-border"
+                aria-label={
+                  language === "es" ? "Categorías de experiencias" : "Experience categories"
+                }
+              >
+                <div className="flex items-center justify-between gap-3 px-1">
+                  <div>
+                    <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-leaf-ink">
+                      {language === "es" ? "Explora" : "Explore"}
+                    </p>
+                    <h2 className="mt-1 font-display text-lg font-bold">
+                      {language === "es" ? "Experiencias" : "Experiences"}
+                    </h2>
+                  </div>
+                  <div className="flex gap-1">
+                    <button
+                      type="button"
+                      aria-label={
+                        language === "es"
+                          ? "Desplazar categorías a la izquierda"
+                          : "Scroll categories left"
+                      }
+                      onClick={() =>
+                        document
+                          .getElementById("experience-carousel-track")
+                          ?.scrollBy({ left: -220, behavior: "smooth" })
+                      }
+                      className="grid size-8 place-items-center rounded-full bg-background ring-1 ring-border"
+                    >
+                      <ChevronLeft className="size-4" />
+                    </button>
+                    <button
+                      type="button"
+                      aria-label={
+                        language === "es"
+                          ? "Desplazar categorías a la derecha"
+                          : "Scroll categories right"
+                      }
+                      onClick={() =>
+                        document
+                          .getElementById("experience-carousel-track")
+                          ?.scrollBy({ left: 220, behavior: "smooth" })
+                      }
+                      className="grid size-8 place-items-center rounded-full bg-background ring-1 ring-border"
+                    >
+                      <ChevronRight className="size-4" />
+                    </button>
+                  </div>
+                </div>
+                <div
+                  id="experience-carousel-track"
+                  className="mt-3 flex snap-x gap-2 overflow-x-auto pb-1"
+                  tabIndex={0}
+                >
+                  {[
+                    ["all", language === "es" ? "Todos" : "All"],
+                    [
+                      "activities",
+                      language === "es" ? "Actividades en La Fortuna" : "Activities in La Fortuna",
+                    ],
+                    ["rivers", language === "es" ? "Ríos y Aventuras" : "Rivers and Adventures"],
+                    [
+                      "parks",
+                      language === "es"
+                        ? "Parques y Puentes Colgantes"
+                        : "Parks and Hanging Bridges",
+                    ],
+                    ["beaches", language === "es" ? "Playas" : "Beaches"],
+                    ["promotion", language === "es" ? "Promoción Local" : "Local Promotion"],
+                    ["blog", language === "es" ? "Blog Local" : "Local Blog"],
+                  ].map(([key, label]) => (
+                    <button
+                      key={key}
+                      type="button"
+                      onClick={() => {
+                        setActiveExperienceFilter(key as typeof activeExperienceFilter);
+                        if (key === "promotion") openFeatureDetail("promotion");
+                        if (key === "blog") scrollToSection("blog");
+                      }}
+                      className={`snap-start whitespace-nowrap rounded-full px-3 py-2 text-xs font-bold ring-1 ring-border transition-transform active:scale-95 ${activeExperienceFilter === key ? "bg-leaf text-leaf-foreground" : "bg-background text-foreground"}`}
+                    >
+                      {label}
+                    </button>
+                  ))}
+                </div>
+                <p className="mt-2 text-center text-[10px] text-muted-foreground">
+                  {language === "es" ? "Desliza para explorar" : "Swipe to explore"}
+                </p>
               </section>
             )}
 
@@ -1946,56 +2070,74 @@ function Index() {
                     priceCrc: 45000,
                     priceUsd: 90,
                   },
-                ].map((tour) => (
-                  <article
-                    key={tour.title}
-                    role="button"
-                    tabIndex={0}
-                    onClick={() => openTourDetail(tour)}
-                    onKeyDown={(event) => {
-                      if (event.key === "Enter" || event.key === " ") {
-                        event.preventDefault();
-                        openTourDetail(tour);
-                      }
-                    }}
-                    className="experience-card unified-card-surface flex min-h-[390px] w-full cursor-pointer flex-col overflow-hidden rounded-[24px] bg-white text-foreground shadow-xl ring-1 ring-white/20 outline-none transition-transform hover:-translate-y-0.5 focus-visible:ring-2 focus-visible:ring-leaf"
-                  >
-                    <img
-                      src={tour.image}
-                      alt={tour.title}
-                      width={1024}
-                      height={768}
-                      loading="lazy"
-                      className="h-44 w-full object-cover"
-                    />
-                    <div className="flex min-h-0 flex-1 flex-col p-4">
-                      <div className="flex items-center justify-between gap-3 text-[10px] font-bold uppercase tracking-[0.12em] text-leaf-ink">
-                        <span>{tour.category}</span>
-                        <span>{tour.meta}</span>
-                      </div>
-                      <h3 className="mt-2 font-display text-xl leading-tight">{tour.title}</h3>
-                      <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-                        {tour.summary}
-                      </p>
-                      <div className="mt-3 flex items-center justify-between text-sm">
-                        <span className="font-bold text-leaf-ink">{tour.price}</span>
-                        <span className="flex items-center gap-1 rounded-md bg-background px-2 py-1 font-bold text-foreground">
-                          <Star className="size-3 fill-current" />
-                          {tour.rating}
-                        </span>
-                      </div>
-                      <button
-                        onClick={(event) => {
-                          event.stopPropagation();
+                ].map((tour, tourIndex) =>
+                  activeExperienceFilter === "all" ||
+                  ["activities", "rivers", "parks", "beaches"][tourIndex] ===
+                    activeExperienceFilter ? (
+                    <article
+                      key={tour.title}
+                      role="button"
+                      tabIndex={0}
+                      onClick={() => openTourDetail(tour)}
+                      onKeyDown={(event) => {
+                        if (event.key === "Enter" || event.key === " ") {
+                          event.preventDefault();
                           openTourDetail(tour);
-                        }}
-                        className="card-cta mt-auto w-full rounded-2xl bg-leaf py-3 text-sm font-bold text-leaf-foreground shadow-[0_3px_0_color-mix(in_oklch,var(--color-jungle)_35%,transparent)]"
-                      >
-                        {language === "es" ? "Seleccionar Tour" : "Select Tour"}
-                      </button>
-                    </div>
-                  </article>
-                ))}
+                        }
+                      }}
+                      className="experience-card unified-card-surface flex min-h-[390px] w-full cursor-pointer flex-col overflow-hidden rounded-[24px] bg-white text-foreground shadow-xl ring-1 ring-white/20 outline-none transition-transform hover:-translate-y-0.5 focus-visible:ring-2 focus-visible:ring-leaf"
+                    >
+                      <img
+                        src={tour.image}
+                        alt={tour.title}
+                        width={1024}
+                        height={768}
+                        loading="lazy"
+                        className="h-44 w-full object-cover"
+                      />
+                      <div className="flex min-h-0 flex-1 flex-col p-4">
+                        <div className="flex items-center justify-between gap-3 text-[10px] font-bold uppercase tracking-[0.12em] text-leaf-ink">
+                          <span>{tour.category}</span>
+                          <span>{tour.meta}</span>
+                        </div>
+                        <h3 className="mt-2 font-display text-xl leading-tight">{tour.title}</h3>
+                        <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                          {tour.summary}
+                        </p>
+                        <div className="mt-3 flex items-center justify-between text-sm">
+                          <span className="font-bold text-leaf-ink">{tour.price}</span>
+                          <span className="flex items-center gap-1 rounded-md bg-background px-2 py-1 font-bold text-foreground">
+                            <Star className="size-3 fill-current" />
+                            {tour.rating}
+                          </span>
+                        </div>
+                        <button
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            openTourDetail(tour);
+                          }}
+                          className="card-cta mt-auto w-full rounded-2xl bg-leaf py-3 text-sm font-bold text-leaf-foreground shadow-[0_3px_0_color-mix(in_oklch,var(--color-jungle)_35%,transparent)]"
+                        >
+                          {language === "es" ? "Seleccionar Tour" : "Select Tour"}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            setTourPaymentMethod("card");
+                            openTourDetail(tour);
+                          }}
+                          className="mt-2 flex w-full items-center justify-center gap-2 rounded-2xl bg-[#eef8fb] py-2.5 text-[11px] font-bold text-[#15566a] ring-1 ring-[#b8dce6]"
+                        >
+                          <Radio className="size-3.5" />
+                          {language === "es"
+                            ? "Pagar con NFC · Acerca tu teléfono"
+                            : "Pay with NFC · Tap your phone"}
+                        </button>
+                      </div>
+                    </article>
+                  ) : null,
+                )}
               </div>
             </section>
 
@@ -2181,8 +2323,8 @@ function Index() {
                 </p>
                 <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
                   {language === "es"
-                    ? "Prepara tu ruta con Via Fortuna y coordina un traslado privado o compartido."
-                    : "Plan your route with Via Fortuna and coordinate a private or shared transfer."}
+                    ? "Prepara tu ruta con TuraVía y coordina un traslado privado o compartido."
+                    : "Plan your route with TuraVía and coordinate a private or shared transfer."}
                 </p>
                 <button
                   type="button"
@@ -2291,6 +2433,24 @@ function Index() {
                       : "Select WhatsApp to send the booking"}
                 </button>
               )}
+            </div>
+
+            <button
+              type="button"
+              onClick={() => {
+                setTourPaymentMethod("card");
+                void confirmTourBooking(selectedTour, "card");
+              }}
+              className="mt-3 flex w-full items-center justify-center gap-2 rounded-2xl bg-[#169bc5] py-3 text-xs font-bold text-white shadow-[0_3px_0_rgba(21,86,106,0.2)]"
+            >
+              <Radio className="size-4" />
+              <Smartphone className="size-4" />
+              {language === "es"
+                ? "Pagar con NFC · Acerca tu teléfono"
+                : "Pay with NFC · Tap your phone"}
+            </button>
+            <div className="mt-2 flex items-center justify-center gap-2 text-[10px] font-semibold text-muted-foreground">
+              <CreditCard className="size-3.5" /> Apple Pay · Google Pay · Stripe
             </div>
 
             <div className="mt-5 rounded-[22px] bg-background p-3 ring-1 ring-border">
@@ -2440,8 +2600,8 @@ function Index() {
             </div>
             <div className="mt-5 rounded-2xl bg-background p-4 text-sm leading-relaxed ring-1 ring-border">
               {language === "es"
-                ? "Serás dirigido a Stripe Checkout o Payment Element para completar el pago. Via Fortuna no almacena números de tarjeta ni códigos de seguridad."
-                : "You will continue to Stripe Checkout or Payment Element to complete payment. Via Fortuna never stores card numbers or security codes."}
+                ? "Serás dirigido a Stripe Checkout o Payment Element para completar el pago. TuraVía no almacena números de tarjeta ni códigos de seguridad."
+                : "You will continue to Stripe Checkout or Payment Element to complete payment. TuraVía never stores card numbers or security codes."}
             </div>
             <div className="mt-4 flex items-center gap-2 text-xs font-semibold text-muted-foreground">
               <ShieldCheck className="size-4 text-leaf" />
@@ -2449,8 +2609,22 @@ function Index() {
             </div>
             <button
               type="button"
+              onClick={() => setPaymentOpen(false)}
+              className="mt-5 flex w-full items-center justify-center gap-2 rounded-2xl bg-[#169bc5] py-3.5 text-sm font-bold text-white"
+            >
+              <Radio className="size-4" />
+              <Smartphone className="size-4" />
+              {language === "es"
+                ? "Pagar con NFC · Acerca tu teléfono"
+                : "Pay with NFC · Tap your phone"}
+            </button>
+            <p className="mt-2 text-center text-[10px] font-semibold text-muted-foreground">
+              Apple Pay · Google Pay · Stripe Checkout
+            </p>
+            <button
+              type="button"
               disabled
-              className="mt-5 w-full rounded-2xl bg-leaf py-3.5 text-sm font-bold text-leaf-foreground disabled:cursor-not-allowed disabled:opacity-55"
+              className="mt-3 w-full rounded-2xl bg-leaf py-3.5 text-sm font-bold text-leaf-foreground disabled:cursor-not-allowed disabled:opacity-55"
             >
               {language === "es"
                 ? "Configurar Stripe para continuar"

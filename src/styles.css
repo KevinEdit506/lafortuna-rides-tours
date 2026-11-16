@@ -780,8 +780,9 @@ input::placeholder {
 
 /* Fine visual details from the supplied reference. */
 .top-header {
-  position: relative;
-  z-index: 2;
+  position: sticky;
+  top: 0.75rem;
+  z-index: 15;
   margin-inline: -0.8rem;
   padding: 0.9rem 0.8rem 1rem;
   border-radius: 0 0 1.6rem 1.6rem;
@@ -797,6 +798,20 @@ input::placeholder {
   box-shadow:
     0 7px 0 oklch(0.2 0.03 160 / 12%),
     0 14px 24px oklch(0.2 0.03 160 / 10%);
+}
+
+.experience-carousel-panel {
+  background: color-mix(in oklch, var(--surface) 94%, white);
+}
+
+#experience-carousel-track {
+  scrollbar-width: none;
+  overscroll-behavior-inline: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+#experience-carousel-track::-webkit-scrollbar {
+  display: none;
 }
 
 .top-header > div:first-child {
