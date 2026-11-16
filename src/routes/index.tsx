@@ -1327,10 +1327,10 @@ function Index() {
               </span>
               <span
                 className="flex min-w-0 h-7 flex-col justify-center leading-none"
-                aria-label="Via La Fortuna · Traslados y Tours"
+                aria-label="TuraVía · Traslados y Tours"
               >
                 <span className="whitespace-nowrap font-display text-[clamp(0.72rem,3.2vw,1rem)] font-extrabold leading-none tracking-[-0.025em]">
-                  Via La Fortuna
+                  TuraVía
                 </span>
                 <span className="mt-0.5 text-[7px] font-bold uppercase tracking-[0.12em] text-white/75">
                   TRASLADOS Y TOURS
