@@ -1,4 +1,11 @@
-import { addDoc, collection, getFirestore, serverTimestamp } from "firebase/firestore";
+import {
+  addDoc,
+  collection,
+  getFirestore,
+  onSnapshot,
+  serverTimestamp,
+  type Unsubscribe,
+} from "firebase/firestore";
 import { getApp, getApps, initializeApp } from "firebase/app";
 
 export type BookingPayload = {
@@ -19,6 +26,12 @@ export type BookingPayload = {
   durationMinutes?: number;
   language: "es" | "en";
   userId?: string | undefined;
+};
+
+export type DriverBooking = BookingPayload & {
+  id: string;
+  status?: string;
+  createdAt?: { seconds: number } | null;
 };
 
 const firebaseConfig = {
@@ -49,4 +62,13 @@ export async function saveBooking(payload: BookingPayload) {
     createdAt: serverTimestamp(),
   });
   return { ok: true as const, id: reference.id };
+}
+
+export function subscribeToBookings(
+  onChange: (bookings: DriverBooking[]) => void,
+): Unsubscribe | null {
+  if (!configured()) return null;
+  return onSnapshot(collection(firestore(), "bookings"), (snapshot) => {
+    onChange(snapshot.docs.map((item) => ({ id: item.id, ...item.data() }) as DriverBooking));
+  });
 }

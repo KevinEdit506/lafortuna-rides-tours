@@ -3,7 +3,16 @@ service cloud.firestore {
   match /databases/{database}/documents {
     match /users/{userId} {
       allow read: if request.auth != null && request.auth.uid == userId;
-      allow create: if request.auth != null && request.auth.uid == userId && request.resource.data.role == "client";
+      allow create: if request.auth != null
+        && request.auth.uid == userId
+        && (
+          request.resource.data.role == "client"
+          || (
+            request.resource.data.roles is list
+            && request.resource.data.roles.size() == 1
+            && request.resource.data.roles[0] == "client"
+          )
+        );
       allow update, delete: if false;
     }
 
@@ -17,13 +26,19 @@ service cloud.firestore {
         && request.resource.data.userId == request.auth.uid
       );
       allow read, update, delete: if request.auth != null
-        && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == "driver";
+        && (
+          get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == "driver"
+          || get(/databases/$(database)/documents/users/$(request.auth.uid)).data.roles.hasAny(["driver"])
+        );
     }
 
     match /paymentRequests/{requestId} {
       allow create: if request.auth != null
         && request.resource.data.driverId == request.auth.uid
-        && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == "driver"
+        && (
+          get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == "driver"
+          || get(/databases/$(database)/documents/users/$(request.auth.uid)).data.roles.hasAny(["driver"])
+        )
         && request.resource.data.status == "pending";
       allow read: if request.auth != null
         && (resource.data.customerId == request.auth.uid

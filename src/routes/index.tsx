@@ -36,15 +36,21 @@ import type { User } from "firebase/auth";
 import misticoImage from "../assets/mistico-bridges.jpg";
 import riverImage from "../assets/penas-blancas.jpg";
 import { MiniRouteMap } from "../components/MiniRouteMap";
+import { DriverDashboardContent } from "../components/DriverDashboard";
 import { saveBooking } from "../lib/firebase-bookings";
 import { subscribeToPaymentRequests, type PaymentRequest } from "../lib/payment-requests";
 import {
+  confirmPhoneCode,
   isFirebaseAuthConfigured,
   registerUser,
+  sendPhoneCode,
   signInUser,
+  signInUserWithGoogle,
+  hasDriverRole,
   signOutUser,
   subscribeToUser,
 } from "../lib/firebase-auth";
+import type { ConfirmationResult } from "firebase/auth";
 
 type MapsWindow = Window & {
   google?: {
@@ -411,10 +417,16 @@ function Index() {
   const [paymentOpen, setPaymentOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const [user, setUser] = useState<User | null>(null);
+  const [activeRole, setActiveRole] = useState<"client" | "driver">("client");
+  const [driverRoleAvailable, setDriverRoleAvailable] = useState(false);
   const [paymentRequests, setPaymentRequests] = useState<PaymentRequest[]>([]);
   const [authMode, setAuthMode] = useState<"login" | "register">("login");
+  const [authMethod, setAuthMethod] = useState<"email" | "phone">("email");
   const [authEmail, setAuthEmail] = useState("");
   const [authPassword, setAuthPassword] = useState("");
+  const [authPhone, setAuthPhone] = useState("");
+  const [authCode, setAuthCode] = useState("");
+  const [phoneVerification, setPhoneVerification] = useState<ConfirmationResult | null>(null);
   const [authError, setAuthError] = useState("");
   const [authSubmitting, setAuthSubmitting] = useState(false);
   const [activeExperienceFilter, setActiveExperienceFilter] = useState<
@@ -433,6 +445,22 @@ function Index() {
     const unsubscribe = subscribeToUser(setUser);
     return () => unsubscribe?.();
   }, []);
+  useEffect(() => {
+    let active = true;
+    if (!user) {
+      setDriverRoleAvailable(false);
+      setActiveRole("client");
+      return () => {
+        active = false;
+      };
+    }
+    void hasDriverRole(user).then((available) => {
+      if (active) setDriverRoleAvailable(available);
+    });
+    return () => {
+      active = false;
+    };
+  }, [user]);
   useEffect(() => {
     if (!user?.uid) {
       setPaymentRequests([]);
@@ -836,6 +864,58 @@ function Index() {
         error instanceof Error
           ? "No se pudo completar la solicitud. Revisa tus datos e inténtalo de nuevo."
           : "Error de autenticación.",
+      );
+    } finally {
+      setAuthSubmitting(false);
+    }
+  };
+
+  const signInGoogle = async () => {
+    setAuthSubmitting(true);
+    setAuthError("");
+    try {
+      await signInUserWithGoogle();
+    } catch {
+      setAuthError(
+        language === "es"
+          ? "No se pudo iniciar sesión con Google. Verifica el dominio autorizado en Firebase."
+          : "Google sign-in failed. Verify the authorized domain in Firebase.",
+      );
+    } finally {
+      setAuthSubmitting(false);
+    }
+  };
+
+  const requestPhoneCode = async () => {
+    setAuthSubmitting(true);
+    setAuthError("");
+    try {
+      const verification = await sendPhoneCode(authPhone, "turavia-phone-recaptcha");
+      setPhoneVerification(verification);
+    } catch {
+      setAuthError(
+        language === "es"
+          ? "No se pudo enviar el código. Usa el formato internacional, por ejemplo +50688888888."
+          : "The code could not be sent. Use international format, for example +50688888888.",
+      );
+    } finally {
+      setAuthSubmitting(false);
+    }
+  };
+
+  const verifyPhoneCode = async () => {
+    if (!phoneVerification) return;
+    setAuthSubmitting(true);
+    setAuthError("");
+    try {
+      await confirmPhoneCode(phoneVerification, authCode);
+      setAuthCode("");
+      setPhoneVerification(null);
+    } catch {
+      setAuthError(
+        language === "es"
+          ? "El código no es válido o ya expiró."
+          : "The code is invalid or expired.",
       );
     } finally {
       setAuthSubmitting(false);
@@ -1315,6 +1395,29 @@ function Index() {
       window.removeEventListener("popstate", syncBookingHash);
     };
   }, []);
+
+  if (activeRole === "driver" && driverRoleAvailable && user) {
+    return (
+      <div className="min-h-screen bg-background text-foreground">
+        <div className="fixed right-4 top-4 z-30 flex items-center gap-2 rounded-full bg-card/95 px-3 py-2 text-xs shadow-lg ring-1 ring-border backdrop-blur">
+          <span className="hidden max-w-[180px] truncate sm:inline">
+            {user.email ?? user.phoneNumber}
+          </span>
+          <span className="rounded-full bg-leaf/20 px-2 py-1 font-bold text-leaf-ink">
+            Conductor
+          </span>
+          <button
+            type="button"
+            onClick={() => setActiveRole("client")}
+            className="font-bold text-muted-foreground hover:text-foreground"
+          >
+            {language === "es" ? "Cliente" : "Client"}
+          </button>
+        </div>
+        <DriverDashboardContent user={user} />
+      </div>
+    );
+  }
 
   return (
     <main
@@ -2733,6 +2836,18 @@ function Index() {
                       : "Client · your bookings can be associated with this account."}
                   </p>
                 </div>
+                {driverRoleAvailable && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setProfileOpen(false);
+                      setActiveRole("driver");
+                    }}
+                    className="w-full rounded-2xl bg-primary py-3 font-bold text-primary-foreground"
+                  >
+                    {language === "es" ? "Cambiar a modo conductor" : "Switch to driver mode"}
+                  </button>
+                )}
                 <button
                   type="button"
                   onClick={() => void signOutUser()}
@@ -2742,33 +2857,92 @@ function Index() {
                 </button>
               </div>
             ) : (
-              <form className="mt-5 space-y-4" onSubmit={submitAuth}>
+              <form
+                className="mt-5 space-y-4"
+                onSubmit={(event) => {
+                  event.preventDefault();
+                  if (authMethod === "phone") {
+                    void (phoneVerification ? verifyPhoneCode() : requestPhoneCode());
+                  } else {
+                    void submitAuth(event);
+                  }
+                }}
+              >
                 <p className="text-sm text-muted-foreground">
                   {language === "es"
                     ? "Crea una cuenta para identificar tus reservas. Los clientes no tienen acceso al panel del conductor."
                     : "Create an account to identify your bookings. Clients cannot access the driver panel."}
                 </p>
-                <label className="block text-sm font-semibold">
-                  {language === "es" ? "Correo" : "Email"}
-                  <input
-                    required
-                    type="email"
-                    value={authEmail}
-                    onChange={(event) => setAuthEmail(event.target.value)}
-                    className="mt-1 w-full rounded-xl bg-background px-3 py-3 ring-1 ring-border outline-none focus:ring-2 focus:ring-leaf"
-                  />
-                </label>
-                <label className="block text-sm font-semibold">
-                  {language === "es" ? "Contraseña" : "Password"}
-                  <input
-                    required
-                    minLength={6}
-                    type="password"
-                    value={authPassword}
-                    onChange={(event) => setAuthPassword(event.target.value)}
-                    className="mt-1 w-full rounded-xl bg-background px-3 py-3 ring-1 ring-border outline-none focus:ring-2 focus:ring-leaf"
-                  />
-                </label>
+                <div className="grid grid-cols-2 gap-2 rounded-2xl bg-background p-1 ring-1 ring-border">
+                  <button
+                    type="button"
+                    onClick={() => setAuthMethod("email")}
+                    className={`rounded-xl py-2 text-xs font-bold ${authMethod === "email" ? "bg-leaf text-leaf-foreground" : "text-muted-foreground"}`}
+                  >
+                    {language === "es" ? "Correo" : "Email"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setAuthMethod("phone")}
+                    className={`rounded-xl py-2 text-xs font-bold ${authMethod === "phone" ? "bg-leaf text-leaf-foreground" : "text-muted-foreground"}`}
+                  >
+                    {language === "es" ? "Teléfono" : "Phone"}
+                  </button>
+                </div>
+                {authMethod === "phone" ? (
+                  <>
+                    <label className="block text-sm font-semibold">
+                      {language === "es" ? "Número de teléfono" : "Phone number"}
+                      <input
+                        required
+                        type="tel"
+                        placeholder="+50688888888"
+                        value={authPhone}
+                        onChange={(event) => setAuthPhone(event.target.value)}
+                        disabled={Boolean(phoneVerification)}
+                        className="mt-1 w-full rounded-xl bg-background px-3 py-3 ring-1 ring-border outline-none focus:ring-2 focus:ring-leaf disabled:opacity-60"
+                      />
+                    </label>
+                    {phoneVerification && (
+                      <label className="block text-sm font-semibold">
+                        {language === "es" ? "Código SMS" : "SMS code"}
+                        <input
+                          required
+                          inputMode="numeric"
+                          autoComplete="one-time-code"
+                          value={authCode}
+                          onChange={(event) => setAuthCode(event.target.value)}
+                          className="mt-1 w-full rounded-xl bg-background px-3 py-3 tracking-[0.35em] ring-1 ring-border outline-none focus:ring-2 focus:ring-leaf"
+                        />
+                      </label>
+                    )}
+                    <div id="turavia-phone-recaptcha" />
+                  </>
+                ) : (
+                  <>
+                    <label className="block text-sm font-semibold">
+                      {language === "es" ? "Correo" : "Email"}
+                      <input
+                        required
+                        type="email"
+                        value={authEmail}
+                        onChange={(event) => setAuthEmail(event.target.value)}
+                        className="mt-1 w-full rounded-xl bg-background px-3 py-3 ring-1 ring-border outline-none focus:ring-2 focus:ring-leaf"
+                      />
+                    </label>
+                    <label className="block text-sm font-semibold">
+                      {language === "es" ? "Contraseña" : "Password"}
+                      <input
+                        required
+                        minLength={6}
+                        type="password"
+                        value={authPassword}
+                        onChange={(event) => setAuthPassword(event.target.value)}
+                        className="mt-1 w-full rounded-xl bg-background px-3 py-3 ring-1 ring-border outline-none focus:ring-2 focus:ring-leaf"
+                      />
+                    </label>
+                  </>
+                )}
                 {authError && (
                   <p
                     role="alert"
@@ -2785,14 +2959,32 @@ function Index() {
                     ? language === "es"
                       ? "Procesando…"
                       : "Processing…"
-                    : authMode === "login"
-                      ? language === "es"
-                        ? "Iniciar sesión"
-                        : "Sign in"
-                      : language === "es"
-                        ? "Crear cuenta"
-                        : "Create account"}
+                    : authMethod === "phone"
+                      ? phoneVerification
+                        ? language === "es"
+                          ? "Verificar código"
+                          : "Verify code"
+                        : language === "es"
+                          ? "Enviar código SMS"
+                          : "Send SMS code"
+                      : authMode === "login"
+                        ? language === "es"
+                          ? "Iniciar sesión"
+                          : "Sign in"
+                        : language === "es"
+                          ? "Crear cuenta"
+                          : "Create account"}
                 </button>
+                {authMethod === "email" && (
+                  <button
+                    type="button"
+                    onClick={() => void signInGoogle()}
+                    disabled={authSubmitting}
+                    className="w-full rounded-2xl bg-background py-3 text-sm font-bold text-foreground ring-1 ring-border disabled:opacity-60"
+                  >
+                    {language === "es" ? "Continuar con Google" : "Continue with Google"}
+                  </button>
+                )}
                 <button
                   type="button"
                   onClick={() => {
