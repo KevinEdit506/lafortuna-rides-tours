@@ -91,17 +91,17 @@
   --border: oklch(0.52 0.018 160 / 52%);
   --input: oklch(0.52 0.018 160 / 62%);
   --ring: oklch(0.52 0.09 165);
-  --jungle: oklch(0.24 0.045 162);
+  --jungle: oklch(0.21 0.018 168);
   --leaf: oklch(0.59 0.08 166);
   --leaf-ink: oklch(0.36 0.065 166);
   --leaf-foreground: oklch(0.14 0.008 162);
   --panel-muted-foreground: oklch(0.82 0.014 162);
   --surface: oklch(0.84 0.03 160);
   --mist: oklch(0.72 0.035 160);
-  --dark-panel-start: oklch(0.17 0.006 162);
-  --dark-panel-mid: oklch(0.21 0.01 162);
-  --dark-panel-end: oklch(0.25 0.018 162);
-  --dark-panel-shadow: oklch(0.08 0 0 / 30%);
+  --dark-panel-start: oklch(0.22 0.008 250);
+  --dark-panel-mid: oklch(0.27 0.012 238);
+  --dark-panel-end: oklch(0.31 0.016 220);
+  --dark-panel-shadow: oklch(0.08 0.006 240 / 22%);
   --chart-1: oklch(0.646 0.222 41.116);
   --chart-2: oklch(0.6 0.118 184.704);
   --chart-3: oklch(0.398 0.07 227.392);
@@ -536,16 +536,16 @@
 .experience-panel {
   background: linear-gradient(
     135deg,
-    color-mix(in oklch, var(--surface) 96%, white),
+    color-mix(in oklch, var(--surface) 94%, white),
     var(--surface) 58%,
-    color-mix(in oklch, var(--leaf) 14%, var(--surface))
+    color-mix(in oklch, var(--dark-panel-end) 7%, var(--surface))
   );
   color: var(--foreground);
   box-shadow:
     inset 0 1px 0 oklch(1 0 0 / 62%),
     inset 0 -1px 0 color-mix(in oklch, var(--foreground) 16%, transparent),
     0 3px 0 color-mix(in oklch, var(--foreground) 16%, transparent),
-    0 14px 24px color-mix(in oklch, var(--foreground) 12%, transparent);
+    0 14px 24px color-mix(in oklch, var(--dark-panel-end) 10%, transparent);
 }
 
 .experience-panel .text-white,
@@ -565,7 +565,7 @@
 }
 
 .experience-panel .bg-black\/20 {
-  background-color: color-mix(in oklch, var(--leaf) 12%, transparent) !important;
+  background-color: color-mix(in oklch, var(--dark-panel-end) 12%, transparent) !important;
 }
 
 .experience-panel .ring-white\/10,
@@ -576,7 +576,7 @@
 }
 
 .experience-panel .bg-white\/10 {
-  background-color: color-mix(in oklch, var(--leaf) 14%, transparent) !important;
+  background-color: color-mix(in oklch, var(--dark-panel-end) 12%, transparent) !important;
 }
 
 .experience-panel .text-amber-200 {
@@ -621,7 +621,29 @@
     inset 0 1px 0 oklch(1 0 0 / 78%),
     inset 0 -2px 0 color-mix(in oklch, var(--foreground) 18%, transparent),
     0 6px 0 color-mix(in oklch, var(--foreground) 18%, transparent),
-    0 22px 32px color-mix(in oklch, var(--leaf) 22%, var(--foreground));
+    0 22px 32px color-mix(in oklch, var(--dark-panel-end) 14%, var(--foreground));
+}
+
+.dark-green-panel {
+  background: linear-gradient(
+    120deg,
+    var(--dark-panel-start),
+    var(--dark-panel-mid) 55%,
+    var(--dark-panel-end)
+  );
+  box-shadow:
+    inset 0 1px 0 oklch(1 0 0 / 9%),
+    inset 0 -1px 0 oklch(0 0 0 / 18%),
+    0 2px 0 oklch(0 0 0 / 14%),
+    0 10px 22px var(--dark-panel-shadow);
+}
+
+.fare-card,
+.booking-reference-panel {
+  box-shadow:
+    inset 0 1px 0 oklch(1 0 0 / 72%),
+    0 3px 0 color-mix(in oklch, var(--dark-panel-end) 10%, transparent),
+    0 12px 24px color-mix(in oklch, var(--dark-panel-end) 9%, transparent);
 }
 
 .experience-card:hover::after,
@@ -1140,8 +1162,8 @@ input::placeholder {
   border: 1px solid color-mix(in oklch, var(--foreground) 12%, transparent);
   box-shadow:
     inset 0 1px 0 oklch(1 0 0 / 72%),
-    0 3px 0 color-mix(in oklch, var(--foreground) 10%, transparent),
-    0 12px 24px color-mix(in oklch, var(--foreground) 11%, transparent);
+    0 3px 0 color-mix(in oklch, var(--dark-panel-end) 10%, transparent),
+    0 12px 24px color-mix(in oklch, var(--dark-panel-end) 9%, transparent);
 }
 
 .experience-card,
