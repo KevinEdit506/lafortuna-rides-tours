@@ -1321,20 +1321,12 @@ function Index() {
       >
         <header className="top-header rise flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="flex min-w-[10.5rem] items-center gap-2 rounded-full bg-jungle px-3 py-2 text-primary-foreground shadow-[0_4px_0_rgba(9,35,26,0.45),0_8px_16px_rgba(9,35,26,0.2)] ring-1 ring-white/25">
-              <span className="grid size-7 place-items-center rounded-full bg-leaf/30 font-display text-sm ring-1 ring-white/20">
-                V
-              </span>
+            <div className="brand-flag flex min-w-[10.5rem] items-center justify-center rounded-full px-3 py-2 text-primary-foreground shadow-[0_4px_0_rgba(9,35,26,0.45),0_8px_16px_rgba(9,35,26,0.2)] ring-1 ring-white/25">
               <span
-                className="flex min-w-0 h-7 flex-col justify-center leading-none"
-                aria-label="TuraVía · Traslados y Tours"
+                className="whitespace-nowrap text-center font-display text-[clamp(0.56rem,2.1vw,0.72rem)] font-extrabold leading-none tracking-[0.01em] text-white [text-shadow:0_1px_2px_rgba(0,0,0,0.45)]"
+                aria-label="Tour ADT of Transport Tour"
               >
-                <span className="whitespace-nowrap font-display text-[clamp(0.72rem,3.2vw,1rem)] font-extrabold leading-none tracking-[-0.025em]">
-                  TuraVía
-                </span>
-                <span className="mt-0.5 text-[7px] font-bold uppercase tracking-[0.12em] text-white/75">
-                  TRASLADOS Y TOURS
-                </span>
+                Tour ADT of Transport Tour
               </span>
             </div>
             <div
