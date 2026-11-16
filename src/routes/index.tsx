@@ -6,8 +6,6 @@ import {
   ChevronLeft,
   ChevronRight,
   CreditCard,
-  Instagram,
-  Facebook,
   Radio,
   Smartphone,
   Bike,
@@ -1329,13 +1327,13 @@ function Index() {
               </span>
               <span
                 className="flex min-w-0 h-7 flex-col justify-center leading-none"
-                aria-label="TuraVía · Tours y Viajes"
+                aria-label="Via La Fortuna · Traslados y Tours"
               >
                 <span className="whitespace-nowrap font-display text-[clamp(0.72rem,3.2vw,1rem)] font-extrabold leading-none tracking-[-0.025em]">
-                  TuraVía
+                  Via La Fortuna
                 </span>
                 <span className="mt-0.5 text-[7px] font-bold uppercase tracking-[0.12em] text-white/75">
-                  TOURS Y VIAJES
+                  TRASLADOS Y TOURS
                 </span>
               </span>
             </div>
@@ -1362,39 +1360,19 @@ function Index() {
               </p>
             </div>
           </div>
-          <div className="flex items-center gap-1.5">
-            <a
-              href="https://www.facebook.com/"
-              target="_blank"
-              rel="noreferrer"
-              aria-label="Facebook TuraVía"
-              className="grid size-8 place-items-center rounded-full bg-jungle/85 text-white ring-1 ring-white/20 transition-transform active:scale-95"
-            >
-              <Facebook className="size-4" />
-            </a>
-            <a
-              href="https://www.instagram.com/"
-              target="_blank"
-              rel="noreferrer"
-              aria-label="Instagram TuraVía"
-              className="grid size-8 place-items-center rounded-full bg-jungle/85 text-white ring-1 ring-white/20 transition-transform active:scale-95"
-            >
-              <Instagram className="size-4" />
-            </a>
-            <div
-              className="flex rounded-full bg-jungle/85 p-1 ring-1 ring-white/20"
-              aria-label={language === "es" ? "Idioma" : "Language"}
-            >
-              {(["es", "en"] as const).map((lang) => (
-                <button
-                  key={lang}
-                  onClick={() => setLanguage(lang)}
-                  className={`rounded-full px-3 py-1 text-[11px] font-bold uppercase transition-colors ${language === lang ? "bg-leaf text-leaf-foreground" : "text-white/75"}`}
-                >
-                  {lang}
-                </button>
-              ))}
-            </div>
+          <div
+            className="flex rounded-full bg-jungle/85 p-1 ring-1 ring-white/20"
+            aria-label="Language"
+          >
+            {(["es", "en"] as const).map((lang) => (
+              <button
+                key={lang}
+                onClick={() => setLanguage(lang)}
+                className={`rounded-full px-3 py-1 text-[11px] font-bold uppercase transition-colors ${language === lang ? "bg-leaf text-leaf-foreground" : "text-white/75"}`}
+              >
+                {lang}
+              </button>
+            ))}
           </div>
         </header>
 

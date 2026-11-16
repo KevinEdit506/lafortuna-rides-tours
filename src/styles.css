@@ -780,9 +780,8 @@ input::placeholder {
 
 /* Fine visual details from the supplied reference. */
 .top-header {
-  position: sticky;
-  top: 0.75rem;
-  z-index: 15;
+  position: relative;
+  z-index: 2;
   margin-inline: -0.8rem;
   padding: 0.9rem 0.8rem 1rem;
   border-radius: 0 0 1.6rem 1.6rem;
