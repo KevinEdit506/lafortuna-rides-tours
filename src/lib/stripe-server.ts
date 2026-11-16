@@ -5,6 +5,7 @@ type FirebaseLookup = {
 };
 
 type CheckoutRequest = {
+  paymentRequestId?: string;
   bookingId?: string;
   tourName?: string;
   amountCents?: number;
@@ -158,6 +159,23 @@ async function getBookingFields(env: ServerEnv, bookingId: string) {
   return payload.fields ?? {};
 }
 
+async function getPaymentRequestFields(env: ServerEnv, paymentRequestId: string) {
+  const projectId =
+    envValue(env, "VITE_FIREBASE_PROJECT_ID") ?? envValue(env, "FIREBASE_PROJECT_ID");
+  if (!projectId) throw new Error("FIREBASE_PROJECT_ID is not configured on the server");
+  const accessToken = await getFirestoreAccessToken(env, projectId);
+  const document = await fetch(
+    `https://firestore.googleapis.com/v1/projects/${encodeURIComponent(projectId)}/databases/(default)/documents/paymentRequests/${encodeURIComponent(paymentRequestId)}`,
+    { headers: { authorization: `Bearer ${accessToken}` } },
+  );
+  if (document.status === 404) return null;
+  if (!document.ok) throw new Error(`Firestore payment request lookup failed (${document.status})`);
+  const payload = (await document.json()) as {
+    fields?: Record<string, { stringValue?: string; integerValue?: string }>;
+  };
+  return payload.fields ?? {};
+}
+
 async function stripeFetch(env: ServerEnv, path: string, init: RequestInit = {}) {
   const secret = envValue(env, "STRIPE_SECRET_KEY");
   if (!secret || (!secret.startsWith("sk_test_") && !secret.startsWith("sk_live_"))) {
@@ -178,10 +196,30 @@ async function createCheckoutSession(request: Request, env: ServerEnv) {
   if (!idToken) return response({ error: "Authentication required" }, 401);
   const user = await lookupFirebaseUser(env, idToken);
   const body = (await request.json()) as CheckoutRequest;
-  const bookingId = body.bookingId?.trim();
-  const tourName = body.tourName?.trim();
-  const amountCents = body.amountCents;
+  const paymentRequestId = body.paymentRequestId?.trim();
+  let bookingId = body.bookingId?.trim();
+  let tourName = body.tourName?.trim();
+  let amountCents = body.amountCents;
   const currency = body.currency?.toLowerCase();
+  if (paymentRequestId) {
+    const paymentRequest = await getPaymentRequestFields(env, paymentRequestId);
+    const requestCustomerId = paymentRequest?.["customerId"]?.stringValue;
+    const requestBookingId = paymentRequest?.["bookingId"]?.stringValue;
+    const requestStatus = paymentRequest?.["status"]?.stringValue;
+    const requestAmount = paymentRequest?.["amountCrc"]?.integerValue;
+    if (
+      !paymentRequest ||
+      requestCustomerId !== user.uid ||
+      requestStatus !== "pending" ||
+      !requestBookingId ||
+      !requestAmount
+    ) {
+      return response({ error: "Payment request was not found for this user" }, 404);
+    }
+    bookingId = requestBookingId;
+    tourName = tourName ?? "Via Fortuna · Cobro solicitado por conductor";
+    amountCents = Number(requestAmount);
+  }
   if (
     !bookingId ||
     !tourName ||
@@ -231,6 +269,7 @@ async function createCheckoutSession(request: Request, env: ServerEnv) {
   form.set("metadata[bookingId]", bookingId);
   form.set("metadata[userId]", user.uid);
   form.set("metadata[serviceType]", "tour");
+  if (paymentRequestId) form.set("metadata[paymentRequestId]", paymentRequestId);
 
   const stripeResponse = await stripeFetch(env, "/checkout/sessions", {
     method: "POST",
@@ -296,6 +335,30 @@ async function markBookingPaid(env: ServerEnv, bookingId: string, fields: Record
   if (!update.ok) throw new Error(`Firestore paid update failed (${update.status})`);
 }
 
+async function markPaymentRequestPaid(
+  env: ServerEnv,
+  paymentRequestId: string,
+  paymentIntentId: string,
+) {
+  const projectId =
+    envValue(env, "VITE_FIREBASE_PROJECT_ID") ?? envValue(env, "FIREBASE_PROJECT_ID");
+  if (!projectId) throw new Error("FIREBASE_PROJECT_ID is not configured on the server");
+  const accessToken = await getFirestoreAccessToken(env, projectId);
+  const url = `https://firestore.googleapis.com/v1/projects/${encodeURIComponent(projectId)}/databases/(default)/documents/paymentRequests/${encodeURIComponent(paymentRequestId)}?updateMask.fieldPaths=status&updateMask.fieldPaths=stripePaymentIntentId&updateMask.fieldPaths=paidAt`;
+  const update = await fetch(url, {
+    method: "PATCH",
+    headers: { authorization: `Bearer ${accessToken}`, "content-type": "application/json" },
+    body: JSON.stringify({
+      fields: {
+        status: firestoreString("paid"),
+        stripePaymentIntentId: firestoreString(paymentIntentId),
+        paidAt: firestoreString(new Date().toISOString()),
+      },
+    }),
+  });
+  if (!update.ok) throw new Error(`Firestore payment request update failed (${update.status})`);
+}
+
 async function retrieveReceiptUrl(env: ServerEnv, paymentIntentId: string) {
   const result = await stripeFetch(
     env,
@@ -344,6 +407,8 @@ async function handleWebhook(request: Request, env: ServerEnv) {
     receiptUrl,
     paidAt: new Date().toISOString(),
   });
+  const paymentRequestId = metadata["paymentRequestId"];
+  if (paymentRequestId) await markPaymentRequestPaid(env, paymentRequestId, paymentIntentId);
   return response({ received: true, bookingId, status: "paid", eventId: event.id ?? null });
 }
 

@@ -37,6 +37,7 @@ import misticoImage from "../assets/mistico-bridges.jpg";
 import riverImage from "../assets/penas-blancas.jpg";
 import { MiniRouteMap } from "../components/MiniRouteMap";
 import { saveBooking } from "../lib/firebase-bookings";
+import { subscribeToPaymentRequests, type PaymentRequest } from "../lib/payment-requests";
 import {
   isFirebaseAuthConfigured,
   registerUser,
@@ -410,6 +411,7 @@ function Index() {
   const [paymentOpen, setPaymentOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const [user, setUser] = useState<User | null>(null);
+  const [paymentRequests, setPaymentRequests] = useState<PaymentRequest[]>([]);
   const [authMode, setAuthMode] = useState<"login" | "register">("login");
   const [authEmail, setAuthEmail] = useState("");
   const [authPassword, setAuthPassword] = useState("");
@@ -431,6 +433,14 @@ function Index() {
     const unsubscribe = subscribeToUser(setUser);
     return () => unsubscribe?.();
   }, []);
+  useEffect(() => {
+    if (!user?.uid) {
+      setPaymentRequests([]);
+      return;
+    }
+    const unsubscribe = subscribeToPaymentRequests(user.uid, setPaymentRequests);
+    return () => unsubscribe?.();
+  }, [user?.uid]);
 
   useEffect(() => {
     if (!selectedTour) return;
@@ -2535,6 +2545,70 @@ function Index() {
             )}
           </section>
         </main>
+      )}
+
+      {paymentRequests.length > 0 && user && (
+        <aside className="fixed inset-x-3 bottom-24 z-30 mx-auto max-w-md rounded-[24px] bg-surface p-4 shadow-2xl ring-1 ring-[#169bc5]/35">
+          <div className="flex items-start gap-3">
+            <div className="grid size-10 shrink-0 place-items-center rounded-full bg-[#169bc5]/15 text-[#169bc5]">
+              <Smartphone className="size-5" />
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-[#15566a]">
+                {language === "es"
+                  ? "Cobro solicitado por tu conductor"
+                  : "Payment requested by your driver"}
+              </p>
+              <p className="mt-1 text-sm font-bold">
+                ₡{paymentRequests[0]!.amountCrc.toLocaleString("es-CR")}
+              </p>
+              <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
+                {language === "es"
+                  ? "Continúa a Stripe Checkout. Google Pay aparecerá si está disponible en tu dispositivo."
+                  : "Continue to Stripe Checkout. Google Pay appears when available on your device."}
+              </p>
+              <button
+                type="button"
+                onClick={async () => {
+                  const request = paymentRequests[0];
+                  if (!request) return;
+                  const idToken = await user.getIdToken();
+                  const response = await fetch("/api/stripe/create-checkout-session", {
+                    method: "POST",
+                    headers: {
+                      "content-type": "application/json",
+                      authorization: `Bearer ${idToken}`,
+                    },
+                    body: JSON.stringify({
+                      paymentRequestId: request.id,
+                      bookingId: request.bookingId,
+                      currency: "crc",
+                      successUrl: `${window.location.origin}/?payment=request-success`,
+                      cancelUrl: `${window.location.origin}/?payment=request-cancelled`,
+                    }),
+                  });
+                  const checkout = (await response.json()) as {
+                    checkoutUrl?: string;
+                    error?: string;
+                  };
+                  if (checkout.checkoutUrl) window.location.assign(checkout.checkoutUrl);
+                  else
+                    setAuthError(
+                      checkout.error ??
+                        (language === "es"
+                          ? "No se pudo iniciar el pago."
+                          : "Payment could not be started."),
+                    );
+                }}
+                className="mt-3 w-full rounded-xl bg-[#169bc5] py-2.5 text-xs font-bold text-white"
+              >
+                {language === "es"
+                  ? "Pagar con Google Pay / Stripe"
+                  : "Pay with Google Pay / Stripe"}
+              </button>
+            </div>
+          </div>
+        </aside>
       )}
 
       {paymentOpen && (
