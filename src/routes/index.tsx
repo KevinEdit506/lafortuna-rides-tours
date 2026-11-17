@@ -3,8 +3,6 @@ import {
   ArrowLeft,
   ArrowRight,
   CalendarDays,
-  ChevronLeft,
-  ChevronRight,
   CreditCard,
   Radio,
   Smartphone,
@@ -429,9 +427,6 @@ function Index() {
   const [phoneVerification, setPhoneVerification] = useState<ConfirmationResult | null>(null);
   const [authError, setAuthError] = useState("");
   const [authSubmitting, setAuthSubmitting] = useState(false);
-  const [activeExperienceFilter, setActiveExperienceFilter] = useState<
-    "all" | "activities" | "rivers" | "parks" | "beaches" | "promotion" | "blog"
-  >("all");
   const dynamicMultiplier = 2.8;
   const returnMultiplier = returnEmpty ? 2 : 1;
   const roadMultiplier = badRoad ? 1.2 : 1.5;
@@ -1601,100 +1596,6 @@ function Index() {
 
             {mode === "transfers" && (
               <section
-                id="experience-carousel"
-                className="experience-carousel-panel rise mt-4 rounded-[28px] p-3 ring-1 ring-border"
-                aria-label={
-                  language === "es" ? "Categorías de experiencias" : "Experience categories"
-                }
-              >
-                <div className="flex items-center justify-between gap-3 px-1">
-                  <div>
-                    <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-leaf-ink">
-                      {language === "es" ? "Explora" : "Explore"}
-                    </p>
-                    <h2 className="mt-1 font-display text-lg font-bold">
-                      {language === "es" ? "Experiencias" : "Experiences"}
-                    </h2>
-                  </div>
-                  <div className="flex gap-1">
-                    <button
-                      type="button"
-                      aria-label={
-                        language === "es"
-                          ? "Desplazar categorías a la izquierda"
-                          : "Scroll categories left"
-                      }
-                      onClick={() =>
-                        document
-                          .getElementById("experience-carousel-track")
-                          ?.scrollBy({ left: -220, behavior: "smooth" })
-                      }
-                      className="grid size-8 place-items-center rounded-full bg-background ring-1 ring-border"
-                    >
-                      <ChevronLeft className="size-4" />
-                    </button>
-                    <button
-                      type="button"
-                      aria-label={
-                        language === "es"
-                          ? "Desplazar categorías a la derecha"
-                          : "Scroll categories right"
-                      }
-                      onClick={() =>
-                        document
-                          .getElementById("experience-carousel-track")
-                          ?.scrollBy({ left: 220, behavior: "smooth" })
-                      }
-                      className="grid size-8 place-items-center rounded-full bg-background ring-1 ring-border"
-                    >
-                      <ChevronRight className="size-4" />
-                    </button>
-                  </div>
-                </div>
-                <div
-                  id="experience-carousel-track"
-                  className="mt-3 flex snap-x gap-2 overflow-x-auto pb-1"
-                  tabIndex={0}
-                >
-                  {[
-                    ["all", language === "es" ? "Todos" : "All"],
-                    [
-                      "activities",
-                      language === "es" ? "Actividades en La Fortuna" : "Activities in La Fortuna",
-                    ],
-                    ["rivers", language === "es" ? "Ríos y Aventuras" : "Rivers and Adventures"],
-                    [
-                      "parks",
-                      language === "es"
-                        ? "Parques y Puentes Colgantes"
-                        : "Parks and Hanging Bridges",
-                    ],
-                    ["beaches", language === "es" ? "Playas" : "Beaches"],
-                    ["promotion", language === "es" ? "Promoción Local" : "Local Promotion"],
-                    ["blog", language === "es" ? "Blog Local" : "Local Blog"],
-                  ].map(([key, label]) => (
-                    <button
-                      key={key}
-                      type="button"
-                      onClick={() => {
-                        setActiveExperienceFilter(key as typeof activeExperienceFilter);
-                        if (key === "promotion") openFeatureDetail("promotion");
-                        if (key === "blog") scrollToSection("blog");
-                      }}
-                      className={`snap-start whitespace-nowrap rounded-full px-3 py-2 text-xs font-bold ring-1 ring-border transition-transform active:scale-95 ${activeExperienceFilter === key ? "bg-leaf text-leaf-foreground" : "bg-background text-foreground"}`}
-                    >
-                      {label}
-                    </button>
-                  ))}
-                </div>
-                <p className="mt-2 text-center text-[10px] text-muted-foreground">
-                  {language === "es" ? "Desliza para explorar" : "Swipe to explore"}
-                </p>
-              </section>
-            )}
-
-            {mode === "transfers" && (
-              <section
                 className="promo-banner rise mt-4"
                 aria-label={language === "es" ? "Promoción" : "Promotion"}
                 role="button"
@@ -2153,74 +2054,70 @@ function Index() {
                     priceCrc: 45000,
                     priceUsd: 90,
                   },
-                ].map((tour, tourIndex) =>
-                  activeExperienceFilter === "all" ||
-                  ["activities", "rivers", "parks", "beaches"][tourIndex] ===
-                    activeExperienceFilter ? (
-                    <article
-                      key={tour.title}
-                      role="button"
-                      tabIndex={0}
-                      onClick={() => openTourDetail(tour)}
-                      onKeyDown={(event) => {
-                        if (event.key === "Enter" || event.key === " ") {
-                          event.preventDefault();
-                          openTourDetail(tour);
-                        }
-                      }}
-                      className="experience-card unified-card-surface flex min-h-[390px] w-full cursor-pointer flex-col overflow-hidden rounded-[24px] bg-white text-foreground shadow-xl ring-1 ring-white/20 outline-none transition-transform hover:-translate-y-0.5 focus-visible:ring-2 focus-visible:ring-leaf"
-                    >
-                      <img
-                        src={tour.image}
-                        alt={tour.title}
-                        width={1024}
-                        height={768}
-                        loading="lazy"
-                        className="h-44 w-full object-cover"
-                      />
-                      <div className="flex min-h-0 flex-1 flex-col p-4">
-                        <div className="flex items-center justify-between gap-3 text-[10px] font-bold uppercase tracking-[0.12em] text-leaf-ink">
-                          <span>{tour.category}</span>
-                          <span>{tour.meta}</span>
-                        </div>
-                        <h3 className="mt-2 font-display text-xl leading-tight">{tour.title}</h3>
-                        <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-                          {tour.summary}
-                        </p>
-                        <div className="mt-3 flex items-center justify-between text-sm">
-                          <span className="font-bold text-leaf-ink">{tour.price}</span>
-                          <span className="flex items-center gap-1 rounded-md bg-background px-2 py-1 font-bold text-foreground">
-                            <Star className="size-3 fill-current" />
-                            {tour.rating}
-                          </span>
-                        </div>
-                        <button
-                          onClick={(event) => {
-                            event.stopPropagation();
-                            openTourDetail(tour);
-                          }}
-                          className="card-cta mt-auto w-full rounded-2xl bg-leaf py-3 text-sm font-bold text-leaf-foreground shadow-[0_3px_0_color-mix(in_oklch,var(--color-jungle)_35%,transparent)]"
-                        >
-                          {language === "es" ? "Seleccionar Tour" : "Select Tour"}
-                        </button>
-                        <button
-                          type="button"
-                          onClick={(event) => {
-                            event.stopPropagation();
-                            setTourPaymentMethod("card");
-                            openTourDetail(tour);
-                          }}
-                          className="mt-2 flex w-full items-center justify-center gap-2 rounded-2xl bg-[#eef8fb] py-2.5 text-[11px] font-bold text-[#15566a] ring-1 ring-[#b8dce6]"
-                        >
-                          <Radio className="size-3.5" />
-                          {language === "es"
-                            ? "Pagar con NFC · Acerca tu teléfono"
-                            : "Pay with NFC · Tap your phone"}
-                        </button>
+                ].map((tour) => (
+                  <article
+                    key={tour.title}
+                    role="button"
+                    tabIndex={0}
+                    onClick={() => openTourDetail(tour)}
+                    onKeyDown={(event) => {
+                      if (event.key === "Enter" || event.key === " ") {
+                        event.preventDefault();
+                        openTourDetail(tour);
+                      }
+                    }}
+                    className="experience-card unified-card-surface flex min-h-[390px] w-full cursor-pointer flex-col overflow-hidden rounded-[24px] bg-white text-foreground shadow-xl ring-1 ring-white/20 outline-none transition-transform hover:-translate-y-0.5 focus-visible:ring-2 focus-visible:ring-leaf"
+                  >
+                    <img
+                      src={tour.image}
+                      alt={tour.title}
+                      width={1024}
+                      height={768}
+                      loading="lazy"
+                      className="h-44 w-full object-cover"
+                    />
+                    <div className="flex min-h-0 flex-1 flex-col p-4">
+                      <div className="flex items-center justify-between gap-3 text-[10px] font-bold uppercase tracking-[0.12em] text-leaf-ink">
+                        <span>{tour.category}</span>
+                        <span>{tour.meta}</span>
                       </div>
-                    </article>
-                  ) : null,
-                )}
+                      <h3 className="mt-2 font-display text-xl leading-tight">{tour.title}</h3>
+                      <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                        {tour.summary}
+                      </p>
+                      <div className="mt-3 flex items-center justify-between text-sm">
+                        <span className="font-bold text-leaf-ink">{tour.price}</span>
+                        <span className="flex items-center gap-1 rounded-md bg-background px-2 py-1 font-bold text-foreground">
+                          <Star className="size-3 fill-current" />
+                          {tour.rating}
+                        </span>
+                      </div>
+                      <button
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          openTourDetail(tour);
+                        }}
+                        className="card-cta mt-auto w-full rounded-2xl bg-leaf py-3 text-sm font-bold text-leaf-foreground shadow-[0_3px_0_color-mix(in_oklch,var(--color-jungle)_35%,transparent)]"
+                      >
+                        {language === "es" ? "Seleccionar Tour" : "Select Tour"}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          setTourPaymentMethod("card");
+                          openTourDetail(tour);
+                        }}
+                        className="mt-2 flex w-full items-center justify-center gap-2 rounded-2xl bg-[#eef8fb] py-2.5 text-[11px] font-bold text-[#15566a] ring-1 ring-[#b8dce6]"
+                      >
+                        <Radio className="size-3.5" />
+                        {language === "es"
+                          ? "Pagar con NFC · Acerca tu teléfono"
+                          : "Pay with NFC · Tap your phone"}
+                      </button>
+                    </div>
+                  </article>
+                ))}
               </div>
             </section>
 
