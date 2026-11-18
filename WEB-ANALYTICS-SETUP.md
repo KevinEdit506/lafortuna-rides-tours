@@ -19,7 +19,7 @@ VITE_FIREBASE_PROJECT_ID=turavia-8109f
 VITE_FIREBASE_STORAGE_BUCKET=turavia-8109f.firebasestorage.app
 VITE_FIREBASE_MESSAGING_SENDER_ID=1091366572922
 VITE_FIREBASE_APP_ID=...
-VITE_FIREBASE_MEASUREMENT_ID=G-XXXXXXXXXX
+VITE_FIREBASE_MEASUREMENT_ID=G-GC77D3R38Q
 ```
 
 La configuración web no se puede deducir del `google-services.json` Android: ese archivo queda reservado para la futura app nativa `com.turavia.app`.
