@@ -6,11 +6,13 @@ import {
   useRouter,
   HeadContent,
   Scripts,
+  useRouterState,
   type ErrorRouteComponent,
 } from "@tanstack/react-router";
 import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
+import { trackPageView } from "../lib/firebase-analytics";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 
 function NotFoundComponent() {
@@ -159,8 +161,19 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
+      <AnalyticsTracker />
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
       <Outlet />
     </QueryClientProvider>
   );
+}
+
+function AnalyticsTracker() {
+  const location = useRouterState({ select: (state) => state.location.href });
+
+  useEffect(() => {
+    void trackPageView(location);
+  }, [location]);
+
+  return null;
 }
