@@ -41,9 +41,10 @@ export function initializeFirebaseAnalytics() {
 export async function trackPageView(path: string) {
   const analytics = await initializeFirebaseAnalytics();
   if (!analytics) return;
+  const pageUrl = new URL(path, window.location.origin);
   logEvent(analytics, "page_view", {
-    page_path: path,
-    page_location: window.location.href,
+    page_path: `${pageUrl.pathname}${pageUrl.search}${pageUrl.hash}`,
+    page_location: pageUrl.href,
     page_title: document.title,
   });
 }
