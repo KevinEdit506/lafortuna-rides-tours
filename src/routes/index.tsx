@@ -183,13 +183,13 @@ function featureFromHash(hash: string): FeatureKey | null {
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "TuraVía | Transfers & Tours in Arenal" },
+      { title: "TURAVIA | Transfers & Tours in Arenal" },
       {
         name: "description",
         content:
           "Reserve traslados privados y tours bilingües en La Fortuna, Costa Rica. Tarifas claras, atención local y experiencias memorables cerca del Arenal.",
       },
-      { property: "og:title", content: "TuraVía | Transfers & Tours in Arenal" },
+      { property: "og:title", content: "TURAVIA | Transfers & Tours in Arenal" },
       {
         property: "og:description",
         content:
@@ -197,7 +197,7 @@ export const Route = createFileRoute("/")({
       },
       { property: "og:type", content: "website" },
       { property: "og:url", content: "https://kevinedit506.github.io/lafortuna-rides-tours/" },
-      { property: "og:site_name", content: "TuraVía" },
+      { property: "og:site_name", content: "TURAVIA" },
       { property: "og:locale", content: "es_CR" },
       {
         property: "og:image",
@@ -207,7 +207,7 @@ export const Route = createFileRoute("/")({
       { property: "og:image:width", content: "2560" },
       { property: "og:image:height", content: "1440" },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:title", content: "TuraVía | Transfers & Tours in Arenal" },
+      { name: "twitter:title", content: "TURAVIA | Transfers & Tours in Arenal" },
       {
         name: "twitter:description",
         content:
@@ -941,10 +941,10 @@ function Index() {
     const isSpanish = language === "es";
     const message = tourName
       ? isSpanish
-        ? `Hola TuraVía, me gustaría reservar el tour ${tourName}.\n\nMétodo de pago: ${tourPayment === "card" ? "Tarjeta" : "Efectivo"}\n\n¿Podrían ayudarme con disponibilidad y próximos pasos?`
-        : `Hello TuraVía, I would like to book the ${tourName} tour.\n\nPayment method: ${tourPayment === "card" ? "Card" : "Cash"}\n\nCould you help me with availability and next steps?`
+        ? `Hola TURAVIA, me gustaría reservar el tour ${tourName}.\n\nMétodo de pago: ${tourPayment === "card" ? "Tarjeta" : "Efectivo"}\n\n¿Podrían ayudarme con disponibilidad y próximos pasos?`
+        : `Hello TURAVIA, I would like to book the ${tourName} tour.\n\nPayment method: ${tourPayment === "card" ? "Card" : "Cash"}\n\nCould you help me with availability and next steps?`
       : isSpanish
-        ? `Hola TuraVía, me gustaría reservar un traslado.\n\nOrigen: ${origin}\nDestino: ${destination}\n${
+        ? `Hola TURAVIA, me gustaría reservar un traslado.\n\nOrigen: ${origin}\nDestino: ${destination}\n${
             rideType === "shared"
               ? `Orígenes por pasajero hacia ${destination}:\n${passengerOrigins
                   .slice(0, passengers)
@@ -952,7 +952,7 @@ function Index() {
                   .join("\n")}`
               : ""
           }\nTipo: ${rideType === "private" ? "Privado" : "Compartido"}\nHorario: ${timing === "now" ? "Ahora" : `${scheduleDate} · ${scheduleTime}`}\nPasajeros: ${passengers}\nPago: ${paymentMethod === "card" ? "Tarjeta" : "Efectivo"}\nTarifa estimada: ${formatFareForMessage(fare.total)}`
-        : `Hello TuraVía, I would like to book a transfer.\n\nPickup: ${origin}\nDestination: ${destination}\n${
+        : `Hello TURAVIA, I would like to book a transfer.\n\nPickup: ${origin}\nDestination: ${destination}\n${
             rideType === "shared"
               ? `Passenger pickups to ${destination}:\n${passengerOrigins
                   .slice(0, passengers)
@@ -974,8 +974,8 @@ function Index() {
   const openHelpWhatsApp = () => {
     const message =
       language === "es"
-        ? "Hola TuraVía, necesito ayuda. ¿Podrían atenderme, por favor?"
-        : "Hello TuraVía, I need help. Could someone assist me, please?";
+        ? "Hola TURAVIA, necesito ayuda. ¿Podrían atenderme, por favor?"
+        : "Hello TURAVIA, I need help. Could someone assist me, please?";
 
     window.open(
       `https://wa.me/50663135655?text=${encodeURIComponent(message)}`,
@@ -2340,8 +2340,8 @@ function Index() {
                 </p>
                 <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
                   {language === "es"
-                    ? "Prepara tu ruta con TuraVía y coordina un traslado privado o compartido."
-                    : "Plan your route with TuraVía and coordinate a private or shared transfer."}
+                    ? "Prepara tu ruta con TURAVIA y coordina un traslado privado o compartido."
+                    : "Plan your route with TURAVIA and coordinate a private or shared transfer."}
                 </p>
                 <button
                   type="button"
@@ -2681,8 +2681,8 @@ function Index() {
             </div>
             <div className="mt-5 rounded-2xl bg-background p-4 text-sm leading-relaxed ring-1 ring-border">
               {language === "es"
-                ? "Serás dirigido a Stripe Checkout o Payment Element para completar el pago. TuraVía no almacena números de tarjeta ni códigos de seguridad."
-                : "You will continue to Stripe Checkout or Payment Element to complete payment. TuraVía never stores card numbers or security codes."}
+                ? "Serás dirigido a Stripe Checkout o Payment Element para completar el pago. TURAVIA no almacena números de tarjeta ni códigos de seguridad."
+                : "You will continue to Stripe Checkout or Payment Element to complete payment. TURAVIA never stores card numbers or security codes."}
             </div>
             <div className="mt-4 flex items-center gap-2 text-xs font-semibold text-muted-foreground">
               <ShieldCheck className="size-4 text-leaf" />

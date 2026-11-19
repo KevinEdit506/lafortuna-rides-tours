@@ -1,4 +1,4 @@
-# Firebase Analytics Web para TuraVía
+# Firebase Analytics Web para TURAVIA
 
 La web usa Firebase Analytics mediante `VITE_FIREBASE_MEASUREMENT_ID` y registra automáticamente un evento `page_view` al abrir o cambiar de ruta.
 
@@ -7,7 +7,7 @@ La web usa Firebase Analytics mediante `VITE_FIREBASE_MEASUREMENT_ID` y registra
 En el proyecto `turavia-8109f`:
 
 1. Abre **Project settings → Your apps → Add app → Web**.
-2. Registra una app web para TuraVía Cliente y copia su configuración web.
+2. Registra una app web para TURAVIA Cliente y copia su configuración web.
 3. En **Analytics → Data streams → Web**, crea o selecciona el flujo web.
 4. Copia el `Measurement ID`, con formato `G-XXXXXXXXXX`.
 5. Configura en GitHub Pages y en el entorno de build:
@@ -38,7 +38,7 @@ La aplicación registra además estos eventos de conversión:
 
 ## Activar conversiones y reportes automáticos
 
-En Firebase Console abre **Analytics → Events** para el flujo web `TuraVia web` y marca como **Key event** estos eventos:
+En Firebase Console abre **Analytics → Events** para el flujo web `TURAVIA web` y marca como **Key event** estos eventos:
 
 1. `booking_created`
 2. `begin_checkout`

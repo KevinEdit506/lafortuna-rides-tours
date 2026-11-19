@@ -53,10 +53,7 @@ export function sendPhoneVerificationCode(
   return signInWithPhoneNumber(auth, normalizedPhone, verifier);
 }
 
-export async function confirmPhoneVerificationCode(
-  confirmation: ConfirmationResult,
-  code: string,
-) {
+export async function confirmPhoneVerificationCode(confirmation: ConfirmationResult, code: string) {
   return confirmation.confirm(code.trim());
 }
 
@@ -192,8 +189,8 @@ export function PhoneVerificationScreen({
             <ShieldCheck className="mt-0.5 size-5 shrink-0 text-leaf-ink" />
             <p className="text-sm leading-relaxed text-muted-foreground">
               {isSpanish
-                ? "Necesitamos verificar tu número antes de continuar con el pago con tarjeta. No almacenamos datos de tarjeta en Via La Fortuna."
-                : "We need to verify your number before continuing with card payment. Via La Fortuna does not store card details."}
+                ? "Necesitamos verificar tu número antes de continuar con el pago con tarjeta. No almacenamos datos de tarjeta en TURAVIA."
+                : "We need to verify your number before continuing with card payment. TURAVIA does not store card details."}
             </p>
           </div>
         </div>
@@ -227,7 +224,13 @@ export function PhoneVerificationScreen({
               onClick={() => void sendCode()}
               className="w-full rounded-2xl bg-leaf py-3.5 text-sm font-bold text-leaf-foreground disabled:opacity-60"
             >
-              {submitting ? <LoaderCircle className="mx-auto size-5 animate-spin" /> : isSpanish ? "Enviar código SMS" : "Send SMS code"}
+              {submitting ? (
+                <LoaderCircle className="mx-auto size-5 animate-spin" />
+              ) : isSpanish ? (
+                "Enviar código SMS"
+              ) : (
+                "Send SMS code"
+              )}
             </button>
             <div id={recaptchaId} />
           </div>
@@ -256,7 +259,11 @@ export function PhoneVerificationScreen({
               onClick={() => void verifyCode()}
               className="flex w-full items-center justify-center gap-2 rounded-2xl bg-leaf py-3.5 text-sm font-bold text-leaf-foreground disabled:opacity-60"
             >
-              {submitting ? <LoaderCircle className="size-5 animate-spin" /> : <CheckCircle2 className="size-5" />}
+              {submitting ? (
+                <LoaderCircle className="size-5 animate-spin" />
+              ) : (
+                <CheckCircle2 className="size-5" />
+              )}
               {isSpanish ? "Verificar teléfono" : "Verify phone"}
             </button>
             <button
@@ -279,7 +286,10 @@ export function PhoneVerificationScreen({
           </p>
         )}
         {error && (
-          <p role="alert" className="mt-4 rounded-2xl bg-destructive/10 p-3 text-sm text-destructive">
+          <p
+            role="alert"
+            className="mt-4 rounded-2xl bg-destructive/10 p-3 text-sm text-destructive"
+          >
             {error}
           </p>
         )}
@@ -368,17 +378,19 @@ if (paymentMethod === "card") {
 Antes del `return` principal, o inmediatamente dentro del fragmento raíz, renderizar la pantalla push:
 
 ```tsx
-{phoneVerificationOpen && (
-  <PhoneVerificationScreen
-    user={user}
-    language={language}
-    onBack={closePhoneVerification}
-    onVerified={() => {
-      closePhoneVerification();
-      setPaymentOpen(true);
-    }}
-  />
-)}
+{
+  phoneVerificationOpen && (
+    <PhoneVerificationScreen
+      user={user}
+      language={language}
+      onBack={closePhoneVerification}
+      onVerified={() => {
+        closePhoneVerification();
+        setPaymentOpen(true);
+      }}
+    />
+  );
+}
 ```
 
 ## 4. Regla Firestore para tarjeta

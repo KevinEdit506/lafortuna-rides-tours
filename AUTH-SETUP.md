@@ -1,4 +1,4 @@
-# Autenticación y roles de TuraVía
+# Autenticación y roles de TURAVIA
 
 La aplicación unificada usa un solo Firebase Authentication y un solo documento `users/{uid}` por persona. Los proveedores previstos son Email/Password, Google y Phone Authentication.
 

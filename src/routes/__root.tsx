@@ -80,14 +80,14 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "TuraVía | Transfers & Tours in Arenal" },
+      { title: "TURAVIA | Transfers & Tours in Arenal" },
       {
         name: "description",
         content:
           "Reserve traslados privados y tours bilingües en La Fortuna, Costa Rica. Tarifas claras, atención local y experiencias memorables cerca del Arenal.",
       },
-      { name: "author", content: "TuraVía" },
-      { property: "og:title", content: "TuraVía | Transfers & Tours in Arenal" },
+      { name: "author", content: "TURAVIA" },
+      { property: "og:title", content: "TURAVIA | Transfers & Tours in Arenal" },
       {
         property: "og:description",
         content:
@@ -95,7 +95,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       },
       { property: "og:type", content: "website" },
       { property: "og:url", content: "https://kevinedit506.github.io/lafortuna-rides-tours/" },
-      { property: "og:site_name", content: "TuraVía" },
+      { property: "og:site_name", content: "TURAVIA" },
       { property: "og:locale", content: "es_CR" },
       {
         property: "og:image",
@@ -105,7 +105,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { property: "og:image:width", content: "2560" },
       { property: "og:image:height", content: "1440" },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:title", content: "TuraVía | Transfers & Tours in Arenal" },
+      { name: "twitter:title", content: "TURAVIA | Transfers & Tours in Arenal" },
       {
         name: "twitter:description",
         content:
