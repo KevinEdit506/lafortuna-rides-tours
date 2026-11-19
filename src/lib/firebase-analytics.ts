@@ -48,3 +48,12 @@ export async function trackPageView(path: string) {
     page_title: document.title,
   });
 }
+
+export async function trackAnalyticsEvent(
+  eventName: string,
+  params: Record<string, string | number | boolean | undefined> = {},
+) {
+  const analytics = await initializeFirebaseAnalytics();
+  if (!analytics) return;
+  logEvent(analytics, eventName, params);
+}

@@ -27,3 +27,24 @@ La configuración web no se puede deducir del `google-services.json` Android: es
 ## Eventos registrados
 
 El helper `src/lib/firebase-analytics.ts` inicializa Analytics solo en navegador y solo cuando existen todas las variables públicas requeridas. Si falta el `measurementId` o el navegador no soporta Analytics, la app continúa funcionando sin bloquear autenticación, reservas o navegación.
+
+La aplicación registra además estos eventos de conversión:
+
+- `sign_up`: registro por correo, Google o teléfono.
+- `login`: inicio de sesión por correo, Google o teléfono.
+- `select_item`: apertura del detalle de un tour.
+- `booking_created`: reserva de traslado o tour guardada.
+- `begin_checkout`: inicio de Stripe Checkout para un tour con tarjeta.
+
+## Activar conversiones y reportes automáticos
+
+En Firebase Console abre **Analytics → Events** para el flujo web `TuraVia web` y marca como **Key event** estos eventos:
+
+1. `booking_created`
+2. `begin_checkout`
+3. `sign_up`
+4. `login`
+
+Firebase empezará a mostrar los eventos en **Analytics → Reports → Engagement → Events** y los eventos clave en **Reports → Acquisition → User acquisition**. Los datos pueden tardar varias horas en aparecer; para validar inmediatamente usa **Analytics → DebugView** durante una sesión de prueba.
+
+Para una prueba, abre la web, inicia sesión, abre un tour, selecciona tarjeta y llega a Stripe Checkout. Deben aparecer `login`, `select_item`, `booking_created` y `begin_checkout`. No se registra información de tarjeta ni datos privados del cliente.

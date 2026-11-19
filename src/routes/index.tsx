@@ -35,6 +35,7 @@ import misticoImage from "../assets/mistico-bridges.jpg";
 import riverImage from "../assets/penas-blancas.jpg";
 import { MiniRouteMap } from "../components/MiniRouteMap";
 import { DriverDashboardContent } from "../components/DriverDashboard";
+import { trackAnalyticsEvent } from "../lib/firebase-analytics";
 import { saveBooking } from "../lib/firebase-bookings";
 import { subscribeToPaymentRequests, type PaymentRequest } from "../lib/payment-requests";
 import {
@@ -851,8 +852,13 @@ function Index() {
     setAuthSubmitting(true);
     setAuthError("");
     try {
-      if (authMode === "login") await signInUser(authEmail, authPassword);
-      else await registerUser(authEmail, authPassword);
+      if (authMode === "login") {
+        await signInUser(authEmail, authPassword);
+        void trackAnalyticsEvent("login", { method: "email" });
+      } else {
+        await registerUser(authEmail, authPassword);
+        void trackAnalyticsEvent("sign_up", { method: "email" });
+      }
       setAuthPassword("");
     } catch (error) {
       setAuthError(
@@ -870,6 +876,7 @@ function Index() {
     setAuthError("");
     try {
       await signInUserWithGoogle();
+      void trackAnalyticsEvent("login", { method: "google" });
     } catch {
       setAuthError(
         language === "es"
@@ -904,6 +911,9 @@ function Index() {
     setAuthError("");
     try {
       await confirmPhoneCode(phoneVerification, authCode);
+      void trackAnalyticsEvent(authMode === "login" ? "login" : "sign_up", {
+        method: "phone",
+      });
       setAuthCode("");
       setPhoneVerification(null);
     } catch {
@@ -1023,6 +1033,15 @@ function Index() {
       ]);
       setConfirmed(true);
       setBookingStatus("saved");
+      void trackAnalyticsEvent("booking_created", {
+        service_type: "transfer",
+        ride_type: rideType,
+        payment_method: paymentMethod,
+        booking_timing: timing,
+        passengers,
+        value: fare.total,
+        currency: "USD",
+      });
     } catch {
       setBookingStatus("error");
     }
@@ -1070,7 +1089,19 @@ function Index() {
         },
         ...items,
       ]);
+      void trackAnalyticsEvent("booking_created", {
+        service_type: "tour",
+        payment_method: requestedPaymentMethod,
+        tour_name: tour.title,
+        value: requestedPaymentMethod === "card" ? tour.priceUsd : tour.priceCrc,
+        currency: requestedPaymentMethod === "card" ? "USD" : "CRC",
+      });
       if (requestedPaymentMethod === "card" && user) {
+        void trackAnalyticsEvent("begin_checkout", {
+          item_name: tour.title,
+          value: tour.priceUsd,
+          currency: "USD",
+        });
         const idToken = await user.getIdToken();
         const checkoutResponse = await fetch("/api/stripe/create-checkout-session", {
           method: "POST",
@@ -1115,6 +1146,12 @@ function Index() {
 
   const openTourDetail = (tour: TourCard) => {
     window.history.pushState({ tour: tour.title }, "", `#tour/${encodeURIComponent(tour.title)}`);
+    void trackAnalyticsEvent("select_item", {
+      item_name: tour.title,
+      item_category: tour.category,
+      value: tour.priceUsd,
+      currency: "USD",
+    });
     setTourWhatsAppSelected(true);
     setSelectedTour(tour);
   };
