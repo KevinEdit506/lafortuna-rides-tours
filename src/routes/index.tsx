@@ -82,6 +82,7 @@ type TourCard = {
   image: string;
   title: string;
   meta: string;
+  distance: string;
   rating: string;
   category: string;
   summary: string;
@@ -825,10 +826,8 @@ function Index() {
   const formatColones = (amount: number) =>
     exchangeRate ? `₡${Math.round(amount * exchangeRate).toLocaleString("es-CR")}` : "₡—";
   const formatDollars = (amount: number) => `$${amount.toFixed(2)}`;
-  const formatFareAmount = (amount: number) =>
-    language === "es" ? formatColones(amount) : formatDollars(amount);
-  const formatFareSecondary = (amount: number) =>
-    language === "es" ? `${formatDollars(amount)} USD` : `${formatColones(amount)} CRC`;
+  const formatFareAmount = (amount: number) => formatColones(amount);
+  const formatFareSecondary = (amount: number) => `${formatDollars(amount)} USD`;
   const formatFareForMessage = (amount: number) =>
     language === "es"
       ? `${formatColones(amount)} CRC (${formatDollars(amount)} USD)`
@@ -1161,13 +1160,14 @@ function Index() {
         image: `${import.meta.env.BASE_URL}category-arenal.jpg`,
         title: language === "es" ? "Actividades en La Fortuna" : "Activities in La Fortuna",
         meta: `5 ${t.hours}`,
+        distance: "12 km",
         rating: "4.9",
         category: language === "es" ? "Naturaleza · Experiencias" : "Nature · Experiences",
         summary:
           language === "es"
             ? "Volcán Arenal, aguas termales y experiencias locales para descubrir la zona con calma."
             : "Arenal Volcano, hot springs, and local experiences to discover the area at an easy pace.",
-        price: language === "es" ? "Desde ₡35.000" : "From $70",
+        price: "Desde ₡35.000",
         priceCrc: 35000,
         priceUsd: 70,
       },
@@ -1175,13 +1175,14 @@ function Index() {
         image: riverImage,
         title: language === "es" ? "Ríos y Aventuras" : "Rivers and Adventures",
         meta: `6 ${t.hours}`,
+        distance: "18 km",
         rating: "4.8",
         category: language === "es" ? "Ríos · Aire libre" : "Rivers · Outdoors",
         summary:
           language === "es"
             ? "Río Peñas Blancas, agua dulce y aventura tropical con acompañamiento local."
             : "Peñas Blancas River, freshwater, and tropical adventure with local guidance.",
-        price: language === "es" ? "Desde ₡28.000" : "From $56",
+        price: "Desde ₡28.000",
         priceCrc: 28000,
         priceUsd: 56,
       },
@@ -1189,13 +1190,14 @@ function Index() {
         image: misticoImage,
         title: language === "es" ? "Parques y Puentes Colgantes" : "Parks and Hanging Bridges",
         meta: `4 ${t.hours}`,
+        distance: "24 km",
         rating: "4.9",
         category: language === "es" ? "Bosque · Aventura" : "Forest · Adventure",
         summary:
           language === "es"
             ? "Senderos protegidos y puentes suspendidos para observar el bosque y su biodiversidad."
             : "Protected trails and suspended bridges to experience the forest and its biodiversity.",
-        price: language === "es" ? "Desde ₡32.000" : "From $64",
+        price: "Desde ₡32.000",
         priceCrc: 32000,
         priceUsd: 64,
       },
@@ -1203,13 +1205,14 @@ function Index() {
         image: `${import.meta.env.BASE_URL}category-playas.jpg`,
         title: language === "es" ? "Playas" : "Beaches",
         meta: `10 ${t.hours}`,
+        distance: "86 km",
         rating: "4.8",
         category: language === "es" ? "Costa · Día completo" : "Coast · Full day",
         summary:
           language === "es"
             ? "Una escapada a la costa del Pacífico con traslado cómodo desde La Fortuna."
             : "A Pacific coast escape with a comfortable transfer from La Fortuna.",
-        price: language === "es" ? "Desde ₡45.000" : "From $90",
+        price: "Desde ₡45.000",
         priceCrc: 45000,
         priceUsd: 90,
       },
@@ -1469,9 +1472,9 @@ function Index() {
             <div className="brand-flag flex min-w-[10.5rem] items-center justify-center rounded-full px-3 py-2 text-primary-foreground shadow-[0_4px_0_rgba(9,35,26,0.45),0_8px_16px_rgba(9,35,26,0.2)] ring-1 ring-white/25">
               <span
                 className="whitespace-nowrap text-center font-display text-[clamp(0.56rem,2.1vw,0.72rem)] font-extrabold leading-none tracking-[0.01em] text-white [text-shadow:0_1px_2px_rgba(0,0,0,0.45)]"
-                aria-label="Tour ADT of Transport Tour"
+                aria-label="TURAVIA"
               >
-                Tour ADT of Transport Tour
+                TURAVIA
               </span>
             </div>
             <div
@@ -2042,7 +2045,8 @@ function Index() {
                       language === "es"
                         ? "Volcán Arenal, aguas termales y experiencias locales para descubrir la zona con calma."
                         : "Arenal Volcano, hot springs, and local experiences to discover the area at an easy pace.",
-                    price: language === "es" ? "Desde ₡35.000" : "From $70",
+                    distance: "12 km",
+                    price: "Desde ₡35.000",
                     priceCrc: 35000,
                     priceUsd: 70,
                   },
@@ -2056,7 +2060,8 @@ function Index() {
                       language === "es"
                         ? "Río Peñas Blancas, agua dulce y aventura tropical con acompañamiento local."
                         : "Peñas Blancas River, fresh water, and tropical adventure with local assistance.",
-                    price: language === "es" ? "Desde ₡28.000" : "From $56",
+                    distance: "18 km",
+                    price: "Desde ₡28.000",
                     priceCrc: 28000,
                     priceUsd: 56,
                   },
@@ -2073,7 +2078,8 @@ function Index() {
                       language === "es"
                         ? "Senderos protegidos y puentes suspendidos para observar el bosque y su biodiversidad."
                         : "Protected trails and suspended bridges to experience the forest and its biodiversity.",
-                    price: language === "es" ? "Desde ₡32.000" : "From $64",
+                    distance: "24 km",
+                    price: "Desde ₡32.000",
                     priceCrc: 32000,
                     priceUsd: 64,
                   },
@@ -2087,7 +2093,8 @@ function Index() {
                       language === "es"
                         ? "Una escapada a la costa del Pacífico con traslado cómodo desde La Fortuna."
                         : "A Pacific coast escape with a comfortable transfer from La Fortuna.",
-                    price: language === "es" ? "Desde ₡45.000" : "From $90",
+                    distance: "86 km",
+                    price: "Desde ₡45.000",
                     priceCrc: 45000,
                     priceUsd: 90,
                   },
@@ -2116,7 +2123,9 @@ function Index() {
                     <div className="flex min-h-0 flex-1 flex-col p-4">
                       <div className="flex items-center justify-between gap-3 text-[10px] font-bold uppercase tracking-[0.12em] text-leaf-ink">
                         <span>{tour.category}</span>
-                        <span>{tour.meta}</span>
+                        <span>
+                          {tour.meta} · {tour.distance}
+                        </span>
                       </div>
                       <h3 className="mt-2 font-display text-xl leading-tight">{tour.title}</h3>
                       <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
@@ -2176,7 +2185,47 @@ function Index() {
               </div>
               <p className="mt-2 text-sm leading-relaxed text-white/80">{t.reviewsIntro}</p>
 
-              <div className="mt-4 grid gap-3 lg:grid-cols-3">
+              <div className="review-summary mt-4 rounded-[22px] bg-white p-4 text-foreground shadow-sm ring-1 ring-border">
+                <div className="flex items-center gap-4">
+                  <div className="shrink-0 text-center">
+                    <p className="font-display text-4xl font-bold leading-none">4,9</p>
+                    <div
+                      className="mt-2 flex justify-center gap-0.5 text-amber-500"
+                      aria-label="4.9 de 5 estrellas"
+                    >
+                      {Array.from({ length: 5 }).map((_, index) => (
+                        <Star key={index} className="size-3 fill-current" aria-hidden="true" />
+                      ))}
+                    </div>
+                    <p className="mt-1 text-[10px] font-semibold text-muted-foreground">
+                      320 reseñas
+                    </p>
+                  </div>
+                  <div
+                    className="min-w-0 flex-1 space-y-1.5"
+                    aria-label={
+                      language === "es" ? "Distribución de reseñas" : "Review distribution"
+                    }
+                  >
+                    {[5, 4, 3, 2, 1].map((score, index) => (
+                      <div
+                        key={score}
+                        className="flex items-center gap-2 text-[10px] text-muted-foreground"
+                      >
+                        <span className="w-2 text-right">{score}</span>
+                        <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-muted">
+                          <span
+                            className="block h-full rounded-full bg-orange-400"
+                            style={{ width: `${[92, 8, 2, 1, 0.5][index]}%` }}
+                          />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-5 grid gap-3 lg:grid-cols-3">
                 {[
                   {
                     quote:
@@ -3216,6 +3265,30 @@ function Index() {
           </section>
         </div>
       )}
+
+      <aside
+        className="final-reserve-banner"
+        aria-label={language === "es" ? "Reserva rápida" : "Quick booking"}
+      >
+        <div className="min-w-0">
+          <p className="text-[9px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
+            TURAVIA · {language === "es" ? "TOURS Y VIAJES" : "TOURS & RIDES"}
+          </p>
+          <p className="mt-0.5 text-sm font-bold text-foreground">
+            {formatColones(fare.total)}{" "}
+            <span className="text-[10px] font-medium text-muted-foreground">
+              / {language === "es" ? "persona" : "person"}
+            </span>
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={openBookingPage}
+          className="shrink-0 rounded-xl bg-[#f47b20] px-4 py-2.5 text-xs font-bold text-white shadow-[0_3px_0_rgba(153,67,12,0.22)] transition-transform active:scale-[0.97]"
+        >
+          {language === "es" ? "Reservar ahora" : "Book now"}
+        </button>
+      </aside>
 
       <nav
         className="pointer-events-none fixed bottom-0 left-1/2 z-20 w-full max-w-[400px] -translate-x-1/2 px-8 pb-4 lg:max-w-lg"

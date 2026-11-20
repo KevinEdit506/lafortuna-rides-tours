@@ -1048,6 +1048,124 @@ input::placeholder {
     height: 6rem;
     font-size: 3.2rem;
   }
+  #tours {
+    margin-top: 1.35rem;
+    padding: 0.85rem;
+    border-radius: 1.35rem;
+  }
+  #tours > .mb-4 {
+    margin-bottom: 0.45rem;
+  }
+  #tours > p {
+    margin-bottom: 0.8rem;
+    font-size: 0.78rem;
+    line-height: 1.45;
+  }
+  #tours > .mt-4 {
+    margin-top: 0;
+    gap: 0.65rem;
+  }
+  .experience-card {
+    display: grid;
+    grid-template-columns: 5.15rem minmax(0, 1fr);
+    min-height: 0;
+    border-radius: 1rem;
+    text-align: left;
+  }
+  .experience-card > img {
+    grid-row: 1;
+    width: 5.15rem;
+    height: 100%;
+    min-height: 9.2rem;
+    border-radius: 0.95rem 0 0 0.95rem;
+  }
+  .experience-card > div {
+    min-width: 0;
+    padding: 0.72rem 0.72rem 0.7rem;
+  }
+  .experience-card > div > div:first-child {
+    display: block;
+    font-size: 0.54rem;
+    line-height: 1.3;
+  }
+  .experience-card h3 {
+    margin-top: 0.25rem;
+    font-size: 1rem;
+    line-height: 1.12;
+  }
+  .experience-card p {
+    display: -webkit-box;
+    margin-top: 0.3rem;
+    overflow: hidden;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    font-size: 0.68rem;
+    line-height: 1.3;
+  }
+  .experience-card > div > div:nth-last-of-type(1) {
+    margin-top: 0.45rem;
+    font-size: 0.78rem;
+  }
+  .experience-card .card-cta,
+  .experience-card > div > button:last-child {
+    min-height: 2.35rem;
+    margin-top: 0.5rem;
+    padding: 0.55rem 0.65rem;
+    font-size: 0.7rem;
+  }
+  #reviews,
+  #blog {
+    margin-top: 1.35rem;
+    padding: 0.85rem;
+    border-radius: 1.35rem;
+  }
+  .review-summary {
+    margin-top: 0.8rem;
+    padding: 0.85rem;
+  }
+  .review-card {
+    min-height: 0;
+    padding: 0.85rem;
+  }
+  .review-card p {
+    font-size: 0.74rem;
+    line-height: 1.45;
+  }
+  #blog > .mt-4 {
+    margin-top: 0.8rem;
+    gap: 0.55rem;
+  }
+  .blog-card {
+    display: grid;
+    grid-template-columns: 4.25rem minmax(0, 1fr);
+    align-items: stretch;
+  }
+  .blog-card > img {
+    width: 4.25rem;
+    height: 100%;
+    min-height: 5.6rem;
+    border-radius: 0.95rem 0 0 0.95rem;
+  }
+  .blog-card > div {
+    min-width: 0;
+    padding: 0.7rem;
+  }
+  .blog-card > div > p:not(.text-muted-foreground) {
+    font-size: 0.55rem;
+  }
+  .blog-card h3 {
+    margin-top: 0.2rem;
+    font-size: 0.86rem;
+  }
+  .blog-card .text-muted-foreground {
+    display: none;
+  }
+  .blog-card button {
+    margin-top: 0.45rem;
+    min-height: 2.1rem;
+    padding-block: 0.45rem;
+    font-size: 0.68rem;
+  }
   .control-relief {
     margin-top: 0.8rem;
     padding: 0.8rem;
@@ -1137,6 +1255,15 @@ input::placeholder {
     color: oklch(0.75 0.18 150);
     background: oklch(0.75 0.18 150 / 16%);
   }
+  .final-reserve-banner {
+    margin-top: 1.5rem;
+    width: 100%;
+    padding: 0.65rem 0.7rem 0.65rem 0.8rem;
+  }
+  .final-reserve-banner button {
+    min-height: 2.5rem;
+    white-space: nowrap;
+  }
 }
 
 /* Booking card visual treatment from the supplied mobile reference. */
@@ -1190,6 +1317,25 @@ input::placeholder {
   box-shadow:
     inset 0 2px 3px color-mix(in oklch, var(--color-jungle) 18%, transparent),
     0 1px 0 color-mix(in oklch, var(--color-jungle) 28%, transparent);
+}
+
+.final-reserve-banner {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin: 2rem auto 1rem;
+  width: min(398px, 100%);
+  padding: 0.7rem 0.8rem 0.7rem 0.95rem;
+  border: 1px solid color-mix(in oklch, var(--foreground) 12%, transparent);
+  border-radius: 1.15rem;
+  background: color-mix(in oklch, white 92%, var(--surface));
+  box-shadow:
+    0 3px 0 color-mix(in oklch, var(--dark-panel-end) 12%, transparent),
+    0 12px 24px color-mix(in oklch, var(--dark-panel-end) 16%, transparent);
+  backdrop-filter: blur(14px);
 }
 
 @media (prefers-reduced-motion: reduce) {
