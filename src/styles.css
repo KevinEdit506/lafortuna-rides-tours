@@ -1864,3 +1864,38 @@ input::placeholder {
     justify-content: center;
   }
 }
+
+/* Keep all five quick actions inside the mobile banner without horizontal overflow. */
+@media (max-width: 767px) {
+  .reference-shortcut-row {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 0.15rem;
+    overflow: visible;
+    padding-inline: 0.25rem;
+  }
+
+  .reference-shortcut,
+  .reference-shortcut:nth-child(3) {
+    min-width: 0;
+    width: 100%;
+    padding-inline: 0.1rem;
+    white-space: normal;
+  }
+
+  .reference-shortcut-icon {
+    width: 2.45rem;
+    height: 2.45rem;
+  }
+
+  .reference-shortcut > span:last-child {
+    display: block;
+    min-height: 1.75rem;
+    max-width: 100%;
+    overflow-wrap: anywhere;
+    white-space: normal;
+    font-size: 0.54rem;
+    line-height: 1.05;
+    text-align: center;
+  }
+}
