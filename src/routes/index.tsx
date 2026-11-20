@@ -184,13 +184,13 @@ function featureFromHash(hash: string): FeatureKey | null {
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "TURAVIA | Transfers & Tours in Arenal" },
+      { title: "TuraVía | Transfers & Tours in Arenal" },
       {
         name: "description",
         content:
           "Reserve traslados privados y tours bilingües en La Fortuna, Costa Rica. Tarifas claras, atención local y experiencias memorables cerca del Arenal.",
       },
-      { property: "og:title", content: "TURAVIA | Transfers & Tours in Arenal" },
+      { property: "og:title", content: "TuraVía | Transfers & Tours in Arenal" },
       {
         property: "og:description",
         content:
@@ -198,7 +198,7 @@ export const Route = createFileRoute("/")({
       },
       { property: "og:type", content: "website" },
       { property: "og:url", content: "https://kevinedit506.github.io/lafortuna-rides-tours/" },
-      { property: "og:site_name", content: "TURAVIA" },
+      { property: "og:site_name", content: "TuraVía" },
       { property: "og:locale", content: "es_CR" },
       {
         property: "og:image",
@@ -208,7 +208,7 @@ export const Route = createFileRoute("/")({
       { property: "og:image:width", content: "2560" },
       { property: "og:image:height", content: "1440" },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:title", content: "TURAVIA | Transfers & Tours in Arenal" },
+      { name: "twitter:title", content: "TuraVía | Transfers & Tours in Arenal" },
       {
         name: "twitter:description",
         content:
@@ -940,10 +940,10 @@ function Index() {
     const isSpanish = language === "es";
     const message = tourName
       ? isSpanish
-        ? `Hola TURAVIA, me gustaría reservar el tour ${tourName}.\n\nMétodo de pago: ${tourPayment === "card" ? "Tarjeta" : "Efectivo"}\n\n¿Podrían ayudarme con disponibilidad y próximos pasos?`
-        : `Hello TURAVIA, I would like to book the ${tourName} tour.\n\nPayment method: ${tourPayment === "card" ? "Card" : "Cash"}\n\nCould you help me with availability and next steps?`
+        ? `Hola TuraVía, me gustaría reservar el tour ${tourName}.\n\nMétodo de pago: ${tourPayment === "card" ? "Tarjeta" : "Efectivo"}\n\n¿Podrían ayudarme con disponibilidad y próximos pasos?`
+        : `Hello TuraVía, I would like to book the ${tourName} tour.\n\nPayment method: ${tourPayment === "card" ? "Card" : "Cash"}\n\nCould you help me with availability and next steps?`
       : isSpanish
-        ? `Hola TURAVIA, me gustaría reservar un traslado.\n\nOrigen: ${origin}\nDestino: ${destination}\n${
+        ? `Hola TuraVía, me gustaría reservar un traslado.\n\nOrigen: ${origin}\nDestino: ${destination}\n${
             rideType === "shared"
               ? `Orígenes por pasajero hacia ${destination}:\n${passengerOrigins
                   .slice(0, passengers)
@@ -951,7 +951,7 @@ function Index() {
                   .join("\n")}`
               : ""
           }\nTipo: ${rideType === "private" ? "Privado" : "Compartido"}\nHorario: ${timing === "now" ? "Ahora" : `${scheduleDate} · ${scheduleTime}`}\nPasajeros: ${passengers}\nPago: ${paymentMethod === "card" ? "Tarjeta" : "Efectivo"}\nTarifa estimada: ${formatFareForMessage(fare.total)}`
-        : `Hello TURAVIA, I would like to book a transfer.\n\nPickup: ${origin}\nDestination: ${destination}\n${
+        : `Hello TuraVía, I would like to book a transfer.\n\nPickup: ${origin}\nDestination: ${destination}\n${
             rideType === "shared"
               ? `Passenger pickups to ${destination}:\n${passengerOrigins
                   .slice(0, passengers)
@@ -973,8 +973,8 @@ function Index() {
   const openHelpWhatsApp = () => {
     const message =
       language === "es"
-        ? "Hola TURAVIA, necesito ayuda. ¿Podrían atenderme, por favor?"
-        : "Hello TURAVIA, I need help. Could someone assist me, please?";
+        ? "Hola TuraVía, necesito ayuda. ¿Podrían atenderme, por favor?"
+        : "Hello TuraVía, I need help. Could someone assist me, please?";
 
     window.open(
       `https://wa.me/50663135655?text=${encodeURIComponent(message)}`,
@@ -1472,9 +1472,9 @@ function Index() {
             <div className="brand-flag flex min-w-[10.5rem] items-center justify-center rounded-full px-3 py-2 text-primary-foreground shadow-[0_4px_0_rgba(9,35,26,0.45),0_8px_16px_rgba(9,35,26,0.2)] ring-1 ring-white/25">
               <span
                 className="whitespace-nowrap text-center font-display text-[clamp(0.56rem,2.1vw,0.72rem)] font-extrabold leading-none tracking-[0.01em] text-white [text-shadow:0_1px_2px_rgba(0,0,0,0.45)]"
-                aria-label="TURAVIA"
+                aria-label="TuraVía"
               >
-                TURAVIA
+                TuraVía
               </span>
             </div>
             <div
@@ -1593,6 +1593,40 @@ function Index() {
         >
           <div>
             {mode === "transfers" && (
+              <section
+                className="promo-banner rise mt-4"
+                aria-label={language === "es" ? "Promoción" : "Promotion"}
+                role="button"
+                tabIndex={0}
+                onClick={() => openFeatureDetail("promotion")}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter" || event.key === " ") {
+                    event.preventDefault();
+                    openFeatureDetail("promotion");
+                  }
+                }}
+              >
+                <div>
+                  <p className="text-[10px] font-bold uppercase tracking-[0.18em]">
+                    {language === "es" ? "Promoción local" : "Local promotion"}
+                  </p>
+                  <h2 className="mt-1 font-display text-[22px] leading-tight">Pizza La Fortuna</h2>
+                  <p className="mt-1 text-sm font-bold">
+                    {language === "es" ? "2x1 · desde ₡9.990" : "2-for-1 · from ₡9,990"}
+                  </p>
+                  <p className="mt-1 text-[11px] opacity-80">
+                    {language === "es"
+                      ? "Consulta disponibilidad local"
+                      : "Ask about local availability"}
+                  </p>
+                </div>
+                <div className="promo-pizza" aria-hidden="true">
+                  🍕
+                </div>
+              </section>
+            )}
+
+            {mode === "transfers" && (
               <section className="fare-card experience-panel rise mt-3 overflow-hidden rounded-[28px] p-4 ring-1 ring-border [animation-delay:140ms]">
                 <div className="flex items-center justify-between">
                   <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-panel-muted-foreground">
@@ -1636,37 +1670,25 @@ function Index() {
 
             {mode === "transfers" && (
               <section
-                className="promo-banner rise mt-4"
-                aria-label={language === "es" ? "Promoción" : "Promotion"}
-                role="button"
-                tabIndex={0}
-                onClick={() => openFeatureDetail("promotion")}
-                onKeyDown={(event) => {
-                  if (event.key === "Enter" || event.key === " ") {
-                    event.preventDefault();
-                    openFeatureDetail("promotion");
-                  }
-                }}
+                className="route-stats mt-3 grid grid-cols-4 gap-2"
+                aria-label={language === "es" ? "Resumen de servicio" : "Service summary"}
               >
-                <div>
-                  <p className="text-[10px] font-bold uppercase tracking-[0.18em]">
-                    {language === "es" ? "Promoción local" : "Local promotion"}
-                  </p>
-                  <h2 className="mt-1 font-display text-[22px] leading-tight">
-                    {language === "es" ? "Pizza La Fortuna" : "Pizza La Fortuna"}
-                  </h2>
-                  <p className="mt-1 text-sm font-bold">
-                    {language === "es" ? "2x1 · desde ₡9.990" : "2-for-1 · from ₡9,990"}
-                  </p>
-                  <p className="mt-1 text-[11px] opacity-80">
-                    {language === "es"
-                      ? "Consulta disponibilidad local"
-                      : "Ask about local availability"}
-                  </p>
-                </div>
-                <div className="promo-pizza" aria-hidden="true">
-                  🍕
-                </div>
+                {[
+                  ["4,9", language === "es" ? "Valoración" : "Rating"],
+                  ["320", language === "es" ? "Viajeros" : "Travelers"],
+                  ["24 h", language === "es" ? "Respuesta" : "Response"],
+                  ["0 ₡", language === "es" ? "Cancelación" : "Cancellation"],
+                ].map(([value, label]) => (
+                  <div
+                    key={label}
+                    className="rounded-xl bg-white px-2 py-2.5 text-center shadow-sm ring-1 ring-border"
+                  >
+                    <p className="text-sm font-bold text-foreground">{value}</p>
+                    <p className="mt-0.5 text-[8px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">
+                      {label}
+                    </p>
+                  </div>
+                ))}
               </section>
             )}
 
@@ -2389,8 +2411,8 @@ function Index() {
                 </p>
                 <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
                   {language === "es"
-                    ? "Prepara tu ruta con TURAVIA y coordina un traslado privado o compartido."
-                    : "Plan your route with TURAVIA and coordinate a private or shared transfer."}
+                    ? "Prepara tu ruta con TuraVía y coordina un traslado privado o compartido."
+                    : "Plan your route with TuraVía and coordinate a private or shared transfer."}
                 </p>
                 <button
                   type="button"
@@ -2730,8 +2752,8 @@ function Index() {
             </div>
             <div className="mt-5 rounded-2xl bg-background p-4 text-sm leading-relaxed ring-1 ring-border">
               {language === "es"
-                ? "Serás dirigido a Stripe Checkout o Payment Element para completar el pago. TURAVIA no almacena números de tarjeta ni códigos de seguridad."
-                : "You will continue to Stripe Checkout or Payment Element to complete payment. TURAVIA never stores card numbers or security codes."}
+                ? "Serás dirigido a Stripe Checkout o Payment Element para completar el pago. TuraVía no almacena números de tarjeta ni códigos de seguridad."
+                : "You will continue to Stripe Checkout or Payment Element to complete payment. TuraVía never stores card numbers or security codes."}
             </div>
             <div className="mt-4 flex items-center gap-2 text-xs font-semibold text-muted-foreground">
               <ShieldCheck className="size-4 text-leaf" />
@@ -3272,7 +3294,7 @@ function Index() {
       >
         <div className="min-w-0">
           <p className="text-[9px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
-            TURAVIA · {language === "es" ? "TOURS Y VIAJES" : "TOURS & RIDES"}
+            TuraVía · {language === "es" ? "TOURS Y VIAJES" : "TOURS & RIDES"}
           </p>
           <p className="mt-0.5 text-sm font-bold text-foreground">
             {formatColones(fare.total)}{" "}

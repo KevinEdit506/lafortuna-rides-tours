@@ -217,7 +217,7 @@ async function createCheckoutSession(request: Request, env: ServerEnv) {
       return response({ error: "Payment request was not found for this user" }, 404);
     }
     bookingId = requestBookingId;
-    tourName = tourName ?? "TURAVIA · Cobro solicitado por conductor";
+    tourName = tourName ?? "TuraVía · Cobro solicitado por conductor";
     amountCents = Number(requestAmount);
   }
   if (

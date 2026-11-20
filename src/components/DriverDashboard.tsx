@@ -111,7 +111,7 @@ export function DriverDashboardContent({ user }: { user: User }) {
       ? {
           eyebrow: "Panel del conductor",
           title: "Operación bajo control.",
-          subtitle: "Ingresos, costos y rentabilidad de TURAVIA en una sola vista.",
+          subtitle: "Ingresos, costos y rentabilidad de TuraVía en una sola vista.",
           today: "Resumen de la semana",
           revenue: "Ingresos",
           fuel: "Combustible",
@@ -161,7 +161,7 @@ export function DriverDashboardContent({ user }: { user: User }) {
       : {
           eyebrow: "Driver control",
           title: "Operations under control.",
-          subtitle: "Revenue, costs, and profitability for TURAVIA in one view.",
+          subtitle: "Revenue, costs, and profitability for TuraVía in one view.",
           today: "Weekly summary",
           revenue: "Revenue",
           fuel: "Fuel",
@@ -478,7 +478,7 @@ export function DriverDashboardContent({ user }: { user: User }) {
               <CarFront className="size-5" />
             </span>
             <div>
-              <p className="font-display text-xl font-bold">TURAVIA</p>
+              <p className="font-display text-xl font-bold">TuraVía</p>
               <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
                 {t.roleLabel}
               </p>
@@ -1042,7 +1042,7 @@ export function DriverDashboardContent({ user }: { user: User }) {
         </div>
         <footer className="mt-8 flex items-center justify-between text-[11px] text-muted-foreground">
           <span>{t.access}</span>
-          <span>TURAVIA · Conductor</span>
+          <span>TuraVía · Conductor</span>
         </footer>
       </div>
     </main>

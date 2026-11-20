@@ -189,8 +189,8 @@ export function PhoneVerificationScreen({
             <ShieldCheck className="mt-0.5 size-5 shrink-0 text-leaf-ink" />
             <p className="text-sm leading-relaxed text-muted-foreground">
               {isSpanish
-                ? "Necesitamos verificar tu número antes de continuar con el pago con tarjeta. No almacenamos datos de tarjeta en TURAVIA."
-                : "We need to verify your number before continuing with card payment. TURAVIA does not store card details."}
+                ? "Necesitamos verificar tu número antes de continuar con el pago con tarjeta. No almacenamos datos de tarjeta en TuraVía."
+                : "We need to verify your number before continuing with card payment. TuraVía does not store card details."}
             </p>
           </div>
         </div>

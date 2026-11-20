@@ -58,7 +58,7 @@ export async function listenForForegroundPush(onPush: (title: string, body: stri
   const messaging = getMessaging(app);
   return onMessage(messaging, (payload) => {
     onPush(
-      payload.notification?.title ?? "TURAVIA",
+      payload.notification?.title ?? "TuraVía",
       payload.notification?.body ?? "Tienes una nueva asignación.",
     );
   });
