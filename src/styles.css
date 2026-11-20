@@ -1899,3 +1899,78 @@ input::placeholder {
     text-align: center;
   }
 }
+
+/* Final small-screen safeguards for lower content cards. */
+#tours,
+#reviews,
+#blog,
+.experience-card,
+.review-card,
+.blog-card {
+  min-width: 0;
+}
+
+.experience-card h3,
+.experience-card p,
+.blog-card h3,
+.blog-card p,
+.review-card p {
+  overflow-wrap: anywhere;
+}
+
+.experience-card .card-cta,
+.experience-card > div > button:last-child,
+.blog-card button {
+  white-space: normal;
+  line-height: 1.15;
+}
+
+@media (max-width: 359px) {
+  #tours,
+  #reviews,
+  #blog {
+    padding-inline: 0.65rem;
+  }
+
+  #tours .experience-card {
+    grid-template-columns: 4.25rem minmax(0, 1fr);
+  }
+
+  #tours .experience-card > img {
+    width: 4.25rem;
+  }
+
+  #tours .experience-card > div {
+    padding-inline: 0.55rem;
+  }
+
+  #tours .experience-card h3 {
+    font-size: 0.92rem;
+  }
+
+  #tours .experience-card .card-cta,
+  #tours .experience-card > div > button:last-child {
+    padding-inline: 0.4rem;
+    font-size: 0.62rem;
+  }
+
+  .review-summary {
+    padding-inline: 0.65rem;
+  }
+
+  .review-summary > div {
+    gap: 0.65rem;
+  }
+
+  .blog-card > div > div:first-child {
+    flex-wrap: wrap;
+    row-gap: 0.15rem;
+  }
+}
+
+@media (min-width: 360px) and (max-width: 767px) {
+  #tours .experience-card .card-cta,
+  #tours .experience-card > div > button:last-child {
+    font-size: 0.66rem;
+  }
+}
