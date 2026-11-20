@@ -92,6 +92,7 @@ export function MiniRouteMap({
             className="map-embed-clean map-camera-in block size-full border-0"
             width="100%"
             height="300"
+            loading="lazy"
             allowFullScreen
             referrerPolicy="strict-origin-when-cross-origin"
             onLoad={() => {

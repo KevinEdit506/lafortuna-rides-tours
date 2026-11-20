@@ -1722,3 +1722,145 @@ input::placeholder {
     font-size: 0.62rem;
   }
 }
+
+/* Mobile interaction polish for the route map and service cards. */
+#route-preview {
+  contain: layout paint;
+}
+
+#route-preview .mini-route-map {
+  min-width: 0;
+}
+
+#route-preview .mini-route-map > div:nth-child(2) {
+  min-height: 11rem;
+  background: color-mix(in oklch, var(--mist) 34%, white);
+}
+
+#route-preview .map-embed-clean {
+  min-height: 11rem;
+  touch-action: pan-x pan-y;
+}
+
+#route-preview .route-map-landmark {
+  z-index: 3;
+  max-width: calc(100% - 1rem);
+  white-space: nowrap;
+  box-shadow: 0 3px 10px color-mix(in oklch, var(--foreground) 14%, transparent);
+}
+
+.route-metrics {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 0.75rem;
+  min-width: 0;
+}
+
+.route-metrics > div {
+  min-width: 0;
+}
+
+.route-metrics strong {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  white-space: nowrap;
+}
+
+.route-metrics .text-right strong {
+  justify-content: flex-end;
+}
+
+.reference-shortcut,
+.experience-card,
+.experience-card button,
+.card-cta {
+  touch-action: manipulation;
+}
+
+@media (max-width: 767px) {
+  #route-preview .mini-route-map > div:nth-child(2) {
+    height: clamp(11rem, 48vw, 13.5rem);
+    min-height: 11rem;
+    border-radius: 1rem;
+  }
+
+  #route-preview .map-embed-clean {
+    min-height: 11rem;
+  }
+
+  #route-preview .route-card-heading {
+    margin-bottom: 0.55rem;
+  }
+
+  #route-preview .route-card-heading p,
+  #route-preview .route-card-heading span {
+    font-size: 0.62rem;
+  }
+
+  .route-metrics {
+    gap: 0.5rem;
+    padding: 0.65rem 0.2rem 0.1rem;
+  }
+
+  .route-metric-label {
+    display: block;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 0.54rem;
+  }
+
+  .route-metrics strong {
+    margin-top: 0.2rem;
+    font-size: 0.82rem;
+  }
+
+  .route-metrics strong svg {
+    width: 0.85rem;
+    height: 0.85rem;
+  }
+
+  .reference-shortcut-row {
+    scroll-snap-type: x proximity;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .reference-shortcut {
+    min-height: 4.45rem;
+    scroll-snap-align: start;
+  }
+
+  #tours .experience-card {
+    min-height: 8.2rem;
+    scroll-margin-top: 1rem;
+  }
+
+  #tours .experience-card > img {
+    height: 100%;
+    min-height: 8.2rem;
+    object-fit: cover;
+  }
+
+  #tours .experience-card > div {
+    display: flex;
+    flex-direction: column;
+  }
+
+  #tours .experience-card .card-cta {
+    min-height: 2.35rem;
+    margin-top: auto;
+  }
+
+  #tours .experience-card > div > button:last-child {
+    min-height: 2rem;
+  }
+
+  .route-stats > div {
+    min-height: 3.55rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+}
