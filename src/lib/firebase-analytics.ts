@@ -20,9 +20,11 @@ function installGtag() {
   if (window.gtag) return true;
 
   window.dataLayer = window.dataLayer ?? [];
-  window.gtag = ((...args: unknown[]) => {
-    window.dataLayer?.push(args);
-  }) as Gtag;
+  window.gtag = function gtag(...args: unknown[]) {
+    // gtag.js consumes the native Arguments object from the dataLayer queue.
+    // eslint-disable-next-line prefer-rest-params
+    window.dataLayer?.push(arguments);
+  } as Gtag;
 
   if (!document.querySelector(`script[data-turavia-analytics="${MEASUREMENT_ID}"]`)) {
     const script = document.createElement("script");
