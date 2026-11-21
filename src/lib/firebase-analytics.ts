@@ -13,7 +13,31 @@ declare global {
 }
 
 const MEASUREMENT_ID = "G-GC77D3R38Q";
+const COLLECT_URL = "https://www.google-analytics.com/g/collect";
 let analyticsPromise: Promise<boolean> | null = null;
+
+function sendHit(eventName: string, params: Record<string, AnalyticsValue>) {
+  if (typeof window === "undefined") return;
+  const storedClientId = window.localStorage.getItem("turavia_ga_client_id");
+  const clientId = storedClientId ?? `${Date.now()}.${Math.floor(Math.random() * 1_000_000_000)}`;
+  if (!storedClientId) window.localStorage.setItem("turavia_ga_client_id", clientId);
+  const query = new URLSearchParams({
+    v: "2",
+    tid: MEASUREMENT_ID,
+    en: eventName,
+    cid: clientId,
+    dl: window.location.href,
+    dt: document.title,
+  });
+  for (const [key, value] of Object.entries(params)) {
+    if (value !== undefined) query.set(key, String(value));
+  }
+  void fetch(`${COLLECT_URL}?${query.toString()}`, {
+    method: "GET",
+    mode: "no-cors",
+    keepalive: true,
+  });
+}
 
 function installGtag() {
   if (typeof window === "undefined" || typeof document === "undefined") return false;
@@ -50,7 +74,7 @@ export function initializeFirebaseAnalytics() {
 export async function trackPageView(path: string) {
   if (!(await initializeFirebaseAnalytics()) || !window.gtag) return;
   const pageUrl = new URL(path, window.location.origin);
-  window.gtag("event", "page_view", {
+  sendHit("page_view", {
     page_path: `${pageUrl.pathname}${pageUrl.search}${pageUrl.hash}`,
     page_location: pageUrl.href,
     page_title: document.title,
@@ -62,5 +86,5 @@ export async function trackAnalyticsEvent(
   params: Record<string, AnalyticsValue> = {},
 ) {
   if (!(await initializeFirebaseAnalytics()) || !window.gtag) return;
-  window.gtag("event", eventName, params);
+  sendHit(eventName, params);
 }
