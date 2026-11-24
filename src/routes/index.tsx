@@ -1284,12 +1284,17 @@ function Index() {
       setTourPickerOpen(true);
       return;
     }
+    if (feature === "ride") {
+      closeFeatureDetail();
+      window.setTimeout(openBookingPage, 280);
+      return;
+    }
     if (feature === "promotion") {
       openWhatsApp();
       return;
     }
     closeFeatureDetail();
-    window.setTimeout(() => scrollToSection("route-preview"), 0);
+    window.setTimeout(openBookingPage, 280);
   };
 
   const featureContent = selectedFeature ? getFeatureContent(selectedFeature, language) : null;
@@ -1430,6 +1435,32 @@ function Index() {
       window.removeEventListener("popstate", syncBookingHash);
     };
   }, []);
+
+  const finalReserveBanner = (
+    <aside
+      className="final-reserve-banner"
+      aria-label={language === "es" ? "Reserva rápida" : "Quick booking"}
+    >
+      <div className="min-w-0">
+        <p className="text-[9px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
+          TuraVía · {language === "es" ? "TOURS Y VIAJES" : "TOURS & RIDES"}
+        </p>
+        <p className="mt-0.5 text-sm font-bold text-foreground">
+          {formatColones(fare.total)}{" "}
+          <span className="text-[10px] font-medium text-muted-foreground">
+            / {language === "es" ? "persona" : "person"}
+          </span>
+        </p>
+      </div>
+      <button
+        type="button"
+        onClick={openBookingPage}
+        className="shrink-0 rounded-xl bg-[#f47b20] px-4 py-2.5 text-xs font-bold text-white shadow-[0_3px_0_rgba(153,67,12,0.22)] transition-transform active:scale-[0.97]"
+      >
+        {language === "es" ? "Reservar ahora" : "Book now"}
+      </button>
+    </aside>
+  );
 
   if (activeRole === "driver" && driverRoleAvailable && user) {
     return (
@@ -1655,21 +1686,6 @@ function Index() {
 
             {mode === "transfers" && (
               <section
-                id="route-preview"
-                className="experience-panel mt-3 overflow-hidden rounded-[28px] p-4 ring-1 ring-border"
-              >
-                <MiniRouteMap
-                  origin={origin}
-                  destination={destination}
-                  language={language}
-                  distanceKm={distanceKm}
-                  durationMinutes={durationMinutes}
-                />
-              </section>
-            )}
-
-            {mode === "transfers" && (
-              <section
                 className="route-stats mt-3 grid grid-cols-4 gap-2"
                 aria-label={language === "es" ? "Resumen de servicio" : "Service summary"}
               >
@@ -1716,6 +1732,15 @@ function Index() {
                         </div>
                       </div>
                     )}
+                    <section className="mb-4 rounded-[24px] bg-background p-3 ring-1 ring-border">
+                      <MiniRouteMap
+                        origin={origin}
+                        destination={destination}
+                        language={language}
+                        distanceKm={distanceKm}
+                        durationMinutes={durationMinutes}
+                      />
+                    </section>
                     <h2 className="mx-auto mb-3 max-w-[13rem] rounded-full bg-jungle px-5 py-2.5 text-center font-display text-lg text-primary-foreground shadow-[0_4px_0_color-mix(in_oklch,var(--color-jungle)_35%,transparent)]">
                       {language === "es" ? "Reservar Tours" : "Book Tours"}
                     </h2>
@@ -2418,7 +2443,7 @@ function Index() {
                   type="button"
                   onClick={() => {
                     closeArticleDetail();
-                    window.setTimeout(() => scrollToSection("route-preview"), 0);
+                    window.setTimeout(openBookingPage, 280);
                   }}
                   className="mt-3 w-full rounded-2xl bg-leaf py-3 text-sm font-bold text-leaf-foreground transition-transform active:scale-[0.98]"
                 >
@@ -2431,7 +2456,7 @@ function Index() {
       )}
 
       {selectedTour && (
-        <main className="fixed inset-0 z-40 overflow-y-auto bg-background px-4 pb-10 pt-4 sm:px-8 sm:pt-8">
+        <main className="fixed inset-0 z-40 overflow-y-auto bg-background px-4 pb-28 pt-4 sm:px-8 sm:pb-10 sm:pt-8">
           <section
             className="mx-auto min-h-[calc(100vh-2rem)] w-full max-w-2xl rounded-[28px] bg-surface p-4 text-foreground shadow-xl ring-1 ring-border sm:min-h-[calc(100vh-4rem)] sm:p-7"
             aria-labelledby="tour-detail-title"
@@ -2471,192 +2496,275 @@ function Index() {
             <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
               {selectedTour.summary}
             </p>
-            <div className="mt-5 rounded-[22px] bg-background p-3 ring-1 ring-border">
-              <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-muted-foreground">
-                {language === "es" ? "Método de pago" : "Payment method"}
+            <button
+              type="button"
+              onClick={() => scrollToSection("tour-checkout")}
+              className="mt-4 w-full rounded-2xl bg-leaf py-3.5 text-sm font-bold text-leaf-foreground shadow-[0_3px_0_color-mix(in_oklch,var(--color-jungle)_35%,transparent)]"
+            >
+              {language === "es" ? "Reservar ahora" : "Book now"}
+            </button>
+            <section className="mt-5 rounded-[22px] bg-background p-4 ring-1 ring-border">
+              <h3 className="text-sm font-bold">
+                {language === "es" ? "Notas para tu viaje" : "Travel notes"}
+              </h3>
+              <ul className="mt-3 space-y-2 text-xs leading-relaxed text-muted-foreground">
+                <li className="flex gap-2">
+                  <span className="mt-1 size-1.5 shrink-0 rounded-full bg-leaf" />
+                  <span>
+                    <strong className="text-foreground">
+                      {language === "es" ? "Qué llevar:" : "What to bring:"}
+                    </strong>{" "}
+                    {language === "es"
+                      ? "Zapatos cómodos, agua y protección solar."
+                      : "Comfortable shoes, water, and sun protection."}
+                  </span>
+                </li>
+                <li className="flex gap-2">
+                  <span className="mt-1 size-1.5 shrink-0 rounded-full bg-leaf" />
+                  <span>
+                    <strong className="text-foreground">
+                      {language === "es" ? "Punto de encuentro:" : "Meeting point:"}
+                    </strong>{" "}
+                    {language === "es"
+                      ? "Se confirma con el operador al reservar."
+                      : "Confirmed with the operator after booking."}
+                  </span>
+                </li>
+                <li className="flex gap-2">
+                  <span className="mt-1 size-1.5 shrink-0 rounded-full bg-leaf" />
+                  <span>
+                    <strong className="text-foreground">
+                      {language === "es" ? "Duración:" : "Duration:"}
+                    </strong>{" "}
+                    {selectedTour.meta}
+                  </span>
+                </li>
+              </ul>
+            </section>
+            {finalReserveBanner}
+            <section className="mt-5 rounded-[22px] bg-background p-4 ring-1 ring-border">
+              <h3 className="text-sm font-bold">
+                {language === "es" ? "Experiencias Locales" : "Local Experiences"}
+              </h3>
+              <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
+                {language === "es"
+                  ? "Explora otras actividades de la zona."
+                  : "Explore more activities in the area."}
               </p>
-              <div className="mt-2 grid grid-cols-2 gap-1.5">
-                {(["cash", "card"] as const).map((method) => (
+              <div className="mt-3 grid grid-cols-2 gap-2">
+                {(
+                  [
+                    [
+                      "activities",
+                      language === "es" ? "Actividades en La Fortuna" : "Activities in La Fortuna",
+                    ],
+                    ["rivers", language === "es" ? "Ríos y Aventuras" : "Rivers and Adventures"],
+                    [
+                      "parks",
+                      language === "es"
+                        ? "Parques y Puentes Colgantes"
+                        : "Parks and Hanging Bridges",
+                    ],
+                    ["beaches", language === "es" ? "Playas" : "Beaches"],
+                  ] as const
+                ).map(([category, title]) => (
                   <button
-                    key={method}
+                    key={category}
                     type="button"
-                    onClick={() => setTourPaymentMethod(method)}
-                    className={`rounded-xl px-2 py-2.5 text-[11px] font-bold transition-colors ${tourPaymentMethod === method ? "bg-[#169bc5] text-white" : "bg-[#eef1f5] text-[#697180]"}`}
+                    onClick={() => openTourCategory(category)}
+                    className="rounded-xl bg-surface px-2.5 py-2.5 text-left text-[11px] font-bold text-leaf-ink ring-1 ring-border"
                   >
-                    {method === "cash"
-                      ? language === "es"
-                        ? "Efectivo"
-                        : "Cash"
-                      : language === "es"
-                        ? "Tarjeta"
-                        : "Card"}
+                    {title}
                   </button>
                 ))}
               </div>
-              <div className="mt-3 flex items-start gap-2 text-xs leading-relaxed text-muted-foreground">
-                <ShieldCheck className="mt-0.5 size-4 shrink-0 text-leaf" />
-                <span>
-                  {tourPaymentMethod === "cash"
-                    ? language === "es"
-                      ? "Solicita el tour y coordina el pago en efectivo con el operador."
-                      : "Request the tour and coordinate cash payment with the operator."
-                    : language === "es"
-                      ? "Continúa a Stripe Checkout para pagar de forma segura; nunca ingreses los datos aquí."
-                      : "Continue to Stripe Checkout for secure payment; never enter card details here."}
+            </section>
+            <section className="mt-5 rounded-[22px] bg-background p-4 ring-1 ring-border">
+              <div className="flex items-center justify-between gap-3">
+                <h3 className="text-sm font-bold">
+                  {language === "es" ? "Reseñas recientes" : "Recent reviews"}
+                </h3>
+                <span className="flex items-center gap-1 text-xs font-bold text-leaf-ink">
+                  <Star className="size-3.5 fill-current" /> 4,9
                 </span>
               </div>
-              {tourPaymentMethod === "cash" && (
-                <button
-                  type="button"
-                  onClick={() => setTourWhatsAppSelected((selected) => !selected)}
-                  className={`mt-3 flex w-full items-center justify-center gap-2 rounded-xl py-2.5 text-xs font-bold transition-colors ${tourWhatsAppSelected ? "bg-[#25D366] text-white" : "bg-[#eef1f5] text-[#697180]"}`}
-                >
-                  <MessageCircle className="size-4" />
-                  {tourWhatsAppSelected
-                    ? language === "es"
-                      ? "WhatsApp seleccionado"
-                      : "WhatsApp selected"
-                    : language === "es"
-                      ? "Seleccionar WhatsApp para enviar la reserva"
-                      : "Select WhatsApp to send the booking"}
-                </button>
+              <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
+                {language === "es"
+                  ? "“La reserva fue sencilla y la experiencia se sintió cercana desde el primer mensaje.”"
+                  : "“Booking was simple, and the experience felt personal from the first message.”"}
+              </p>
+              <p className="mt-2 text-[11px] font-bold text-leaf-ink">
+                {language === "es"
+                  ? "Familia viajera · Tour y traslado"
+                  : "Traveling family · Tour and transfer"}
+              </p>
+            </section>
+            <div id="tour-checkout" className="scroll-mt-4">
+              <div className="mt-5 rounded-[22px] bg-background p-3 ring-1 ring-border">
+                <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-muted-foreground">
+                  {language === "es" ? "Método de pago" : "Payment method"}
+                </p>
+                <div className="mt-2 grid grid-cols-2 gap-1.5">
+                  {(["cash", "card"] as const).map((method) => (
+                    <button
+                      key={method}
+                      type="button"
+                      onClick={() => setTourPaymentMethod(method)}
+                      className={`rounded-xl px-2 py-2.5 text-[11px] font-bold transition-colors ${tourPaymentMethod === method ? "bg-[#169bc5] text-white" : "bg-[#eef1f5] text-[#697180]"}`}
+                    >
+                      {method === "cash"
+                        ? language === "es"
+                          ? "Efectivo"
+                          : "Cash"
+                        : language === "es"
+                          ? "Tarjeta"
+                          : "Card"}
+                    </button>
+                  ))}
+                </div>
+                <div className="mt-3 flex items-start gap-2 text-xs leading-relaxed text-muted-foreground">
+                  <ShieldCheck className="mt-0.5 size-4 shrink-0 text-leaf" />
+                  <span>
+                    {tourPaymentMethod === "cash"
+                      ? language === "es"
+                        ? "Solicita el tour y coordina el pago en efectivo con el operador."
+                        : "Request the tour and coordinate cash payment with the operator."
+                      : language === "es"
+                        ? "Continúa a Stripe Checkout para pagar de forma segura; nunca ingreses los datos aquí."
+                        : "Continue to Stripe Checkout for secure payment; never enter card details here."}
+                  </span>
+                </div>
+                {tourPaymentMethod === "cash" && (
+                  <button
+                    type="button"
+                    onClick={() => setTourWhatsAppSelected((selected) => !selected)}
+                    className={`mt-3 flex w-full items-center justify-center gap-2 rounded-xl py-2.5 text-xs font-bold transition-colors ${tourWhatsAppSelected ? "bg-[#25D366] text-white" : "bg-[#eef1f5] text-[#697180]"}`}
+                  >
+                    <MessageCircle className="size-4" />
+                    {tourWhatsAppSelected
+                      ? language === "es"
+                        ? "WhatsApp seleccionado"
+                        : "WhatsApp selected"
+                      : language === "es"
+                        ? "Seleccionar WhatsApp para enviar la reserva"
+                        : "Select WhatsApp to send the booking"}
+                  </button>
+                )}
+              </div>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setTourPaymentMethod("card");
+                  void confirmTourBooking(selectedTour, "card");
+                }}
+                className="mt-3 flex w-full items-center justify-center gap-2 rounded-2xl bg-[#169bc5] py-3 text-xs font-bold text-white shadow-[0_3px_0_rgba(21,86,106,0.2)]"
+              >
+                <Radio className="size-4" />
+                <Smartphone className="size-4" />
+                {language === "es"
+                  ? "Pagar con NFC · Acerca tu teléfono"
+                  : "Pay with NFC · Tap your phone"}
+              </button>
+              <div className="mt-2 flex items-center justify-center gap-2 text-[10px] font-semibold text-muted-foreground">
+                <CreditCard className="size-3.5" /> Apple Pay · Google Pay · Stripe
+              </div>
+
+              <div className="mt-5 rounded-[22px] bg-[#eef8fb] p-4 ring-1 ring-[#b8dce6]">
+                <div className="flex items-center justify-between gap-3">
+                  <h3 className="text-sm font-bold text-[#15566a]">
+                    {language === "es" ? "Resumen del pedido" : "Order summary"}
+                  </h3>
+                  <CheckCircle2 className="size-4 text-[#169bc5]" />
+                </div>
+                <div className="mt-3 space-y-2 text-xs">
+                  <div className="flex items-start justify-between gap-4">
+                    <span className="text-muted-foreground">
+                      {language === "es" ? "Tour seleccionado" : "Selected tour"}
+                    </span>
+                    <span className="max-w-[58%] text-right font-semibold">
+                      {selectedTour.title}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between gap-4">
+                    <span className="text-muted-foreground">
+                      {language === "es" ? "Duración" : "Duration"}
+                    </span>
+                    <span className="font-semibold">{selectedTour.meta}</span>
+                  </div>
+                  <div className="flex items-center justify-between gap-4">
+                    <span className="text-muted-foreground">
+                      {language === "es" ? "Precio del tour" : "Tour price"}
+                    </span>
+                    <span className="font-semibold">{selectedTour.price}</span>
+                  </div>
+                  <div className="flex items-center justify-between gap-4">
+                    <span className="text-muted-foreground">
+                      {language === "es" ? "Cantidad" : "Quantity"}
+                    </span>
+                    <span className="font-semibold">1</span>
+                  </div>
+                  <div className="border-t border-[#b8dce6] pt-2">
+                    <div className="flex items-center justify-between gap-4 text-sm font-bold text-[#15566a]">
+                      <span>{language === "es" ? "Total estimado" : "Estimated total"}</span>
+                      <span>{selectedTour.price}</span>
+                    </div>
+                  </div>
+                  <p className="pt-1 text-[11px] leading-relaxed text-muted-foreground">
+                    {language === "es"
+                      ? tourPaymentMethod === "card"
+                        ? "Pago: Tarjeta · Checkout seguro de Stripe"
+                        : "Pago: Efectivo · Envío: WhatsApp"
+                      : tourPaymentMethod === "card"
+                        ? "Payment: Card · Secure Stripe Checkout"
+                        : "Payment: Cash · Send via: WhatsApp"}
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => void confirmTourBooking(selectedTour)}
+                disabled={
+                  (tourPaymentMethod === "cash" && !tourWhatsAppSelected) ||
+                  bookingStatus === "saving"
+                }
+                className="mt-4 w-full rounded-2xl bg-leaf py-3.5 text-sm font-bold text-leaf-foreground shadow-[0_3px_0_color-mix(in_oklch,var(--color-jungle)_35%,transparent)] disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {bookingStatus === "saving"
+                  ? language === "es"
+                    ? "Guardando…"
+                    : "Saving…"
+                  : language === "es"
+                    ? tourPaymentMethod === "card"
+                      ? "Pagar con Stripe Checkout"
+                      : "Enviar reserva por WhatsApp"
+                    : tourPaymentMethod === "card"
+                      ? "Pay with Stripe Checkout"
+                      : "Send booking by WhatsApp"}
+              </button>
+              {bookingStatus === "saved" && (
+                <p className="mt-2 text-center text-xs font-semibold text-leaf-ink">
+                  {language === "es"
+                    ? "Solicitud de tour confirmada correctamente."
+                    : "Tour request confirmed successfully."}
+                </p>
               )}
             </div>
-
             <button
               type="button"
-              onClick={() => {
-                setTourPaymentMethod("card");
-                void confirmTourBooking(selectedTour, "card");
-              }}
-              className="mt-3 flex w-full items-center justify-center gap-2 rounded-2xl bg-[#169bc5] py-3 text-xs font-bold text-white shadow-[0_3px_0_rgba(21,86,106,0.2)]"
+              onClick={() => scrollToSection("tour-checkout")}
+              className="fixed inset-x-4 bottom-[6.5rem] z-50 flex items-center justify-center rounded-2xl bg-leaf px-4 py-3.5 text-sm font-bold text-leaf-foreground shadow-[0_5px_0_color-mix(in_oklch,var(--color-jungle)_35%,transparent),0_12px_24px_rgba(0,0,0,0.16)] sm:bottom-4 sm:hidden"
             >
-              <Radio className="size-4" />
-              <Smartphone className="size-4" />
               {language === "es"
-                ? "Pagar con NFC · Acerca tu teléfono"
-                : "Pay with NFC · Tap your phone"}
+                ? `Reservar ahora - ${selectedTour.price}`
+                : `Book now - ${selectedTour.price}`}
             </button>
-            <div className="mt-2 flex items-center justify-center gap-2 text-[10px] font-semibold text-muted-foreground">
-              <CreditCard className="size-3.5" /> Apple Pay · Google Pay · Stripe
-            </div>
-
-            <div className="mt-5 rounded-[22px] bg-background p-3 ring-1 ring-border">
-              <h3 className="text-sm font-bold">
-                {language === "es" ? "Tours disponibles por tipo" : "Available tours by type"}
-              </h3>
-              <div className="mt-3 space-y-3">
-                {(language === "es"
-                  ? [
-                      ["Naturaleza", "Volcán Arenal y aguas termales · Puentes Colgantes Místico"],
-                      ["Playas", "Escapada a playas del Pacífico"],
-                      ["Parques", "Parques nacionales de Costa Rica"],
-                      ["Ríos y aventura", "Safari Río Peñas Blancas · Ríos y aventura tropical"],
-                    ]
-                  : [
-                      ["Nature", "Arenal Volcano & hot springs · Mystic Hanging Bridges"],
-                      ["Beaches", "Pacific coast beach escape"],
-                      ["Parks", "Costa Rica national parks"],
-                      [
-                        "Rivers & adventure",
-                        "Peñas Blancas River Safari · Rivers & tropical adventure",
-                      ],
-                    ]
-                ).map(([type, activities]) => (
-                  <div key={type} className="border-b border-border pb-2 last:border-0 last:pb-0">
-                    <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-leaf-ink">
-                      {type}
-                    </p>
-                    <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
-                      {activities}
-                    </p>
-                  </div>
-                ))}
-              </div>
-            </div>
-            <div className="mt-5 rounded-[22px] bg-[#eef8fb] p-4 ring-1 ring-[#b8dce6]">
-              <div className="flex items-center justify-between gap-3">
-                <h3 className="text-sm font-bold text-[#15566a]">
-                  {language === "es" ? "Resumen del pedido" : "Order summary"}
-                </h3>
-                <CheckCircle2 className="size-4 text-[#169bc5]" />
-              </div>
-              <div className="mt-3 space-y-2 text-xs">
-                <div className="flex items-start justify-between gap-4">
-                  <span className="text-muted-foreground">
-                    {language === "es" ? "Tour seleccionado" : "Selected tour"}
-                  </span>
-                  <span className="max-w-[58%] text-right font-semibold">{selectedTour.title}</span>
-                </div>
-                <div className="flex items-center justify-between gap-4">
-                  <span className="text-muted-foreground">
-                    {language === "es" ? "Duración" : "Duration"}
-                  </span>
-                  <span className="font-semibold">{selectedTour.meta}</span>
-                </div>
-                <div className="flex items-center justify-between gap-4">
-                  <span className="text-muted-foreground">
-                    {language === "es" ? "Precio del tour" : "Tour price"}
-                  </span>
-                  <span className="font-semibold">{selectedTour.price}</span>
-                </div>
-                <div className="flex items-center justify-between gap-4">
-                  <span className="text-muted-foreground">
-                    {language === "es" ? "Cantidad" : "Quantity"}
-                  </span>
-                  <span className="font-semibold">1</span>
-                </div>
-                <div className="border-t border-[#b8dce6] pt-2">
-                  <div className="flex items-center justify-between gap-4 text-sm font-bold text-[#15566a]">
-                    <span>{language === "es" ? "Total estimado" : "Estimated total"}</span>
-                    <span>{selectedTour.price}</span>
-                  </div>
-                </div>
-                <p className="pt-1 text-[11px] leading-relaxed text-muted-foreground">
-                  {language === "es"
-                    ? tourPaymentMethod === "card"
-                      ? "Pago: Tarjeta · Checkout seguro de Stripe"
-                      : "Pago: Efectivo · Envío: WhatsApp"
-                    : tourPaymentMethod === "card"
-                      ? "Payment: Card · Secure Stripe Checkout"
-                      : "Payment: Cash · Send via: WhatsApp"}
-                </p>
-              </div>
-            </div>
-            <button
-              type="button"
-              onClick={() => void confirmTourBooking(selectedTour)}
-              disabled={
-                (tourPaymentMethod === "cash" && !tourWhatsAppSelected) ||
-                bookingStatus === "saving"
-              }
-              className="mt-4 w-full rounded-2xl bg-leaf py-3.5 text-sm font-bold text-leaf-foreground shadow-[0_3px_0_color-mix(in_oklch,var(--color-jungle)_35%,transparent)] disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              {bookingStatus === "saving"
-                ? language === "es"
-                  ? "Guardando…"
-                  : "Saving…"
-                : language === "es"
-                  ? tourPaymentMethod === "card"
-                    ? "Pagar con Stripe Checkout"
-                    : "Enviar reserva por WhatsApp"
-                  : tourPaymentMethod === "card"
-                    ? "Pay with Stripe Checkout"
-                    : "Send booking by WhatsApp"}
-            </button>
-            {bookingStatus === "saved" && (
-              <p className="mt-2 text-center text-xs font-semibold text-leaf-ink">
-                {language === "es"
-                  ? "Solicitud de tour confirmada correctamente."
-                  : "Tour request confirmed successfully."}
-              </p>
-            )}
           </section>
         </main>
       )}
 
       {paymentRequests.length > 0 && user && (
-        <aside className="fixed inset-x-3 bottom-24 z-30 mx-auto max-w-md rounded-[24px] bg-surface p-4 shadow-2xl ring-1 ring-[#169bc5]/35">
+        <aside className="fixed inset-x-3 bottom-[13rem] z-30 mx-auto max-w-md rounded-[24px] bg-surface p-4 shadow-2xl ring-1 ring-[#169bc5]/35 sm:bottom-24">
           <div className="flex items-start gap-3">
             <div className="grid size-10 shrink-0 place-items-center rounded-full bg-[#169bc5]/15 text-[#169bc5]">
               <Smartphone className="size-5" />
@@ -3044,6 +3152,18 @@ function Index() {
               {featureContent.description}
             </p>
 
+            {selectedFeature === "ride" && (
+              <section className="mt-6 rounded-[24px] bg-background p-3 ring-1 ring-border">
+                <MiniRouteMap
+                  origin={origin}
+                  destination={destination}
+                  language={language}
+                  distanceKm={distanceKm}
+                  durationMinutes={durationMinutes}
+                />
+              </section>
+            )}
+
             {selectedFeature === "booking" && (
               <section className="mt-6 rounded-[24px] bg-background p-4 ring-1 ring-border">
                 <div className="flex items-center justify-between gap-3">
@@ -3257,6 +3377,16 @@ function Index() {
               />
             </div>
 
+            <section className="mt-5 rounded-[24px] bg-background p-3 ring-1 ring-border">
+              <MiniRouteMap
+                origin={origin}
+                destination={destinationQuery.trim() || destination}
+                language={language}
+                distanceKm={distanceKm}
+                durationMinutes={durationMinutes}
+              />
+            </section>
+
             <div className="mt-6 space-y-2" aria-live="polite">
               <p className="px-1 text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
                 {language === "es" ? "Sugerencias" : "Suggestions"}
@@ -3287,30 +3417,6 @@ function Index() {
           </section>
         </div>
       )}
-
-      <aside
-        className="final-reserve-banner"
-        aria-label={language === "es" ? "Reserva rápida" : "Quick booking"}
-      >
-        <div className="min-w-0">
-          <p className="text-[9px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
-            TuraVía · {language === "es" ? "TOURS Y VIAJES" : "TOURS & RIDES"}
-          </p>
-          <p className="mt-0.5 text-sm font-bold text-foreground">
-            {formatColones(fare.total)}{" "}
-            <span className="text-[10px] font-medium text-muted-foreground">
-              / {language === "es" ? "persona" : "person"}
-            </span>
-          </p>
-        </div>
-        <button
-          type="button"
-          onClick={openBookingPage}
-          className="shrink-0 rounded-xl bg-[#f47b20] px-4 py-2.5 text-xs font-bold text-white shadow-[0_3px_0_rgba(153,67,12,0.22)] transition-transform active:scale-[0.97]"
-        >
-          {language === "es" ? "Reservar ahora" : "Book now"}
-        </button>
-      </aside>
 
       <nav
         className="pointer-events-none fixed bottom-0 left-1/2 z-20 w-full max-w-[400px] -translate-x-1/2 px-8 pb-4 lg:max-w-lg"

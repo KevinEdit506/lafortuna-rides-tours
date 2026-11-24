@@ -839,7 +839,19 @@ input::placeholder {
   gap: 0.6rem;
   padding: 0.58rem 0.65rem;
   border-radius: 1.2rem;
-  background: white;
+  background: linear-gradient(
+    to bottom,
+    #244f9b 0%,
+    #244f9b 20%,
+    #ffffff 20%,
+    #ffffff 40%,
+    #d5222b 40%,
+    #d5222b 60%,
+    #ffffff 60%,
+    #ffffff 80%,
+    #244f9b 80%,
+    #244f9b 100%
+  );
   color: var(--jungle);
   box-shadow:
     0 4px 0 oklch(0.2 0.03 160 / 17%),
