@@ -33,7 +33,6 @@ import type { User } from "firebase/auth";
 
 import misticoImage from "../assets/mistico-bridges.jpg";
 import riverImage from "../assets/penas-blancas.jpg";
-import { MiniRouteMap } from "../components/MiniRouteMap";
 import { DriverDashboardContent } from "../components/DriverDashboard";
 import { trackAnalyticsEvent } from "../lib/firebase-analytics";
 import { saveBooking } from "../lib/firebase-bookings";
@@ -1732,15 +1731,6 @@ function Index() {
                         </div>
                       </div>
                     )}
-                    <section className="mb-4 rounded-[24px] bg-background p-3 ring-1 ring-border">
-                      <MiniRouteMap
-                        origin={origin}
-                        destination={destination}
-                        language={language}
-                        distanceKm={distanceKm}
-                        durationMinutes={durationMinutes}
-                      />
-                    </section>
                     <h2 className="mx-auto mb-3 max-w-[13rem] rounded-full bg-jungle px-5 py-2.5 text-center font-display text-lg text-primary-foreground shadow-[0_4px_0_color-mix(in_oklch,var(--color-jungle)_35%,transparent)]">
                       {language === "es" ? "Reservar Tours" : "Book Tours"}
                     </h2>
@@ -3152,18 +3142,6 @@ function Index() {
               {featureContent.description}
             </p>
 
-            {selectedFeature === "ride" && (
-              <section className="mt-6 rounded-[24px] bg-background p-3 ring-1 ring-border">
-                <MiniRouteMap
-                  origin={origin}
-                  destination={destination}
-                  language={language}
-                  distanceKm={distanceKm}
-                  durationMinutes={durationMinutes}
-                />
-              </section>
-            )}
-
             {selectedFeature === "booking" && (
               <section className="mt-6 rounded-[24px] bg-background p-4 ring-1 ring-border">
                 <div className="flex items-center justify-between gap-3">
@@ -3376,16 +3354,6 @@ function Index() {
                 className="min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
               />
             </div>
-
-            <section className="mt-5 rounded-[24px] bg-background p-3 ring-1 ring-border">
-              <MiniRouteMap
-                origin={origin}
-                destination={destinationQuery.trim() || destination}
-                language={language}
-                distanceKm={distanceKm}
-                durationMinutes={durationMinutes}
-              />
-            </section>
 
             <div className="mt-6 space-y-2" aria-live="polite">
               <p className="px-1 text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">

@@ -449,31 +449,6 @@
   border-color: var(--color-border) !important;
 }
 
-/* Google Maps places its origin/destination legend at the top of the embed.
- * Start the iframe above the viewport so only the clean route map is visible. */
-.map-embed-clean {
-  height: calc(100% + 96px);
-  margin-top: -96px;
-  transform-origin: center center;
-}
-
-@keyframes map-camera-in {
-  from {
-    opacity: 0.72;
-    transform: scale(1.045) translate3d(0, 8px, 0);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1) translate3d(0, 0, 0);
-  }
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .map-camera-in {
-    animation: map-camera-in 520ms cubic-bezier(0.23, 1, 0.32, 1) both;
-  }
-}
-
 .app-shell::before,
 .app-shell::after {
   position: fixed;
@@ -499,10 +474,6 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .map-camera-in {
-    animation: none;
-  }
-
   .app-shell::before {
     transform: none;
     will-change: auto;
