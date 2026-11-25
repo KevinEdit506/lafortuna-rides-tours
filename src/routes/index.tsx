@@ -1619,7 +1619,7 @@ function Index() {
         )}
 
         <div
-          className={`lg:gap-16 ${mode === "transfers" ? "lg:grid lg:grid-cols-[minmax(0,0.9fr)_minmax(390px,0.72fr)]" : "lg:block"}`}
+          className={`lg:gap-16 ${mode === "transfers" && !bookingPageOpen ? "lg:grid lg:grid-cols-[minmax(0,0.9fr)_minmax(390px,0.72fr)]" : "lg:block"}`}
         >
           <div>
             {mode === "transfers" && (
@@ -1709,7 +1709,7 @@ function Index() {
 
             {mode === "transfers" ? (
               bookingPageOpen ? (
-                <div className="booking-page-shell rounded-[30px] bg-background p-2 sm:p-4">
+                <div className="booking-page-shell mx-auto w-full max-w-2xl rounded-[30px] bg-background p-2 sm:p-4">
                   <section className="booking-reference-panel control-relief rise mt-4 rounded-[30px] bg-surface p-4 [animation-delay:200ms]">
                     {bookingPageOpen && (
                       <div className="mb-4 flex items-center gap-3 border-b border-border pb-4">
