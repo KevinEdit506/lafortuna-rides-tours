@@ -1652,12 +1652,13 @@ input::placeholder {
   }
 }
 
-/* Quick actions banner: every action keeps its icon and complete label in one horizontal strip. */
+/* Quick actions banner: keep all five actions inside the banner grid. */
 .reference-shortcut-row {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   align-items: stretch;
   gap: 0.45rem;
-  overflow-x: auto;
+  min-width: 0;
   padding: 0.55rem 0.35rem 0.7rem;
   border: 1px solid color-mix(in oklch, var(--foreground) 10%, transparent);
   border-radius: 1.25rem;
@@ -1673,14 +1674,15 @@ input::placeholder {
 }
 
 .reference-shortcut {
-  flex: 0 0 auto;
-  min-width: 5.8rem;
-  padding-inline: 0.65rem;
-  white-space: nowrap;
+  width: auto;
+  min-width: 0;
+  justify-self: stretch;
+  padding-inline: 0.1rem;
+  white-space: normal;
 }
 
 .reference-shortcut:nth-child(3) {
-  min-width: 7.4rem;
+  min-width: 0;
 }
 
 .reference-shortcut-icon {
@@ -1695,12 +1697,12 @@ input::placeholder {
   }
 
   .reference-shortcut {
-    min-width: 5.7rem;
-    padding-inline: 0.5rem;
+    min-width: 0;
+    padding-inline: 0.1rem;
   }
 
   .reference-shortcut:nth-child(3) {
-    min-width: 7.1rem;
+    min-width: 0;
   }
 
   .reference-shortcut > span:last-child {
