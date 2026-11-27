@@ -306,21 +306,24 @@
 
 .reference-shortcut {
   display: grid;
+  width: 100%;
   justify-items: center;
   gap: 0.35rem;
   min-width: 0;
   padding: 0;
+  overflow: hidden;
   color: var(--foreground);
   font-size: 0.68rem;
   font-weight: 700;
+  line-height: 1.1;
   background: transparent;
   box-shadow: none;
 }
 
 .reference-shortcut-icon {
   display: grid;
-  width: 3.6rem;
-  height: 3.6rem;
+  width: clamp(2.75rem, 10vw, 3.6rem);
+  height: clamp(2.75rem, 10vw, 3.6rem);
   place-items: center;
   border-radius: 999px;
   color: white;
@@ -974,11 +977,15 @@ input::placeholder {
     gap: 0.1rem;
   }
   .reference-shortcut-icon {
-    width: 3.05rem;
-    height: 3.05rem;
+    width: clamp(2.55rem, 12.5vw, 3.05rem);
+    height: clamp(2.55rem, 12.5vw, 3.05rem);
   }
   .reference-shortcut {
     gap: 0.28rem;
+    padding-inline: 0.05rem;
+    font-size: 0.6rem;
+    overflow-wrap: anywhere;
+    text-align: center;
   }
   .reference-search {
     margin-top: 0.9rem;
