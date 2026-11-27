@@ -390,6 +390,13 @@ function Index() {
   const [exchangeRate, setExchangeRate] = useState<number | null>(null);
   const [confirmed, setConfirmed] = useState(false);
   const [bookingStatus, setBookingStatus] = useState<"idle" | "saving" | "saved" | "error">("idle");
+  const [tourConfirmation, setTourConfirmation] = useState<{
+    id: string;
+    title: string;
+    price: string;
+    method: "cash" | "card";
+  } | null>(null);
+  const [tripsTab, setTripsTab] = useState<"upcoming" | "past" | "favorites">("upcoming");
   const [currentReservations, setCurrentReservations] = useState<ReservationSummary[]>([]);
   const [scheduledTrips, setScheduledTrips] = useState<string[]>([]);
   const [scheduleDate, setScheduleDate] = useState(() => {
@@ -1135,6 +1142,12 @@ function Index() {
       }
       openWhatsApp(tour.title, requestedPaymentMethod);
       setBookingStatus("saved");
+      setTourConfirmation({
+        id: result.id,
+        title: tour.title,
+        price: tour.price,
+        method: requestedPaymentMethod,
+      });
       setSelectedTour(null);
     } catch {
       setBookingStatus("error");
@@ -1615,6 +1628,35 @@ function Index() {
                     : "Scheduled"}
               </span>
             </button>
+            <div
+              className="home-category-tabs"
+              aria-label={language === "es" ? "Categorías" : "Categories"}
+            >
+              {(
+                [
+                  ["tours", language === "es" ? "Tours" : "Tours"],
+                  ["transfers", language === "es" ? "Transporte" : "Transport"],
+                  ["experiences", language === "es" ? "Experiencias" : "Experiences"],
+                ] as const
+              ).map(([category, label]) => (
+                <button
+                  key={category}
+                  type="button"
+                  onClick={() => {
+                    if (category === "transfers") {
+                      setMode("transfers");
+                      openBookingPage();
+                    } else {
+                      setMode("tours");
+                      scrollToSection("tours");
+                    }
+                  }}
+                  className={`home-category-tab ${category === "transfers" ? "is-secondary" : ""}`}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
           </section>
         )}
 
@@ -2072,68 +2114,33 @@ function Index() {
                 {[
                   {
                     image: `${import.meta.env.BASE_URL}category-arenal.jpg`,
-                    title:
-                      language === "es" ? "Actividades en La Fortuna" : "Activities in La Fortuna",
-                    meta: `5 ${t.hours}`,
+                    title: language === "es" ? "Arenal Volcano Tour" : "Arenal Volcano Tour",
+                    meta: "12 min",
                     rating: "4.9",
-                    category:
-                      language === "es" ? "Naturaleza · Experiencias" : "Nature · Experiences",
+                    category: language === "es" ? "Naturaleza · Tour" : "Nature · Tour",
                     summary:
                       language === "es"
-                        ? "Volcán Arenal, aguas termales y experiencias locales para descubrir la zona con calma."
-                        : "Arenal Volcano, hot springs, and local experiences to discover the area at an easy pace.",
-                    distance: "12 km",
-                    price: "Desde ₡35.000",
-                    priceCrc: 35000,
-                    priceUsd: 70,
+                        ? "Caminata guiada por bosque tropical, vistas del volcán y una experiencia tranquila cerca del Arenal."
+                        : "A guided walk through tropical forest, volcano views, and a relaxed experience near Arenal.",
+                    distance: "5.2 km",
+                    price: "$45",
+                    priceCrc: 22500,
+                    priceUsd: 45,
                   },
                   {
                     image: `${import.meta.env.BASE_URL}category-rios.jpg`,
-                    title: language === "es" ? "Ríos y Aventuras" : "Rivers and Adventures",
-                    meta: `6 ${t.hours}`,
-                    rating: "4.8",
-                    category: language === "es" ? "Ríos · Aire libre" : "Rivers · Outdoors",
-                    summary:
-                      language === "es"
-                        ? "Río Peñas Blancas, agua dulce y aventura tropical con acompañamiento local."
-                        : "Peñas Blancas River, fresh water, and tropical adventure with local assistance.",
-                    distance: "18 km",
-                    price: "Desde ₡28.000",
-                    priceCrc: 28000,
-                    priceUsd: 56,
-                  },
-                  {
-                    image: misticoImage,
-                    title:
-                      language === "es"
-                        ? "Parques y Puentes Colgantes"
-                        : "Parks and Hanging Bridges",
-                    meta: `4 ${t.hours}`,
+                    title: language === "es" ? "La Fortuna Waterfall" : "La Fortuna Waterfall",
+                    meta: "8 min",
                     rating: "4.9",
-                    category: language === "es" ? "Bosque · Aventura" : "Forest · Adventure",
+                    category: language === "es" ? "Naturaleza · Agua" : "Nature · Water",
                     summary:
                       language === "es"
-                        ? "Senderos protegidos y puentes suspendidos para observar el bosque y su biodiversidad."
-                        : "Protected trails and suspended bridges to experience the forest and its biodiversity.",
-                    distance: "24 km",
-                    price: "Desde ₡32.000",
-                    priceCrc: 32000,
-                    priceUsd: 64,
-                  },
-                  {
-                    image: `${import.meta.env.BASE_URL}category-playas.jpg`,
-                    title: language === "es" ? "Playas" : "Beaches",
-                    meta: `10 ${t.hours}`,
-                    rating: "4.8",
-                    category: language === "es" ? "Costa · Día completo" : "Coast · Full day",
-                    summary:
-                      language === "es"
-                        ? "Una escapada a la costa del Pacífico con traslado cómodo desde La Fortuna."
-                        : "A Pacific coast escape with a comfortable transfer from La Fortuna.",
-                    distance: "86 km",
-                    price: "Desde ₡45.000",
-                    priceCrc: 45000,
-                    priceUsd: 90,
+                        ? "Descubre la catarata de La Fortuna con traslado cómodo y tiempo para disfrutar el sendero y el agua."
+                        : "Discover La Fortuna Waterfall with comfortable transport and time for the trail and fresh water.",
+                    distance: "3.8 km",
+                    price: "$45",
+                    priceCrc: 22500,
+                    priceUsd: 45,
                   },
                 ].map((tour) => (
                   <article
@@ -2184,20 +2191,6 @@ function Index() {
                       >
                         {language === "es" ? "Seleccionar Tour" : "Select Tour"}
                       </button>
-                      <button
-                        type="button"
-                        onClick={(event) => {
-                          event.stopPropagation();
-                          setTourPaymentMethod("card");
-                          openTourDetail(tour);
-                        }}
-                        className="mt-2 flex w-full items-center justify-center gap-2 rounded-2xl bg-[#eef8fb] py-2.5 text-[11px] font-bold text-[#15566a] ring-1 ring-[#b8dce6]"
-                      >
-                        <Radio className="size-3.5" />
-                        {language === "es"
-                          ? "Pagar con NFC · Acerca tu teléfono"
-                          : "Pay with NFC · Tap your phone"}
-                      </button>
                     </div>
                   </article>
                 ))}
@@ -2235,7 +2228,7 @@ function Index() {
                       ))}
                     </div>
                     <p className="mt-1 text-[10px] font-semibold text-muted-foreground">
-                      320 reseñas
+                      128 reseñas
                     </p>
                   </div>
                   <div
@@ -2267,18 +2260,18 @@ function Index() {
                   {
                     quote:
                       language === "es"
-                        ? "El traslado fue puntual y muy tranquilo. La comunicación antes del viaje nos dio mucha confianza."
-                        : "The transfer was punctual and relaxed. The communication before the ride gave us real peace of mind.",
-                    name: language === "es" ? "Cliente de La Fortuna" : "La Fortuna traveler",
-                    detail: language === "es" ? "Traslado local" : "Local transfer",
+                        ? "Increíble experiencia, súper organizada y el guía muy amable."
+                        : "Incredible experience, very organized, and the guide was so kind.",
+                    name: language === "es" ? "María L." : "Maria L.",
+                    detail: language === "es" ? "Arenal Volcano Tour" : "Arenal Volcano Tour",
                   },
                   {
                     quote:
                       language === "es"
-                        ? "Nos ayudaron a organizar una visita al Arenal sin complicaciones y con información clara."
-                        : "They helped us plan an Arenal visit without complications and with clear information.",
-                    name: language === "es" ? "Visitante internacional" : "International visitor",
-                    detail: language === "es" ? "Experiencia Arenal" : "Arenal experience",
+                        ? "El volcán fue impresionante, 100% recomendable."
+                        : "The volcano was impressive, 100% recommended.",
+                    name: language === "es" ? "James K." : "James K.",
+                    detail: language === "es" ? "Arenal Volcano Tour" : "Arenal Volcano Tour",
                   },
                   {
                     quote:
@@ -2486,6 +2479,44 @@ function Index() {
             <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
               {selectedTour.summary}
             </p>
+            <div
+              className="tour-route-map mt-5"
+              aria-label={
+                language === "es"
+                  ? "Ruta de La Fortuna al tour"
+                  : "Route from La Fortuna to the tour"
+              }
+            >
+              <div className="tour-route-line" />
+              <span className="tour-route-pin tour-route-pin-start">
+                <MapPin className="size-4" />
+              </span>
+              <span className="tour-route-pin tour-route-pin-end">
+                <MapPin className="size-4" />
+              </span>
+              <div className="tour-route-labels">
+                <span>{language === "es" ? "Centro de La Fortuna" : "La Fortuna center"}</span>
+                <span>{selectedTour.title}</span>
+              </div>
+            </div>
+            <div className="tour-includes mt-4">
+              <p className="text-xs font-bold uppercase tracking-[0.14em] text-leaf-ink">
+                {language === "es" ? "Qué incluye" : "What's included"}
+              </p>
+              <div className="mt-3 grid grid-cols-2 gap-2 text-xs font-semibold text-foreground">
+                {[
+                  { Icon: Compass, label: language === "es" ? "Guía" : "Guide" },
+                  { Icon: CarFront, label: language === "es" ? "Transporte" : "Transport" },
+                  { Icon: CheckCircle2, label: language === "es" ? "Entrada" : "Entrance" },
+                  { Icon: Radio, label: language === "es" ? "Agua" : "Water" },
+                ].map(({ Icon: IncludeIcon, label }) => (
+                  <span key={label} className="flex items-center gap-2">
+                    <IncludeIcon className="size-4 text-leaf" />
+                    {label}
+                  </span>
+                ))}
+              </div>
+            </div>
             <button
               type="button"
               onClick={() => scrollToSection("tour-checkout")}
@@ -2749,6 +2780,95 @@ function Index() {
                 ? `Reservar ahora - ${selectedTour.price}`
                 : `Book now - ${selectedTour.price}`}
             </button>
+          </section>
+        </main>
+      )}
+
+      {tourConfirmation && (
+        <main className="fixed inset-0 z-[65] overflow-y-auto bg-background px-4 pb-10 pt-4 sm:px-8 sm:pt-8">
+          <section className="mx-auto w-full max-w-md rounded-[30px] bg-white p-6 text-foreground shadow-2xl ring-1 ring-border sm:p-8">
+            <div className="text-center">
+              <CheckCircle2 className="mx-auto size-20 text-leaf" aria-hidden="true" />
+              <h1 className="mt-4 font-display text-3xl font-bold">
+                {language === "es" ? "¡Reserva lista!" : "Booking ready!"}
+              </h1>
+              <p className="mt-2 text-sm text-muted-foreground">
+                {language === "es"
+                  ? "Tu solicitud fue guardada y enviada para coordinación."
+                  : "Your request was saved and sent for coordination."}
+              </p>
+            </div>
+            <div className="mt-6 rounded-2xl bg-[#E6F4EB] p-4 ring-1 ring-[#b9dfc8]">
+              <p className="text-xs font-bold uppercase tracking-[0.14em] text-leaf-ink">
+                {language === "es" ? "Detalles de la reserva" : "Booking details"}
+              </p>
+              <div className="mt-3 space-y-2 text-sm">
+                <div className="flex justify-between gap-3">
+                  <span className="text-muted-foreground">Tour</span>
+                  <strong className="text-right">{tourConfirmation.title}</strong>
+                </div>
+                <div className="flex justify-between gap-3">
+                  <span className="text-muted-foreground">
+                    {language === "es" ? "Total" : "Total"}
+                  </span>
+                  <strong>{tourConfirmation.price}</strong>
+                </div>
+                <div className="flex justify-between gap-3">
+                  <span className="text-muted-foreground">
+                    {language === "es" ? "Método" : "Method"}
+                  </span>
+                  <strong>
+                    {tourConfirmation.method === "cash"
+                      ? language === "es"
+                        ? "WhatsApp / efectivo"
+                        : "WhatsApp / cash"
+                      : "Stripe Checkout"}
+                  </strong>
+                </div>
+                <div className="flex justify-between gap-3">
+                  <span className="text-muted-foreground">Código</span>
+                  <strong>{tourConfirmation.id.slice(0, 8).toUpperCase()}</strong>
+                </div>
+              </div>
+            </div>
+            <div
+              className="mx-auto mt-6 grid size-36 place-items-center rounded-2xl bg-white ring-8 ring-[#E6F4EB] shadow-sm"
+              aria-label="QR de reserva"
+            >
+              <div className="grid size-24 grid-cols-5 gap-1 p-2 ring-2 ring-jungle">
+                {Array.from({ length: 25 }, (_, index) => (
+                  <span
+                    key={index}
+                    className={index % 3 === 0 || index % 7 === 0 ? "bg-jungle" : "bg-transparent"}
+                  />
+                ))}
+              </div>
+            </div>
+            <p className="mt-4 text-center text-xs leading-relaxed text-muted-foreground">
+              {language === "es"
+                ? "Muestra este código al llegar para el check-in."
+                : "Show this code on arrival for check-in."}
+            </p>
+            <div className="mt-6 space-y-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setTourConfirmation(null);
+                  setActiveNav("routes");
+                  openFeatureDetail("booking");
+                }}
+                className="w-full rounded-2xl bg-leaf py-3.5 text-sm font-bold text-white"
+              >
+                {language === "es" ? "Ver mis viajes" : "View my trips"}
+              </button>
+              <button
+                type="button"
+                onClick={() => setTourConfirmation(null)}
+                className="w-full rounded-2xl border border-leaf bg-white py-3.5 text-sm font-bold text-leaf-ink"
+              >
+                {language === "es" ? "Volver a Inicio" : "Back to Home"}
+              </button>
+            </div>
           </section>
         </main>
       )}
@@ -3155,7 +3275,25 @@ function Index() {
                   </div>
                   <CalendarDays className="size-5 text-leaf" aria-hidden="true" />
                 </div>
-                {currentReservations.length > 0 ? (
+                <div className="mt-4 grid grid-cols-3 gap-1 rounded-2xl bg-background p-1 ring-1 ring-border">
+                  {(
+                    [
+                      ["upcoming", language === "es" ? "Próximos" : "Upcoming"],
+                      ["past", language === "es" ? "Pasados" : "Past"],
+                      ["favorites", language === "es" ? "Favoritos" : "Favorites"],
+                    ] as const
+                  ).map(([tab, label]) => (
+                    <button
+                      key={tab}
+                      type="button"
+                      onClick={() => setTripsTab(tab)}
+                      className={`rounded-xl py-2 text-[11px] font-bold ${tripsTab === tab ? "bg-leaf text-white" : "text-muted-foreground"}`}
+                    >
+                      {label}
+                    </button>
+                  ))}
+                </div>
+                {tripsTab === "upcoming" && currentReservations.length > 0 ? (
                   <div className="mt-4 space-y-2">
                     {currentReservations.map((reservation) => (
                       <article

@@ -1962,3 +1962,46 @@ input::placeholder {
     font-size: 0.66rem;
   }
 }
+
+/* Mobile redesign additions — preserve the existing visual system and handlers. */
+.home-category-tabs {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.55rem;
+  margin-top: 0.75rem;
+}
+.home-category-tab {
+  min-height: 2.8rem;
+  border: 1px solid #b9dfc8;
+  border-radius: 1rem;
+  background: #e6f4eb;
+  color: #155c3a;
+  font-size: 0.76rem;
+  font-weight: 800;
+  line-height: 1.15;
+  padding: 0.55rem 0.45rem;
+}
+.home-category-tab:hover,
+.home-category-tab:focus-visible { background: #d5eedf; outline: none; transform: translateY(-1px); }
+.home-category-tab.is-secondary { background: #1a7a4c; border-color: #1a7a4c; color: white; }
+.tour-route-map {
+  position: relative;
+  min-height: 6.8rem;
+  overflow: hidden;
+  border: 1px solid #cce8d6;
+  border-radius: 1.25rem;
+  background: linear-gradient(135deg, rgba(230,244,235,.88), rgba(247,250,248,.98)), repeating-linear-gradient(35deg, transparent 0 18px, rgba(26,122,76,.06) 18px 20px);
+  padding: 1rem;
+}
+.tour-route-line { position: absolute; left: 18%; right: 18%; top: 43%; height: 2px; background: repeating-linear-gradient(90deg, #1a7a4c 0 7px, transparent 7px 12px); transform: rotate(-7deg); }
+.tour-route-pin { position: absolute; top: calc(43% - .8rem); display: grid; width: 1.7rem; height: 1.7rem; place-items: center; border-radius: 999px; background: #1a7a4c; color: white; box-shadow: 0 4px 10px rgba(26,122,76,.22); }
+.tour-route-pin-start { left: 12%; }
+.tour-route-pin-end { right: 12%; }
+.tour-route-labels { position: absolute; inset: auto .85rem .7rem; display: flex; justify-content: space-between; gap: 1rem; color: #315744; font-size: .68rem; font-weight: 700; }
+.tour-route-labels span:last-child { text-align: right; }
+.tour-includes { border-top: 1px solid #e1eee5; padding-top: .9rem; }
+@media (max-width: 390px) {
+  .home-category-tabs { gap: .35rem; }
+  .home-category-tab { font-size: .68rem; padding-inline: .25rem; }
+  .tour-route-labels { font-size: .6rem; }
+}
