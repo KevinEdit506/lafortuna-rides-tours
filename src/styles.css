@@ -2005,3 +2005,234 @@ input::placeholder {
   .home-category-tab { font-size: .68rem; padding-inline: .25rem; }
   .tour-route-labels { font-size: .6rem; }
 }
+
+/* Mobile reference screens: clean white cards, green actions, and generous spacing. */
+@media (max-width: 899px) {
+  body,
+  .app-shell {
+    background: #f7f7f7;
+  }
+
+  .top-header {
+    min-height: 5.3rem;
+    margin-inline: -0.65rem;
+    padding: 1rem 0.85rem 0.65rem;
+    align-items: center;
+    background: #fff;
+    border-bottom: 1px solid #ececec;
+  }
+
+  .brand-flag {
+    min-width: auto;
+    gap: 0.45rem;
+    padding: 0.2rem 0.25rem;
+    color: #17202b;
+    background: transparent;
+    box-shadow: none;
+    ring: 0;
+  }
+
+  .brand-flag::before {
+    display: grid;
+    width: 2rem;
+    height: 2rem;
+    place-items: center;
+    border-radius: 999px;
+    content: "◆";
+    color: #fff;
+    background: #1a7a4c;
+    font-size: 1rem;
+    transform: rotate(45deg);
+  }
+
+  .brand-flag > span {
+    color: #17202b !important;
+    text-shadow: none !important;
+    font-size: 1.45rem !important;
+    letter-spacing: -0.04em;
+  }
+
+  .top-header > div:first-child {
+    max-width: calc(100% - 4.6rem);
+    padding: 0;
+  }
+
+  .top-header > div:first-child > div:last-child {
+    display: none;
+  }
+
+  .top-header > div:last-child {
+    background: #f4f4f4;
+    box-shadow: inset 0 0 0 1px #d7d7d7;
+  }
+
+  .top-header > div:last-child button {
+    color: #40464d;
+    box-shadow: none;
+  }
+
+  .top-header > div:last-child button.bg-leaf {
+    color: #fff;
+    background: #1a7a4c;
+  }
+
+  .reference-shortcuts {
+    margin-top: 0.55rem;
+    padding-top: 0.45rem;
+  }
+
+  .reference-search {
+    border-color: #cfcfcf;
+    background: #fff;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.06);
+  }
+
+  .reference-search-action { display: none; }
+
+  .home-category-tab {
+    border-color: #e5e5e5;
+    background: #eeeeee;
+    color: #252a30;
+    min-height: 2.7rem;
+    font-size: 0.82rem;
+  }
+
+  .home-category-tab.is-secondary,
+  .home-category-tab:first-child {
+    background: #1a7a4c;
+    border-color: #1a7a4c;
+    color: #fff;
+  }
+
+  .promo-banner {
+    min-height: 6.6rem;
+    border: 0;
+    background: #dcefdc;
+    box-shadow: none;
+  }
+
+  .promo-banner h2 { font-size: 1.15rem; }
+  .promo-banner .promo-pizza { width: 4.5rem; height: 4.5rem; font-size: 2.3rem; }
+
+  #tours,
+  #reviews,
+  #blog {
+    background: transparent !important;
+    color: #111820 !important;
+    box-shadow: none !important;
+    ring: 0;
+  }
+
+  #tours > div:first-child p,
+  #reviews > div:first-child p,
+  #blog > div:first-child p {
+    color: #1a7a4c !important;
+  }
+
+  #tours h2,
+  #reviews h2,
+  #blog h2 {
+    color: #111820 !important;
+  }
+
+  #tours > p,
+  #reviews > p,
+  #blog > p {
+    color: #5c6268 !important;
+  }
+
+  #tours > .mt-4 {
+    grid-template-columns: 1fr;
+    gap: 0.85rem;
+  }
+
+  .experience-card {
+    display: flex;
+    min-height: 0;
+    border-radius: 1.2rem;
+    background: #fff !important;
+    box-shadow: 0 5px 16px rgba(20, 38, 29, 0.13) !important;
+  }
+
+  .experience-card > img {
+    width: 100%;
+    height: 8.4rem;
+    min-height: 0;
+    border-radius: 1.1rem 1.1rem 0 0;
+  }
+
+  .experience-card > div { padding: 0.75rem 0.85rem 0.85rem; }
+  .experience-card > div > div:first-child { display: flex; justify-content: space-between; font-size: 0.64rem; }
+  .experience-card h3 { margin-top: 0.35rem; font-size: 1.15rem; color: #111820; }
+  .experience-card p { display: none; }
+  .experience-card > div > div:nth-last-of-type(1) { margin-top: 0.5rem; font-size: 1rem; }
+  .experience-card .card-cta { min-height: 2.65rem; margin-top: 0.65rem; font-size: 0.88rem; }
+
+  .review-summary { background: #fff !important; box-shadow: 0 4px 14px rgba(0,0,0,.08); }
+  .review-summary .font-display { font-size: 3.7rem; color: #111820; }
+  .review-card { background: #fff !important; color: #111820 !important; box-shadow: 0 3px 10px rgba(0,0,0,.08); }
+  .review-card p,
+  .review-card .text-white,
+  .review-card .text-white\/90,
+  .review-card .text-white\/65 { color: #273039 !important; }
+
+  .bottom-nav-shell {
+    background: #fff !important;
+    border: 1px solid #e1e1e1;
+    box-shadow: 0 -4px 18px rgba(0,0,0,.08) !important;
+  }
+  .bottom-nav-item { color: #555d64; }
+  .bottom-nav-item.is-active { color: #1a7a4c !important; }
+  .bottom-nav-item.is-active .bottom-nav-icon { color: #1a7a4c !important; background: transparent; }
+
+  .tour-detail-shell {
+    padding: 0 0 7rem !important;
+    border-radius: 1.7rem !important;
+    background: #fff !important;
+    box-shadow: 0 6px 22px rgba(0,0,0,.12) !important;
+    overflow: hidden;
+  }
+  .tour-detail-topbar {
+    position: absolute;
+    inset: 1rem 1rem auto;
+    z-index: 2;
+    border: 0;
+  }
+  .tour-detail-topbar > button { background: #fff; }
+  .tour-detail-hero { margin-top: 0 !important; height: 15rem; }
+  .tour-detail-hero img { width: 100%; height: 100%; object-fit: cover; }
+  .tour-detail-shell > h2,
+  .tour-detail-shell > h2 ~ * { margin-inline: 1.1rem; }
+  .tour-detail-shell > h2 { font-size: 2rem; }
+  .tour-detail-shell > h2 + div { margin-top: .65rem; }
+  .tour-detail-shell > h2 + div + p { font-size: 2rem; color: #111820; }
+  .tour-route-map { margin-top: 1.3rem; }
+  .tour-includes { margin-top: 1.35rem; }
+
+  [aria-label="QR de reserva"] { border-radius: 1.25rem; }
+}
+
+@media (max-width: 899px) {
+  .confirmation-screen,
+  .trips-screen {
+    background: #f7f7f7 !important;
+  }
+  .confirmation-card,
+  .trips-screen {
+    border-radius: 1.7rem !important;
+    box-shadow: 0 6px 22px rgba(0,0,0,.1) !important;
+  }
+  .confirmation-card > div:first-child svg {
+    width: 5.8rem;
+    height: 5.8rem;
+    padding: 1.15rem;
+    border-radius: 999px;
+    color: #fff;
+    background: #1a7a4c;
+  }
+  .confirmation-card h1 { font-size: 2.15rem; letter-spacing: -.04em; }
+  .confirmation-card .bg-\[\#E6F4EB\] { background: #fff; box-shadow: 0 3px 14px rgba(0,0,0,.08); }
+  .trips-screen > header h1,
+  .trips-screen h2 { color: #111820; }
+  .trips-screen article { box-shadow: 0 4px 14px rgba(0,0,0,.08); }
+}

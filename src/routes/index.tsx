@@ -12,6 +12,7 @@ import {
   Circle,
   Clock3,
   Compass,
+  Heart,
   Home,
   MapPin,
   MessageCircle,
@@ -397,6 +398,7 @@ function Index() {
     method: "cash" | "card";
   } | null>(null);
   const [tripsTab, setTripsTab] = useState<"upcoming" | "past" | "favorites">("upcoming");
+  const [favoriteTours, setFavoriteTours] = useState<string[]>([]);
   const [currentReservations, setCurrentReservations] = useState<ReservationSummary[]>([]);
   const [scheduledTrips, setScheduledTrips] = useState<string[]>([]);
   const [scheduleDate, setScheduleDate] = useState(() => {
@@ -1664,7 +1666,7 @@ function Index() {
           className={`lg:gap-16 ${mode === "transfers" && !bookingPageOpen ? "lg:grid lg:grid-cols-[minmax(0,0.9fr)_minmax(390px,0.72fr)]" : "lg:block"}`}
         >
           <div>
-            {mode === "transfers" && (
+            {mode === "transfers" && !bookingPageOpen && (
               <section
                 className="promo-banner rise mt-4"
                 aria-label={language === "es" ? "Promoción" : "Promotion"}
@@ -2441,10 +2443,10 @@ function Index() {
       {selectedTour && (
         <main className="fixed inset-0 z-40 overflow-y-auto bg-background px-4 pb-28 pt-4 sm:px-8 sm:pb-10 sm:pt-8">
           <section
-            className="mx-auto min-h-[calc(100vh-2rem)] w-full max-w-2xl rounded-[28px] bg-surface p-4 text-foreground shadow-xl ring-1 ring-border sm:min-h-[calc(100vh-4rem)] sm:p-7"
+            className="tour-detail-shell mx-auto min-h-[calc(100vh-2rem)] w-full max-w-2xl rounded-[28px] bg-surface p-4 text-foreground shadow-xl ring-1 ring-border sm:min-h-[calc(100vh-4rem)] sm:p-7"
             aria-labelledby="tour-detail-title"
           >
-            <div className="flex items-center gap-3 border-b border-border pb-4">
+            <div className="tour-detail-topbar flex items-center justify-between gap-3">
               <button
                 type="button"
                 aria-label={language === "es" ? "Volver a la lista" : "Back to list"}
@@ -2453,20 +2455,29 @@ function Index() {
               >
                 <ArrowLeft className="size-4" />
               </button>
-              <div>
-                <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-leaf-ink">
-                  {language === "es" ? "Detalle de actividad" : "Activity details"}
-                </p>
-                <h2 id="tour-detail-title" className="mt-1 font-display text-2xl leading-tight">
-                  {selectedTour.title}
-                </h2>
-              </div>
+              <button
+                type="button"
+                aria-label={language === "es" ? "Guardar tour" : "Save tour"}
+                onClick={() =>
+                  setFavoriteTours((current) =>
+                    current.includes(selectedTour.title)
+                      ? current.filter((title) => title !== selectedTour.title)
+                      : [...current, selectedTour.title],
+                  )
+                }
+                className="grid size-10 place-items-center rounded-full bg-white text-foreground shadow-md ring-1 ring-border"
+              >
+                <Heart
+                  className={`size-5 ${favoriteTours.includes(selectedTour.title) ? "fill-leaf text-leaf" : ""}`}
+                />
+              </button>
             </div>
-            <img
-              src={selectedTour.image}
-              alt={selectedTour.title}
-              className="mt-4 h-44 w-full rounded-[20px] object-cover"
-            />
+            <div className="tour-detail-hero mt-3">
+              <img src={selectedTour.image} alt={selectedTour.title} />
+            </div>
+            <h2 id="tour-detail-title" className="mt-5 font-display text-3xl leading-tight">
+              {selectedTour.title}
+            </h2>
             <div className="mt-3 flex items-center justify-between gap-3 text-xs text-muted-foreground">
               <span className="font-bold uppercase tracking-[0.12em] text-leaf-ink">
                 {selectedTour.category}
@@ -2785,8 +2796,8 @@ function Index() {
       )}
 
       {tourConfirmation && (
-        <main className="fixed inset-0 z-[65] overflow-y-auto bg-background px-4 pb-10 pt-4 sm:px-8 sm:pt-8">
-          <section className="mx-auto w-full max-w-md rounded-[30px] bg-white p-6 text-foreground shadow-2xl ring-1 ring-border sm:p-8">
+        <main className="confirmation-screen fixed inset-0 z-[65] overflow-y-auto bg-background px-4 pb-10 pt-4 sm:px-8 sm:pt-8">
+          <section className="confirmation-card mx-auto w-full max-w-md rounded-[30px] bg-white p-6 text-foreground shadow-2xl ring-1 ring-border sm:p-8">
             <div className="text-center">
               <CheckCircle2 className="mx-auto size-20 text-leaf" aria-hidden="true" />
               <h1 className="mt-4 font-display text-3xl font-bold">
@@ -3234,7 +3245,7 @@ function Index() {
         <main
           className={`push-screen fixed inset-0 z-[55] overflow-y-auto bg-background px-4 pb-10 pt-4 text-foreground sm:px-8 sm:pt-8 ${featureTransition === "exit" ? "is-exiting" : ""}`}
         >
-          <section className="mx-auto min-h-[calc(100vh-2rem)] w-full max-w-2xl rounded-[30px] bg-surface p-5 shadow-xl ring-1 ring-border sm:min-h-[calc(100vh-4rem)] sm:p-8">
+          <section className="trips-screen mx-auto min-h-[calc(100vh-2rem)] w-full max-w-2xl rounded-[30px] bg-surface p-5 shadow-xl ring-1 ring-border sm:min-h-[calc(100vh-4rem)] sm:p-8">
             <header className="flex items-center gap-3 border-b border-border pb-5">
               <button
                 type="button"
